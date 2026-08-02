@@ -38,7 +38,7 @@
 | Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **untested** | no photo with Devanagari text yet |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
-| Currency mode | ⬜ Not started | no dataset, no model |
+| Currency mode | 🟡 Notebook + engine ready | needs a Kaggle dataset, then training |
 | Scene / Ask modes | 🟡 SmolVLM wired, not yet run through `app/` | `app/engines/smolvlm.py` |
 | Translation + TTS | 🟡 Wired, not yet run through `app/` | `app/speech.py`, `--lang mr --speak` |
 | Android port | ⬜ Not started | Phase 5 |
@@ -124,7 +124,8 @@ alone could not do — every variant traded one for the other.
       that abstains on *everything* also scores well and would be useless
 - [ ] Continue fine-tuning on the custom Indian dataset
 - [ ] Re-run notebook 01 evaluation — **same N, same prompt** — for a fair comparison
-- [ ] Train the MobileNet currency classifier (≥99% target)
+- [ ] Train the MobileNet currency classifier (≥99% target) — `notebooks/03` is written
+      and the engine is wired; needs a licensed Kaggle dataset (`DEC-022`)
 - [ ] Ablation: stock vs VizWiz-tuned vs VizWiz+custom-tuned
 
 **Exit criteria:** fine-tuned model beats 0.308 on the same slice, with the delta written up,
@@ -205,6 +206,9 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-019 | **The app is a browser app, not a desktop GUI** | One codebase covers the laptop demo and the phone, so the Phase-5 Android port becomes a PWA rather than native llama.cpp work — a large reduction in the riskiest milestone. Browsers also give camera access, screen-reader support and `aria-live` for free. Cost: a local server process must be running |
 | DEC-020 | Captures are deleted immediately after answering | Users point this at prescriptions, bank documents and money. Retaining those on disk would contradict the privacy claim the project rests on. Deletion is in a `finally` block so it also happens when a model raises |
 | DEC-021 | Offline-ness is enforced by a test, not a convention | A single CDN font or script would silently break the airplane-mode demo — and would only be discovered on stage. A test asserts the rendered page contains no external URLs |
+| DEC-022 | **Currency is scored by rupee error, not just accuracy** | Misclassification cost is asymmetric: ₹500→₹100 costs the user ₹400, ₹10→₹20 costs ₹10. Two models with equal accuracy are not equally good. Notebook 03 reports expected rupee error per identification and ranks the confusion matrix by rupee impact rather than frequency |
+| DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
+| DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
 ---
 
