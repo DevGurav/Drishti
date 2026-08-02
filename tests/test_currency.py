@@ -1,0 +1,80 @@
+"""Tests for Money mode and the currency classifier's non-model logic.
+
+Deliberately avoids torch and a checkpoint: what is worth pinning here is the label
+handling and the refusal behaviour, which is where a wrong answer costs a user money.
+"""
+import unittest
+from pathlib import Path
+
+from app.engines.currency_cnn import (
+    CheckpointMissingError,
+    CurrencyClassifier,
+    denomination,
+)
+from app.modes.currency import CONFIDENCE_THRESHOLD
+from app.modes.currency import run as run_currency
+
+
+class FakeClassifier:
+    def __init__(self, label, confidence):
+        self._result = (label, confidence)
+
+    def classify(self, image_path):
+        return self._result
+
+
+class TestDenomination(unittest.TestCase):
+    def test_plain_digits(self):
+        self.assertEqual(denomination('500'), '500')
+
+    def test_common_folder_naming_variants(self):
+        for raw in ('Rs500', '500_note', 'rs_500', '500 rupees'):
+            self.assertEqual(denomination(raw), '500', raw)
+
+    def test_non_numeric_label_passes_through(self):
+        """Better to speak an odd label than to silently return an empty string."""
+        self.assertEqual(denomination('unknown'), 'unknown')
+
+
+class TestMoneyMode(unittest.TestCase):
+    def test_confident_prediction_is_reported(self):
+        out = run_currency(Path('n.jpg'), FakeClassifier('500', 0.99))
+        self.assertIn('500', out)
+
+    def test_low_confidence_refuses_rather_than_guessing(self):
+        """A wrong denomination costs the user money; a refusal costs a retaken photo."""
+        out = run_currency(Path('n.jpg'), FakeClassifier('500', 0.42))
+        self.assertNotIn('500', out)
+        self.assertIn('not confident', out.lower())
+
+    def test_refusal_tells_the_user_what_to_do(self):
+        out = run_currency(Path('n.jpg'), FakeClassifier('100', 0.10))
+        self.assertTrue(any(w in out.lower() for w in ('clearer', 'light')))
+
+    def test_threshold_boundary_is_inclusive(self):
+        out = run_currency(Path('n.jpg'), FakeClassifier('200', CONFIDENCE_THRESHOLD))
+        self.assertIn('200', out)
+
+    def test_just_below_threshold_refuses(self):
+        out = run_currency(Path('n.jpg'), FakeClassifier('200', CONFIDENCE_THRESHOLD - 0.01))
+        self.assertNotIn('200', out)
+
+    def test_threshold_is_high_enough_to_be_meaningful(self):
+        """Guards against someone lowering the bar to make the demo look good."""
+        self.assertGreaterEqual(CONFIDENCE_THRESHOLD, 0.80)
+
+
+class TestMissingCheckpoint(unittest.TestCase):
+    def test_error_names_the_notebook_that_produces_the_model(self):
+        clf = CurrencyClassifier(checkpoint=Path('does/not/exist.pt'))
+        with self.assertRaises(CheckpointMissingError) as ctx:
+            clf.classify(Path('n.jpg'))
+        self.assertIn('03_currency_classifier', str(ctx.exception))
+
+    def test_error_is_raised_lazily_not_at_construction(self):
+        """Constructing engines must stay cheap — the CLI builds all of them up front."""
+        CurrencyClassifier(checkpoint=Path('does/not/exist.pt'))
+
+
+if __name__ == '__main__':
+    unittest.main()
