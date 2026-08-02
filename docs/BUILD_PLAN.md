@@ -37,8 +37,8 @@
 | Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **untested** | no photo with Devanagari text yet |
 | VizWiz baseline | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | Currency mode | ⬜ Not started | no dataset, no model |
-| Scene / Ask modes | ⬜ No VLM wired | blocked on Phase 1 baseline |
-| Translation + TTS | 🟡 Spiked, not integrated | notebook 00 §4–5 |
+| Scene / Ask modes | 🟡 SmolVLM wired, not yet run through `app/` | `app/engines/smolvlm.py` |
+| Translation + TTS | 🟡 Wired, not yet run through `app/` | `app/speech.py`, `--lang mr --speak` |
 | Android port | ⬜ Not started | Phase 5 |
 | NGO / user study | 🔴 **Not contacted** | long lead time — start now |
 | Latency vs <8s target | 🔴 **~30s/image** | unresolved, see RISK-1 |
@@ -72,9 +72,12 @@
 - [ ] **Run `notebooks/02_abstention_prompts.ipynb`** (see `DEC-013`) — cheapest available
       win: recall 0.258 with precision 0.913 means the threshold, not the capability, is
       wrong. ~30 min on a T4; sweeps 5 prompts on 200 samples, confirms the winner on 500
-- [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `lang='mr'`
-- [ ] Wire the chosen VLM into `app/engines/` as a `VLMEngine` → unblocks scene/ask modes
-- [ ] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
+- [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `--ocr-lang mr`
+- [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
+- [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
+- [ ] **Run the full pipeline once on real hardware** — `--mode medicine --ocr-lang en
+      --lang mr --speak`. Logic is unit-tested with fakes, but no model has actually been
+      loaded through `app/` yet; that is the Phase-1 exit criterion, not the wiring
 - [ ] Source a real drug-name database (replace `data/drug_names_seed.txt` placeholder)
 - [ ] **Send NGO / blind-school outreach emails** ← *long lead time, do immediately*
 - [ ] Get synopsis approved by guide (names + roll numbers still blank)
