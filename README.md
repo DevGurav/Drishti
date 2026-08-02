@@ -64,15 +64,38 @@ plus real date parsing. `app/drug_db.py` is the medicine-mode safety guardrail �
 Surya and Tesseract were rejected, plus the mandatory config flags (`DEC-004`, `DEC-005`,
 `DEC-008`).
 
-Read and medicine modes work today. Scene/ask (VLM) and currency (CNN) still raise
-`NotImplementedError` pointing at the work that will supply them:
+## Running it
+
+**No model needs downloading by hand** — every engine fetches its weights on first use
+(Hugging Face for the VLM/translation/TTS, PaddleX for OCR). Budget ~6 GB of disk.
+
+Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-pip install paddlepaddle paddleocr           # only needed for read/medicine
-python -m app.cli --mode medicine --image some_strip.jpg
-python -m app.cli --mode read --image sign.jpg --lang mr    # Devanagari
-python -m unittest discover -s tests -t .    # 39 tests, no models required
+# 0. tests need nothing at all - 76 tests, no models
+python -m unittest discover -s tests -t .
+
+# 1. OCR: read + medicine modes            (~100 MB downloaded on first run)
+pip install paddlepaddle paddleocr
+python -m app.cli --mode medicine --image strip.jpg
+
+# 2. Speech: Marathi/Hindi output          (~950 MB on first run)
+pip install transformers torch IndicTransToolkit
+python -m app.cli --mode medicine --image strip.jpg --ocr-lang en --lang mr --speak
+
+# 3. VLM: scene + ask modes                (~4.5 GB on first run)
+python -m app.cli --mode scene --image room.jpg
+python -m app.cli --mode ask --image x.jpg --question "what colour is this?"
 ```
+
+`--ocr-lang` is separate from `--lang` on purpose: an Indian medicine strip prints the drug
+name and expiry in **Latin script** even on Marathi packaging, so `--ocr-lang en --lang mr`
+is the usual combination.
+
+Currency mode still raises `NotImplementedError` — it needs the MobileNet training run.
+
+On a CPU-only machine SmolVLM answers in tens of seconds rather than the 1.2 s measured on
+a Colab T4. That is expected. OCR and speech are comfortable on CPU.
 
 ## Setup (local, Windows)
 

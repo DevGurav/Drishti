@@ -6,8 +6,17 @@ never pays for the VLM and `--mode scene` never pays for OCR.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
-from pathlib import Path
+
+# Must be set before PaddlePaddle or PyTorch load. Each bundles its own OpenMP runtime, and
+# a single command can legitimately need both (medicine mode runs OCR, then --lang mr loads
+# IndicTrans2 on torch). Co-loading them aborts the process -- it is what killed the Colab
+# kernel during the OCR spike, with no Python traceback. See DEC-006 in docs/BUILD_PLAN.md.
+# This is a mitigation, not a fix; the real fix is separate inference processes (Phase 5).
+os.environ.setdefault('KMP_DUPLICATE_LIB_OK', 'TRUE')
+
+from pathlib import Path  # noqa: E402
 
 from app import languages
 from app.drug_db import DrugDatabase

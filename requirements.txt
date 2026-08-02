@@ -1,5 +1,5 @@
 # Core local deps (CPU-only laptop: no NVIDIA GPU).
-# Heavy GPU work (VLM fine-tuning, Surya OCR, TTS experiments) runs in notebooks/ on Colab.
+# Heavy GPU work (VLM fine-tuning, baseline sweeps) runs in notebooks/ on Colab.
 # Use Python 3.12 (see setup.ps1) - 3.14 lacks wheels for parts of the ML stack.
 
 --extra-index-url https://download.pytorch.org/whl/cpu
@@ -12,5 +12,23 @@ tqdm
 requests
 jupyter
 
-# Optional, only needed for data/scripts/download_currency.py:
+# ---------------------------------------------------------------------------
+# Engine dependencies. Install in stages rather than all at once -- each pulls
+# models on first use, and a failure is easier to attribute when it is isolated.
+# All weights download automatically; nothing needs fetching by hand.
+#
+#   1. OCR (read + medicine modes)   ~100 MB of models, cheapest and proven
+#      pip install paddlepaddle paddleocr
+#
+#   2. Speech (--lang mr --speak)    ~950 MB (IndicTrans2 200M + MMS-TTS voices)
+#      pip install IndicTransToolkit
+#
+#   3. VLM (scene + ask modes)       ~4.5 GB (SmolVLM-Instruct)
+#      already covered by transformers above
+#
+# Budget roughly 6 GB of disk. On a CPU-only machine SmolVLM answers in tens of
+# seconds, not the 1.2s measured on a Colab T4 -- expected, not a fault.
+# ---------------------------------------------------------------------------
+
+# Optional, only for data/scripts/download_currency.py:
 # kaggle
