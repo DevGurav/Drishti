@@ -1,0 +1,33 @@
+# environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# large artifacts
+models/*
+!models/.gitkeep
+data/vizwiz/
+data/raw/
+data/custom/images/
+test-images/
+*.gguf
+*.zip
+*.pt
+*.safetensors
+*.onnx
+
+# results & logs
+eval/results/*
+*.log
+wandb/
+
+# ...but evaluation CSVs are the project's evidence trail, not build artifacts. They are
+# small (~60 KB), and every claim in the report traces back to one. Keep them versioned so
+# a result can be reproduced and compared against later runs.
+!eval/results/*.csv
+
+# OS/editor
+.DS_Store
+Thumbs.db

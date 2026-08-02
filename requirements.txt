@@ -1,0 +1,16 @@
+# Core local deps (CPU-only laptop: no NVIDIA GPU).
+# Heavy GPU work (VLM fine-tuning, Surya OCR, TTS experiments) runs in notebooks/ on Colab.
+# Use Python 3.12 (see setup.ps1) - 3.14 lacks wheels for parts of the ML stack.
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+transformers
+datasets
+pillow
+numpy
+tqdm
+requests
+jupyter
+
+# Optional, only needed for data/scripts/download_currency.py:
+# kaggle
