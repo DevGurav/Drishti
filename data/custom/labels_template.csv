@@ -1,0 +1,6 @@
+filename,mode,question,answer,lang,notes
+medicine_0001.jpg,medicine,what medicine is this,Paracetamol 650mg,en,back of strip; expiry partially visible
+currency_0001.jpg,currency,what denomination is this note,500,en,folded corner
+label_0001.jpg,read,what does this label say,best before 12 2027,en,MRP label on packet
+scene_0001.jpg,scene,describe the surroundings,a kitchen counter with a steel cup and a plate,en,indoor low light
+signage_0001.jpg,read,what does this sign say,स्वागत,mr,devanagari signage; means 'welcome'
