@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drishti</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Screen readers announce answers from here. assertive because the user is waiting
+     on this specific result and it should interrupt. -->
+<div id="live" role="status" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<header>
+  <h1>Drishti</h1>
+  <p class="tagline">Offline vision assistant</p>
+</header>
+
+<main>
+  <section aria-label="Camera">
+    <div class="stage">
+      <video id="video" autoplay playsinline muted aria-label="Camera preview"></video>
+      <canvas id="canvas" hidden></canvas>
+      <p id="camera-error" class="error" hidden></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="mode-heading">
+    <h2 id="mode-heading">What should I look at?</h2>
+    <div class="modes" role="group" aria-labelledby="mode-heading">
+      <button class="mode" data-mode="read"     accesskey="1"><span class="num">1</span> Read text</button>
+      <button class="mode" data-mode="medicine" accesskey="2"><span class="num">2</span> Medicine</button>
+      <button class="mode" data-mode="currency" accesskey="3"><span class="num">3</span> Money</button>
+      <button class="mode" data-mode="scene"    accesskey="4"><span class="num">4</span> Describe scene</button>
+      <button class="mode" data-mode="ask"      accesskey="5"><span class="num">5</span> Ask a question</button>
+    </div>
+
+    <div id="ask-row" hidden>
+      <label for="question">Your question</label>
+      <input id="question" type="text" placeholder="What colour is this?" autocomplete="off">
+    </div>
+  </section>
+
+  <section aria-label="Answer">
+    <p id="answer" class="answer">Choose a mode, then press the capture button.</p>
+    <p id="answer-en" class="answer-en" hidden></p>
+    <audio id="player" hidden></audio>
+  </section>
+</main>
+
+<footer>
+  <div class="settings">
+    <label for="lang">Speak in</label>
+    <select id="lang">
+      {% for code, lang in languages.items() %}
+      <option value="{{ code }}">{{ lang.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label class="check">
+      <input type="checkbox" id="speak" checked>
+      Read answers aloud
+    </label>
+  </div>
+
+  <button id="capture" class="capture" disabled>
+    Capture <span class="hint">(space)</span>
+  </button>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

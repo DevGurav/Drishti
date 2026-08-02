@@ -32,3 +32,6 @@ jupyter
 
 # Optional, only for data/scripts/download_currency.py:
 # kaggle
+
+# Web app (app/web/) -- small, pure-python
+flask

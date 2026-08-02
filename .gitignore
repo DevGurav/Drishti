@@ -31,3 +31,6 @@ wandb/
 # OS/editor
 .DS_Store
 Thumbs.db
+
+# runtime scratch (captures are deleted after answering, audio is regenerated)
+runtime/
