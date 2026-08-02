@@ -10,12 +10,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from app import languages
+from app.engines.currency_cnn import CheckpointMissingError
 from app.router import MODES, Engines, route
 from app.speech import deliver
 
-# Modes whose engines are not wired yet. Reported as a clean error the UI can speak,
-# rather than an exception trace the user cannot act on.
-UNAVAILABLE_MODES = {'currency': 'Currency recognition is not trained yet.'}
+# Modes with no engine at all. Availability that depends on a trained model is decided at
+# request time instead (see handle()), so training a model makes the mode work without a
+# code change here.
+UNAVAILABLE_MODES: dict[str, str] = {}
 
 # Browsers hand us whatever the camera produced; refuse anything implausible early rather
 # than letting a 40MB frame reach the model.
@@ -104,6 +106,12 @@ class AnswerService:
             answer_en = route(req.mode, image_path, self.engines, question=req.question)
             result = deliver(answer_en, lang=req.lang, translator=self.translator,
                              tts=self.tts, speak=req.speak)
+        except CheckpointMissingError:
+            # The exception text names notebooks and file paths -- useful to a developer,
+            # useless spoken aloud. Translate it into something the user can act on.
+            return AnswerResponse(
+                ok=False, lang=req.lang,
+                error='Money recognition is not available yet. Try another mode.')
         except NotImplementedError as e:
             return AnswerResponse(ok=False, error=str(e), lang=req.lang)
         except Exception as e:  # noqa: BLE001 - surface a speakable message, log the rest

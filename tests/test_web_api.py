@@ -31,6 +31,19 @@ class ExplodingOCR:
         raise RuntimeError('model file corrupt')
 
 
+class FakeCurrency:
+    def classify(self, image_path):
+        return ('500', 0.99)
+
+
+class UntrainedClassifier:
+    def classify(self, image_path):
+        from pathlib import Path as _P
+
+        from app.engines.currency_cnn import CheckpointMissingError
+        raise CheckpointMissingError(_P('models/currency_mobilenetv3.pt'))
+
+
 class FakeTranslator:
     def translate(self, text, target_lang):
         return f'<{target_lang}>{text}'
@@ -51,11 +64,6 @@ class TestValidation(unittest.TestCase):
     def test_unknown_mode_rejected(self):
         with self.assertRaises(ValidationError):
             validate(AnswerRequest(mode='teleport', image_bytes=JPEG))
-
-    def test_untrained_mode_reports_plainly(self):
-        with self.assertRaises(ValidationError) as ctx:
-            validate(AnswerRequest(mode='currency', image_bytes=JPEG))
-        self.assertIn('not trained yet', ctx.exception.message)
 
     def test_missing_image_rejected(self):
         with self.assertRaises(ValidationError):
@@ -142,8 +150,23 @@ class TestAnswerService(unittest.TestCase):
 
     def test_validation_failure_short_circuits_before_touching_disk(self):
         svc = _service(self.tmp, ocr=FakeOCR())
-        svc.handle(AnswerRequest(mode='currency', image_bytes=JPEG))
+        svc.handle(AnswerRequest(mode='teleport', image_bytes=JPEG))
         self.assertEqual(list(Path(self.tmp).glob('capture_*')), [])
+
+    def test_untrained_currency_model_gives_a_speakable_message(self):
+        """The raw exception names notebooks and file paths -- fine for a developer,
+        useless read aloud to a blind user."""
+        r = _service(self.tmp, classifier=UntrainedClassifier()).handle(
+            AnswerRequest(mode='currency', image_bytes=JPEG))
+        self.assertFalse(r.ok)
+        self.assertIn('not available yet', r.error)
+        self.assertNotIn('notebook', r.error.lower())
+
+    def test_trained_currency_model_answers(self):
+        r = _service(self.tmp, classifier=FakeCurrency()).handle(
+            AnswerRequest(mode='currency', image_bytes=JPEG))
+        self.assertTrue(r.ok)
+        self.assertIn('500', r.text_en)
 
     def test_response_serializes_for_json(self):
         r = _service(self.tmp, ocr=FakeOCR()).handle(

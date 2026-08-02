@@ -17,6 +17,7 @@ from pathlib import Path  # noqa: E402
 from flask import Flask, jsonify, render_template, request, send_file  # noqa: E402
 
 from app.drug_db import DrugDatabase  # noqa: E402
+from app.engines.currency_cnn import CurrencyClassifier  # noqa: E402
 from app.engines.paddle_ocr import PaddleOCREngine  # noqa: E402
 from app.engines.smolvlm import SmolVLMEngine  # noqa: E402
 from app.languages import LANGUAGES  # noqa: E402
@@ -40,6 +41,7 @@ def build_service(enable_vlm: bool = True, enable_speech: bool = True) -> Answer
     engines = Engines(
         ocr=PaddleOCREngine(),
         vlm=SmolVLMEngine() if enable_vlm else None,
+        classifier=CurrencyClassifier(),
         drug_db=DrugDatabase.from_file(),
     )
     return AnswerService(engines=engines, upload_dir=UPLOAD_DIR,

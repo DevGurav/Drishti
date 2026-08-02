@@ -20,6 +20,7 @@ from pathlib import Path  # noqa: E402
 
 from app import languages
 from app.drug_db import DrugDatabase
+from app.engines.currency_cnn import CurrencyClassifier
 from app.engines.indictrans import IndicTrans2Translator
 from app.engines.mms_tts import MMSTTSEngine
 from app.engines.paddle_ocr import PaddleOCREngine
@@ -28,27 +29,13 @@ from app.router import MODES, Engines, route
 from app.speech import deliver
 
 
-class NotWiredEngine:
-    """Fails loudly instead of silently returning fake data."""
-
-    def __init__(self, what: str, blocked_on: str):
-        self._what = what
-        self._blocked_on = blocked_on
-
-    def __getattr__(self, _name):
-        def _unimplemented(*_args, **_kwargs):
-            raise NotImplementedError(
-                f"{self._what} is not wired in yet — blocked on {self._blocked_on}."
-            )
-
-        return _unimplemented
-
-
 def build_engines(ocr_lang: str = 'en') -> Engines:
+    """Engines are cheap to construct — every one loads its weights lazily, so an unused
+    mode costs nothing and a missing model is reported only when that mode is used."""
     return Engines(
         ocr=PaddleOCREngine(lang=languages.get(ocr_lang).ocr),
         vlm=SmolVLMEngine(),
-        classifier=NotWiredEngine("currency classifier", "the MobileNet training run"),
+        classifier=CurrencyClassifier(),
         drug_db=DrugDatabase.from_file(),
     )
 
