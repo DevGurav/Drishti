@@ -132,14 +132,21 @@ an ablation table produced, and abstention behaviour reported separately.
 
 ---
 
-### Phase 4 — Integration · Jan 2027 · ⬜ Not started
+### Phase 4 — Integration · Jan 2027 · 🟡 Started early
 
 **Goal:** one coherent app rather than five scripts.
 
-- [ ] All five modes served through `app/router.py` with real engines
-- [ ] Mode routing: cheap specialist models first, VLM only for open-ended queries
-- [ ] Full pipeline: camera → mode → answer → IndicTrans2 → TTS → speaker
-- [ ] Accessible UX: audio-first, large touch targets, works without sight
+Brought forward while model installs were pending — the interface needs no weights to build.
+
+- [x] All five modes served through `app/router.py` with real engines
+- [x] Mode routing: cheap specialist models first, VLM only for open-ended queries
+- [x] Full pipeline wired: camera → mode → answer → IndicTrans2 → TTS
+- [x] **Browser app** (`app/web/`) — camera capture, keys 1–5, space to capture
+- [x] Accessible UX: `aria-live` announcements, ~4rem targets, AAA contrast, no
+      dependence on sight, `prefers-reduced-motion` / `prefers-color-scheme`
+- [x] Offline guaranteed by test — rendered page asserted to contain no external URLs
+- [x] Captures deleted immediately after answering, including on engine error
+- [ ] Run the browser app against **real** engines (currently verified with fakes)
 - [ ] Latency budget enforced per mode (see RISK-1)
 
 **Exit criteria:** end-to-end spoken answer in Marathi from a photo, offline, <8s on laptop.
@@ -195,6 +202,9 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-016 | **Ship the `stakes` prompt; accept the precision drop** | Sweep of 5 variants on the baseline's own 500 samples. Naming the stakes ("the person asking is blind and cannot check your answer") beat listing failure criteria (0.508), stating the base rate (0.477) and demanding caution (0.302). Overall 0.308 → **0.533**; abstention recall 0.258 → 0.639 at the cost of precision 0.913 → 0.726. The trade is deliberate and asymmetric: a false abstention costs a retaken photo, a false answer can cost a wrong medicine |
 | DEC-017 | **Phase 3 is measured against 0.533, not 0.308** | The +0.225 came from prompting and is already banked. Comparing a fine-tuned model to the stock-prompt baseline would credit fine-tuning with a gain it did not produce |
 | DEC-018 | Strip an `Answer:` prefix before abstention matching | SmolVLM emits `"Answer: unanswerable"` intermittently (4 of 500). Unhandled, the app reads that string aloud to a blind user instead of offering retake guidance — a correctness bug in the product, not just 0.008 of unscored metric |
+| DEC-019 | **The app is a browser app, not a desktop GUI** | One codebase covers the laptop demo and the phone, so the Phase-5 Android port becomes a PWA rather than native llama.cpp work — a large reduction in the riskiest milestone. Browsers also give camera access, screen-reader support and `aria-live` for free. Cost: a local server process must be running |
+| DEC-020 | Captures are deleted immediately after answering | Users point this at prescriptions, bank documents and money. Retaining those on disk would contradict the privacy claim the project rests on. Deletion is in a `finally` block so it also happens when a model raises |
+| DEC-021 | Offline-ness is enforced by a test, not a convention | A single CDN font or script would silently break the airplane-mode demo — and would only be discovered on stage. A test asserts the rendered page contains no external URLs |
 
 ---
 

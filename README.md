@@ -64,6 +64,28 @@ plus real date parsing. `app/drug_db.py` is the medicine-mode safety guardrail �
 Surya and Tesseract were rejected, plus the mandatory config flags (`DEC-004`, `DEC-005`,
 `DEC-008`).
 
+## The app
+
+A browser app served from localhost — one codebase for the laptop demo and the phone.
+
+```powershell
+pip install flask
+python -m app.web.server --no-vlm --no-speech    # runs before any model is downloaded
+# open http://127.0.0.1:5000
+```
+
+Drop the flags once the models are installed. `--host 0.0.0.0` makes it reachable from a
+phone on the same wifi, which is the cheapest possible "mobile demo".
+
+Interaction is designed to work without sight: **keys 1–5** pick a mode, **space** captures,
+and every state change is announced through an `aria-live` region. Nothing loads from a CDN
+— a test asserts the rendered page contains no external URLs, since one would silently break
+the airplane-mode demo.
+
+Captured photos are deleted immediately after answering, including when a model errors.
+Users point this at prescriptions and bank documents; keeping them would contradict the
+privacy claim the project rests on.
+
 ## Running it
 
 **No model needs downloading by hand** — every engine fetches its weights on first use
