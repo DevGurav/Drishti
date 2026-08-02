@@ -1,0 +1,501 @@
+question,prediction,latency_s,acc,unanswerable_gt,gt_sample
+Ok. There is another picture I hope it is a better one.,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me what this medicine is please?,Unanswerable.,0.0,0.6666666666666666,False,no; unanswerable; night time
+What is the title of this book? ,unanswerable,0.0,0.0,False,dog years; dog years: memoir; dog years
+Which one is the blue one?,Blue,0.0,0.0,False,right; right; right
+What does the arrow say?,OK,0.0,0.0,True,unanswerable; unanswerable; zoomtext
+What the screen says? Thank you.,Windows.,0.0,0.0,False,unanswerable; unanswerable; dell
+What is seen on the laptop screen? What is seen on the laptop screen?,Nothing.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Okay I think I got it this time. Can you read the model and serial number for me? Thanks.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Is this shampoo or conditioner?,Shampoo,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Can you describe for me what's going on outside the window? Just curious.,Buildings.,0.0,0.0,False,store front; unanswerable; nothing going outside window just building windows sign to right
+What about the signery.,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; political
+What color is this,White,0.0,1.0,False,white; white; white
+This piece of mail for and where is it from?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Who is this mail for?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does my eye look like?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"Which one of these items is the children's dictionary? Is it the one on the right, or the one on the left?",Left.,0.0,1.0,False,left; left; left
+What is this?,unanswerable,0.0,1.0,True,finger; unanswerable; unanswerable
+Can you see if this is 32 bit or 64 bit?  Thanks.,32 bit.,0.0,0.0,True,unanswerable; no; unanswerable
+What is the computer doing?,Loading,0.0,0.6666666666666666,False,rebooting; repair mode; unanswerable
+What is the tag number?,545,0.0,0.0,True,unanswerable; 1545; 1545
+What does this sign say?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this color and pattern? There's some sort of pattern on my left chest there. Describe. ,White,0.0,0.0,False,plain white uspa logo in gold; emblem polo rider initials uspa; brown uspa
+Can you tell what this is?,Unanswerable,0.0,0.3333333333333333,False,bottle something dropper lid; unanswerable; bottle meds
+Can you tell me what the error message is on the Windows screen?,Starting Windows,0.0,1.0,False,unanswerable; starting windows; starting windows
+"Sometimes it does this too.  It's great when it works, but when it doesn't, it's annoying.",unanswerable,0.0,1.0,False,doing disk check; unanswerable; check disk
+I was wondering how ominous the sky is looking here at the northwest.,Ominous.,0.0,0.3333333333333333,False,fairly but could be worse; dark stormy; dark cloudy
+Can you tell me what these are please?,Box.,0.0,0.0,False,tablets; no i cant; pills
+What type of pills are these?,unanswerable,0.0,1.0,True,medication; capsule; unanswerable
+Is this a woman?>,Yes,0.0,1.0,False,yes; unanswerable; yes
+What does it say?,"Bond for a while, while, once quit.",0.0,0.0,False,unanswerable; unanswerable; quit
+What does that money say?,unanswerable,0.0,1.0,True,unanswerable; puffy taco place tejano plate hamburger combo fish plate shrimp plate; unanswerable
+Can anyone tell me what's actually on the screen of the laptop?,Screen,0.0,0.0,False,unanswerable; recovery screen some kind; samsung recovery solution
+Can you tell me what this is a picture of?,Screen.,0.0,0.0,False,unanswerable; computer screen; web browser
+Can you read the bottle on the screen?,unanswerable.,0.0,1.0,True,unanswerable; no; no
+How big do you think my TV is? Thank you.,Large,0.0,0.0,False,unanswerable; 32 inches; 27 inches
+What does this note say?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is the title of this book?,unanswerable,0.0,0.6666666666666666,False,dog years; dog years; dog years
+"Hi, I just wanted to confirm that these are indeed pork chops. Any other information that is clear would be appreciated. Thank you.",unanswerable,0.0,0.0,False,yes; yes; yes kirkland signature pork chops
+Please tell me what this is.,Unanswerable,0.0,1.0,True,unanswerable; too blurry; unanswerable
+What denomination is this?,Unanswerable,0.0,1.0,True,unanswerable; 0 pictured; unanswerable
+Please tell me what is in this food packaging. I know it's a Tesco's Indian meal of some kind. ,unanswerable,0.0,1.0,True,indian beef rice; unanswerable; no
+What is this receipt about and is there a phone number?,Phone number.,0.0,0.0,True,unanswerable; unanswerable; unsure
+What does this fortune cookie say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; too blurry
+Tell me what's in this photo.,Unanswerable.,0.0,1.0,True,part person; unanswerable; person
+Able on my vacuum I need the serial number and model number.,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; too blurry
+What is the expiration date on this bus pass?,Unanswerable,0.0,1.0,False,jul 08 11; unanswerable; blurry
+"How big is my TV and what is on the screen, and what is the model number, and what brand is it?",unanswerable,0.0,1.0,True,32 inch sporting event unanswerable for rest; unanswerable; unsure
+what is this we taking a picture of?,Person.,0.0,0.0,False,boobs; unanswerable; boobs
+What store is this?,The Original Pancake House,0.0,1.0,False,original pancake house; original pancake house; original pancake house
+What kind of pop is this?,Orange.,0.0,0.3333333333333333,False,nestea; unanswerable; nestle tea
+Screen showing.,Answer: unanswerable,0.0,0.0,True,yes; unanswerable; yes
+What letters am I supposed to enter in to claim the prize?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me if there is a model on here please? Thank you.,unanswerable,0.0,1.0,True,yes; unanswerable; unanswerable
+"Hello there, are you able to see what's on this LCD screen and if it's expecting any input from the user, as in, does it have a next button, back button?",No,0.0,0.3333333333333333,False,no; no cant see; yes
+What's the name of the drink?,IRKDBU,0.0,0.0,False,irnbru; irn bru; irnbru barr
+Where do you think I could get a power cord? ,unanswerable,0.0,1.0,True,forest hill maryland; amazon; biazie engineering
+Specials on this menu.,Capoed,0.0,0.0,True,beef seafood; dont see any; unanswerable
+What is on the pillowcase?,Texas,0.0,1.0,False,texas logo; sports team logo; texas
+I cannot move the camera slightly closer to the monitor.,Unanswerable,0.0,1.0,True,yes; unanswerable; unanswerable
+What does the label say on this electronic component?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Please tell me the them of this book,Unanswerable,0.0,0.6666666666666666,False,clive cussler dirk cussler; unanswerable; clive cussler dirk cussler
+What is this?,Unanswerable,0.0,0.6666666666666666,False,email tab; desktop; close up computer screen
+What website is this?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Alright see if you can see the ORCA serial number now.,Unanswerable,0.0,1.0,True,no serial number; no; unanswerable
+What is the person doing?,Unanswerable,0.0,0.0,False,looking at computer screen; watching computer screen; working on computer
+Could you please tell me what's on my screen?  ,Screen,0.0,0.0,True,no; white black screen; unanswerable
+Product key for this version of Office.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; yes
+What's the website?,Gees On A Lash,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What does the screen say?,Windows,0.0,0.3333333333333333,True,windows please; unanswerable; unanswerable
+Can you tell me what this bottle says?,Sychula,0.0,0.0,False,warm vanilla sugar; sugar; warm vanilla sugar
+"About this one, thank you.",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this item,Unanswerable,0.0,1.0,True,unanswerable; plastic case; cellphone
+what does the sky look like in this photograph,Blue.,0.0,0.3333333333333333,False,cloudy; blue sky some clouds; blue few clouds
+Can you tell me what this screen says?,Unanswerable,0.0,1.0,True,unanswerable; windows repair; unanswerable
+Product key for this version of office?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; blurry
+Is there anything on the screen?,Yes.,0.0,1.0,False,yes; unanswerable; install mac computer
+Business card.,unanswerable,0.0,1.0,True,no; unanswerable; blurry not plan
+What's on my computer screen?,Window,0.0,0.0,False,pop up window; error message; white card blue line
+"Can see what's on the screen, like is it a log in screen or anything like that? Thank you.",Yes,0.0,0.6666666666666666,False,no; error message; yes
+What is this a medal for?,Unanswerable.,0.0,0.6666666666666666,False,america cancer society; cancer; running
+What is this show? ,Ghost town,0.0,0.0,False,news stream; csi: crime scene investigation; csi crime scene investigation
+"Please tell me the title of this book, thank you for your time.",Oliver cussler and dirk cussler,0.0,0.0,True,crescent dawn; unanswerable; unanswerable
+"Is my computer performing a disc check? For example, does it say on the screen, \Checking files system\, or \Stage one of four\ or some such? Thank you. ",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Which one of the three images is the Google logo?,Google,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+IS there a picture on this tv screen?,Yes,0.0,1.0,False,yes; yes; yes
+please explain what is on this piece of paper,unanswerable,0.0,1.0,False,unanswerable; stress advertisement; stress relieve instructions
+What bill is this?,2000,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What are the cooking instructions for this?,Thick slice.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Is there a button I need to press to make it resume? Or do I just wait?,Wait.,0.0,0.3333333333333333,False,system resume; unanswerable; yes
+What does the screen say?,Oboy,0.0,0.0,True,file; unanswerable; expanding windows filters
+Is the dialogue more visible in that picture?,No.,0.0,1.0,False,bored; yes; no
+What does the small label on this disc say?,PPDX,0.0,0.0,False,3d disk; unanswerable; prop quartics inc
+"The previous screen presented country, timezone, currency and keyboard and I went ahead and after I got a response from the web worker I selected Alt-N followed by next so I'm not sure if I ",Windows,0.0,0.3333333333333333,True,windows; unanswerable; unanswerable
+"Is this picture clear, and where are we now?",Yes.,0.0,0.3333333333333333,False,card; unanswerable; no
+Can you please tell me what the computer screen says within in the VMware workstation window?  Particular to see if there's any progress on the Windows installation.,Windows,0.0,0.3333333333333333,True,unanswerable; unanswerable; windows install now screen
+Can you see what's on the screen?,Yes,0.0,0.0,False,you sure you want to cancel; unanswerable; confirm cancel notification
+Is this caffeinated or decaffeinated?,Decaffeinated,0.0,0.0,False,caffeinated; caffeinated; caffeinated
+Can you tell me if there's any local Seattle beers on this menu?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is the model number of the computer?,HP.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+"Alright. If you could tell what the screen says, that would be helpful, thank you",Unanswerable.,0.0,1.0,False,iniciar el escaneo de; iniciar el escaneo; unanswerable
+Can you see the dosage information? Thank you.,Yes,0.0,0.0,False,heavy power; no; no
+Is their text on this computer screen?,Yes,0.0,1.0,False,overy options; yes; yes
+"this is a picture of a home i'm planning to buy, does it look like its in a safe neighborhood? ",No.,0.0,1.0,False,yes; no; no
+What bottle is this please? Thank you.,Unanswerable.,0.0,1.0,True,prescription bottle; unanswerable; pills
+Can you please tell me the progress of the Windows installation? Thank you very much.,Unanswerable.,0.0,1.0,True,install now; unanswerable; not started
+Has the text on the screen changed?,No.,0.0,0.6666666666666666,True,no; unanswerable; no
+"Hi, can you give me the percentage of the scan disk? Thanks. ",Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Please tell me the title of this book. Thank you for your time.,Oliver cussler and dirk cussler,0.0,0.0,True,clive cussler dirk cussler; unanswerable; unanswerable
+What does this screen say?,Expanding windows files,0.0,1.0,False,expanding windows files 52%; expanding windows files; expanding windows files 52%
+What is the expiration date on this bus pass?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+what kind of medication is this?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+what is this,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Please describe this page. Thank you.,Big,0.0,0.0,False,store ad; has prices pics various sale products; ad for sporting goods store
+What are the letters I need to enter in?,Keyboard,0.0,0.0,False,kej; kej; kej
+Is it impossible for you to read the captcha image in this picture? Thanks.,Yes,0.0,0.6666666666666666,False,unanswerable; no; no
+What is this?,Unanswerable.,0.0,0.3333333333333333,False,chest; purple tank top on woman; picture breast
+What does this arrow say?,OK,0.0,0.3333333333333333,True,unanswerable; unanswerable; using unsuitable vga display driver which not supported by zoomtext
+Please tell me the name of this book.,Live cussler and dirk cussler,0.0,0.0,True,clive cussler; unanswerable; unanswerable
+What does this say?,Copyright 2004 by Thomas Clemons,0.0,0.0,True,unanswerable; copyright 2004; unanswerable
+what is written on the screen?,Tempo,0.0,0.0,True,unanswerable; free memo space; unanswerable
+What is this?,Unanswerable,0.0,1.0,True,unanswerable; receipt; unanswerable
+Product key for this versions off,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this item?,Bottle,0.0,0.3333333333333333,False,mexican steak marinade; bottle; unanswerable
+"Yeah, it should be fine, I'm just trying to post it online so someone can see all the inputs and connectors and things like that. If you can see those, then yeah, email it to me at mike@melo.com",JBL,0.0,0.0,False,unanswerable; yes i will; inputs connectors visible
+What drink is this?,Blackberry,0.0,0.3333333333333333,False,hint; bottle flavored water on desk; hint blackberry
+Can you tell me what this is a picture of?,Picture.,0.0,0.0,False,computer screen; computer screen showing online chat session; unanswerable
+What's in this bottle?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does the screen say?,Vindo 7,0.0,0.0,False,windows 7 home premium; windows; windows 7 home premium
+Hi what's on this card?  I'm looking for some sort of ID number it could be eight digits.,T-Mobile.,0.0,0.0,True,unanswerable; trees; unanswerable
+"Ok I have taken a picture of a sticker close up now hopefully you can see it. Again, I need the model number. Thank You",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"Can you see a bottle in this picture? And if so, what is it?",No.,0.0,1.0,False,no; no; no
+Trying to take a picture of this bottle of wine.,Wine,0.0,0.0,True,you did; unanswerable; unanswerable
+What does this message say?,Restore Complete,0.0,0.0,False,restoration complete; unanswerable; successful restoration complete
+Can you tell us what this screen says? Thanks.,Next,0.0,0.6666666666666666,False,something about remembering your password; next; if you need help will show you hint for your password
+What is this?,Obama,0.0,0.0,False,computer screen; laptop skype logo; help page for apple
+Can you please tell me what is displayed on the screen?,Facebook repair.,0.0,0.0,False,words; error message; unanswerable
+Tell me what this screen says because the computers not functioning properly and it gave another sound,Unanswerable.,0.0,0.0,False,printer not responding; printer not responding; printer not responding
+What is on this piece of paper?  Thank you.,Unanswerable,0.0,0.0,False,sales ad; coupon; sales ads
+What does this say?What does this say?,unanswerable,0.0,0.3333333333333333,False,medicare inquiry center po box 31647 tampa florida 33633 1586; business reply mail; unanswerable
+What does this message say?,Restoration Complete,0.0,1.0,False,unanswerable; restore complete; unanswerable
+Can you please describe to me what's on the page and its orientation? Thank you,Page.,0.0,0.0,False,sideways car sales ad; car dealership advertisement; sales ad landscape
+What's in this jar please?,Semolina,0.0,0.6666666666666666,True,i dont see jar; unanswerable; unanswerable
+Work for me or I'm going to beat you. I will beat the out of you. ,Unanswerable,0.0,1.0,True,crap; unanswerable; unanswerable
+"I need to know the cooking instructions for grilling for these burgers. If you need to turn, me to turn the package over just let me know.",unanswerable,0.0,1.0,True,unanswerable; turn re ask question get closer; unanswerable
+What does this say?  Thank you.,McAfee,0.0,0.3333333333333333,False,mcafee your computer at risk check status; your computer at risk from mcafee message; mcafee antivirus
+Can you see the steak on this menu?,Yes,0.0,1.0,False,yes; yes 18$; yes
+Hopefully you can see what this screen says.,Unanswerable,0.0,1.0,True,yes; ok cancel; unanswerable
+Can you tell what's on this paper?,Unanswerable,0.0,1.0,False,water; grease; liquid stain
+What is written on that screen?,unanswerable,0.0,1.0,True,unanswerable; blurry; unanswerable
+What is this?,Screen,0.0,0.0,True,bar code; unanswerable; computer monitor
+Can you please tell me what the computer screen says?  Thank you.,unanswerable,0.0,1.0,True,no; unanswerable; unanswerable
+"Okay, I moved the camera a little to the right. Hopefully that will get whatever the code is I need and I am looking forward to the answer. Thanks a bunch.",Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is the captcha show?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me which medicine this is please?,Night time.,0.0,1.0,False,night time cough syrup; night time for cold flu symptoms; night time cough syrup
+What does this coupon say on it?,Buy one pizza at menu price & fare one pizza equal or lesser value free. expires 12-31-,0.0,0.0,False,buy 1 pizza at menu price receive on pizza equal lesser value free expires 12 31 11; buy 1 pizza at menu price receive 1 equal lesser value free; buy 1 pizza at menu price receive 1 pizza equal lesser value free expires 12 31 11
+Is this piece of mail?,unanswerable,0.0,1.0,True,yes; unanswerable; unanswerable
+Can you tell what I'm playing?,Angry birds,0.0,1.0,False,no; angry birds; angry birds
+"Yes, can you please tell me what this screen says? I seem to have an error booting up my computer. ",American Megatrends,0.0,1.0,False,unanswerable; some sort error message; american megatrends
+What is this?,Unanswerable,0.0,1.0,True,meat package; unanswerable; package
+Help me with this capture.,Unanswerable,0.0,0.3333333333333333,False,casithwo; casithwo; casithwo
+Can you give me an idea of what's on the screen? Thank you.,Links for russia,0.0,0.3333333333333333,False,links to sites; different chrome links like news products; menu
+What is in this picture?,Car on tv,0.0,0.0,False,tv; tv screen car on clock other furniture; car
+What does this say?,Verifying files (stage 1 of 4),0.0,0.0,False,scan was completed; computer verifying files other parts system 1 at time; check disk
+What is that word?,Aperture,0.0,0.0,False,entsursa; entsursa; erytslu2sa
+Yeah what is this?,Unanswerable,0.0,1.0,True,wall; unanswerable; papper some kind
+What does the top of this pamphlet say?,unanswerable,0.0,0.6666666666666666,False,college area breadth requirement; college; collage requirements
+What does this say?,Azithromycin,0.0,0.0,True,unanswerable; azithromycin tablets 250mg; tablets
+"Okay, I've turn the package over and I need to know the grilling instruction for these burgers, thank you.",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does the computer screen say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; finish
+What is in this can?,Caffeine,0.0,0.0,True,cola; unanswerable; soda
+What color is this skirt?,Blue,0.0,1.0,False,blue; blue; blue
+What is the TV channel? ,unanswerable,0.0,1.0,False,8; unanswerable; news
+What's on this channel?,Maple Leafs,0.0,0.3333333333333333,False,sports game; hockey game; maple leafs at rangers
+clouds in the sky look like,Yes.,0.0,0.0,False,grey; dark; white
+What does the screen say?,Unanswerable,0.0,1.0,True,lenovo pop up unreadable; unanswerable; lenovo
+What does the text on this say?,unanswerable,0.0,1.0,False,asking for personal information on form; unanswerable; form to fill out
+What's going on on the computer screen?,unanswerable,0.0,1.0,False,just blue green screen; unanswerable; looks broken somewhat
+I need the serial number for this software.,unanswerable,0.0,1.0,True,730420122239; unanswerable; 700420122239
+What does this cartoon look like? Thank you.,Window,0.0,0.0,True,black white 2 men facing each other; unanswerable; comic Comic strip
+Is this person attractive?,No.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+On the screen does it say it's restoring?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Real pun.,Unanswerable.,0.0,1.0,True,unanswerable; unknown; unanswerable
+Can you tell me what's on this screen please?  If at all readable or anything like that.,Unanswerable.,0.0,1.0,True,unanswerable; no; no
+Is there text or any identifying identification on this side of the card?,Unanswerable,0.0,1.0,False,no text identifying identification on side card; yes; unanswerable
+Is it more in focus now?,Yes,0.0,0.6666666666666666,False,unanswerable; no; no
+"Please tell me whats on my screen, thank you, thank you, thank you I have no speech, bless you all for doing this. Oh No!",Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this CD?,Tech-script,0.0,0.0,False,technet; windows server 2008 r2; software
+What is this receipt about?,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; nothing
+"Tell me about this creme, what is showing, what is visible, doesn't really matter if you can't read the full text as long as I know there's something going on that's fine. ",Answer: unanswerable,0.0,0.0,True,blue screen; unanswerable; plain blue screen
+Can you please tell me if there are any errors on this screen?,unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"What software is this, and read any serial number if you can see one.",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What are the letters to enter in to obtain the prize?,CJO,0.0,1.0,False,cjo; cjo; cjo
+What is this?,Television,0.0,0.3333333333333333,False,room; television; shoes
+"Can you please tell me what's on this page, and it's orientation? Thank you.",Page.,0.0,0.0,True,beckham; unanswerable; top sports page to left
+Does it still say loading Windows or is it to the restore?,Loading windows,0.0,0.3333333333333333,False,says loading files; still loading windows; loading
+What does the screen on my TV say?,unanswerable,0.0,0.6666666666666666,False,starz encore call us at; starz; starz
+What is this a picture of?,Picture,0.0,0.0,False,back chair woman in; woman; woman
+Can you please tell me the 1-800 number on this card?,1-800-735-2929,0.0,0.3333333333333333,False,800 735 2929; 1 877 328 9677 1 80 732 2929; 1 800 735 2929
+Can you tell me what the screen says?,unanswerable,0.0,1.0,True,something not working; unanswerable; unanswerable
+"There did I press the ok button I think?  And am I further along, thanks.",Unanswerable,0.0,1.0,True,next button to be clicked now hit enter; unanswerable; unanswerable
+What is that drink?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you read this seven day forecast and write it out in the app so I can use voice over to read it? It's a seven day forecast,Sun.,0.0,0.0,False,wed 100 thu 101 80 fri 102 80 sat 10280 sun 101 80 mon 10081 tues 100 80; wed 100 thu 101 fri 100 sat 102 sun 101 mon 100 tue 100; 100 101 100 102 101 100 100
+Hello could you please tell me what this says? Thank you.,unanswerable,0.0,1.0,True,unanswerable; book; unanswerable
+Is the laptop screen open?,Yes.,0.0,1.0,False,yes; laptop open; yes
+What does this CD say?,unanswerable,0.0,1.0,False,death cab for cutie codes keys; data music; unanswerable
+What does this say?,unanswerable,0.0,1.0,True,unknown; unanswerable; unanswerable
+What is this package?,Unanswerable,0.0,1.0,True,unknown; unanswerable; unanswerable
+"This is probably going to be a long shot in the dark, but I'm trying to fill out a form which requires a captcha, to be solved, and if someone could tell me what the code is, I'd be extremely grateful, thank you.",unanswerable,0.0,1.0,True,unknown; cannot read code; unanswerable
+Do the clouds look like storm clouds?,No.,0.0,1.0,False,yes; yes; no
+Do you see steak on this menu?,Yes.,0.0,1.0,False,yes; yes; yes
+"Hi, what does this card say, I'm looking for an 8 digit ID number.",Unanswerable,0.0,1.0,True,unknown; unanswerable; unanswerable
+"Can you please give me as much as possible as what you see on my computer screen, whether it's a Windows log on or a blue screen of death or anything at all because I have a.",Windows,0.0,0.0,True,notification; cannot read screen image has computer too far away; unanswerable
+What  can you see on this screen? ,Windows,0.0,0.3333333333333333,True,unanswerable; pop ups that blurry; windows
+"Hi, thanks for letting me know this is start-up repair, might take awhile but I really want to try  and actually get myself back into Windows I am an IT technician, so all I really need",Unanswerable.,0.0,1.0,True,click finish to exit shut down your computer; press enter your on finish button right now i think; unanswerable
+Can you describe what is on the case of this DVD?,Sh,0.0,0.0,True,unanswerable; man but case cut off; unanswerable
+Please identify what's on the screen.,Window,0.0,0.0,False,windows installation; where do you want to install windows screen; windows
+Ok.  This is a picture with a different angle.  Do you see another an id number now with the RT systems software?,Unanswerable.,0.0,0.6666666666666666,False,unanswerable; no; unanswerable
+What is the person doing?,Working,0.0,0.0,False,looking at computer monitor; sitting at desktop facing away; typing
+What do you see here?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; blurry screen
+What's on this shirt?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Looking for the time that this screen is trying to tell me. I'm trying to do a FileVault decryption. ,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"Hi, what do you see in the screen?",Unanswerable,0.0,1.0,True,file storage sizes; unanswerable; words
+Can you please tell me the percentage or progress of the Windows 7 installation? ,Unanswerable,0.0,1.0,True,unanswerable; no; no progress bar
+What is the number on the back of this card?,unanswerable,0.0,1.0,True,unanswerable; unknown; unanswerable
+What is the time shown on the screen?,Unanswerable,0.0,1.0,True,unanswerable; unknown; unanswerable
+What is on the screen?,MacBook,0.0,0.0,False,disk icon; unanswerable; unanswerable
+Can you tell me what this pop up is saying?,Unanswerable,0.0,1.0,True,no too far away; unanswerable; unanswerable
+What is this?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What's on the screen?,unanswerable,0.0,1.0,True,pop up; windows; unanswerable
+Please tell me about this calendar? ,October,0.0,1.0,False,month october has horse images; october; october
+"Can you tell what brand and model this television is, please? Thank you.",Sony.,0.0,0.0,True,no; unanswerable; unanswerable
+Just curious to see whether you could read what was on the computer screen. Just testing this application.,Unanswerable,0.0,0.3333333333333333,False,australia lucky google go to googlecom; no; partially
+Is it possible then that we have a blank screen? If so this may mean that something is happening.,Yes,0.0,0.6666666666666666,False,no; yes; yes driver installation
+What is playing on this channel?,Unanswerable,0.0,1.0,True,unanswerable; hockey; house crashers
+Can you tell us what the screen says?,Windows 7 home premium,0.0,0.3333333333333333,False,yes; windows 7; windows account log in
+Can you tell me what the error message is and what I can do to get past it?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unable to read try restart
+Is there any change to the monitor?,No,0.0,0.3333333333333333,False,need to click restart for driver to be installed; driver installed; unanswerable
+"Alright, I found the input button. Now I'm wondering if I have to select something onscreen to change and if anyone has a Vizio tv that would help me out, as well. ",Vizio,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Is this?,Yes,0.0,0.0,False,new boxers hand towels; socks; washcloths
+is this?,Yes,0.0,0.0,False,computer; keyboard; dell computer
+Can you please tell me what's on screen? Thank you.,Screen.,0.0,0.0,False,reboot disk check screen; unanswerable; programming menu
+Please tell me what the title of this book is? Thank you for your time.,Silver cussler,0.0,0.0,False,unanswerable; no; unanswerable
+Computer screen showing?,Unanswerable,0.0,1.0,False,yes; unanswerable; code
+Please tell us what the screen says on the computer.,Checking file system on:,0.0,0.0,False,unanswerable; checking file system; checking file system on c:
+Which one of the three images is the Google logo?,Google,0.0,0.0,True,unanswerable; 0; unanswerable
+What does the screen say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this message say?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me what this price tag says?,737310000,0.0,0.0,False,mission tortilla strips mission foods 1015 7373108100 2; mission tortilla strips; mission tortilla strips mission foods
+What does the label say on this electronic component?,SanDisk,0.0,0.0,False,unanswerable; seagate; serial number made in china memory space this electronic gadget
+Hi can you tell if this page has my boarding pass on it? Thanks.,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me the captcha letters or number in this image?  Thank you.,unanswerable,0.0,1.0,True,unanswerable; no; no
+What is that please.,unanswerable,0.0,1.0,True,unanswerable; card; toothpaste
+What does this paper say?,unanswerable,0.0,1.0,False,unanswerable; pump; garoo pump
+"I'm trying again, I moved the camera. Can you tell me who this piece of mail is from? Thank you.",unanswerable,0.0,1.0,True,unanswerable; clark; no
+What is this?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+what is in this bottle and what is it?,Unanswerable,0.0,1.0,True,unanswerable; water medication; unanswerable
+What is this?,Laptop.,0.0,1.0,False,unanswerable; laptop; computer
+Sorry about that. I was away from the app and it didn't take me...it kind of crashed. But can you see the dialog?,Unanswerable.,0.0,1.0,True,unanswerable; no; unanswerable
+"OK, lets try this again and see if this works. Do you see any kind of an ID number here that would tell me what is what so that I can get disconnected?",No.,0.0,0.6666666666666666,False,no but youre mouse almost on top stop button; yes; no
+What does this say?,unanswerable,0.0,0.3333333333333333,False,if application doesn't respond for while select name click force quit; if application doesnt respond for while select name click force quit; force quit application
+what is this camera doing or this screen on this computer what is it saying now we just started it up and its not talking yet,Unanswerable,0.0,1.0,True,pop up open no camera; unanswerable; unanswerable
+What is the computer screen showing?,Window.,0.0,0.0,False,audio driver install screen; computer screen menu pulled up; audio driver
+"Can you tell me the 1-800 number off this card, and are you able to hear this question?",1-800-735-2292,0.0,0.0,False,1 800 735 2929 cant hear q; 1 877 328 9677; 1 877 328 9677 1 800 735 2929
+What color is this?,Purple,0.0,1.0,False,purple; purple; purple
+What does this say?,unanswerable,0.0,0.6666666666666666,False,shower curtain royal; shower curtain; shower curtain
+What color has the light?,Red,0.0,1.0,True,white; red; clear
+What color is this paper?,White,0.0,1.0,False,white; white; white
+What is this item?,Purple tree,0.0,0.0,False,advertisement; box; invitation
+What does the label on this electronic device say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this computer screen say?,unanswerable,0.0,1.0,False,unable to start; unable to start; unable to start
+Please tell me the name of this book?,Live cussler and dirk cussler,0.0,0.0,False,crescent dawn; unanswerable; author clive cussler dirk cussler
+Is this?,Yes,0.0,0.0,True,unanswerable; unanswerable; twister
+"Can you please tell me what's on the screen? And if there's anything I need to interact with, which may include selecting an item, or inputting information. Thank you very much",Windows 7 Home Premium,0.0,0.0,False,windows 7 homechoose country time currency keyboard layout; windows 7 sign in; set up windows country region time currency keyboard layout
+What is this?,Unanswerable.,0.0,1.0,False,unanswerable; tablet; box
+What kind of piano appears in the image I am sending?,Piano.,0.0,0.0,False,baby grand; unanswerable; made glass crystal elephant sitting on bench
+I have two questions for you. What is the name of this game and what platform can you play it on?,MLB the show.,0.0,0.0,False,unanswerable; baseball game unanswerable for platform; mlb show on ps3
+What does this screen look like?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me what the computer screen is saying? Windows is not booting.,Unanswerable,0.0,1.0,False,unanswerable; starting repairs; unable to start checking your system for problems starting repairs
+tell me if there's text what it says on computer screen please.,Startup repair,0.0,1.0,False,unanswerable; startup repair; startup repair checking your system if problems found startup repair will fix them
+These curtains look clean.,Answer: unanswerable,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+"Must be one less error, appreciate it, thanks.",Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this?,Unanswerable,0.0,1.0,True,unanswerable; blurred out book something; unanswerable
+What is this?,Unanswerable,0.0,1.0,True,bar code; blurred out label; unanswerable
+CCan you tell me what percentagbe of being done the process is here?,Unanswerable,0.0,1.0,True,no; unanswerable; unanswerable
+"The computer is now on, is Windows coming up",Unanswerable,0.0,0.3333333333333333,False,yes; windows resume loader screen; unanswerable
+Is the dialogue there now?,Yes,0.0,1.0,False,yes; unanswerable; yes
+"Hello there, can you please tell me what this says? Thank you.",unanswerable,0.0,1.0,True,unreadable; unanswerable; unanswerable
+I think I pressed the okay button. Am I further along on this here? Thank you. ,Yes,0.0,1.0,True,i believe so; yes; yes
+What letters am i supposed to enter in to claim the prize?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+they would like for us to take an 8 digit id number,Unanswerable.,0.0,1.0,True,unanswerable; qualification; unanswerable
+What does this paper say please?,Unanswerable,0.0,1.0,True,unanswerable; notification; unanswerable
+"Looking for properties to rent in my area, what is the condition of the house shown in the image?",Unanswerable.,0.0,0.0,False,poor; bad; extremely poor
+"Can you get up from your chair, walk across the room and slap Walter?",Unanswerable,0.0,1.0,True,unanswerable; maybe; no
+Please tell me what this is?,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unable to see all
+Can you please to describe to me in detail what this picture looks like? Thank you.,Window help.,0.0,0.0,True,unanswerable; unanswerable; comic
+Don't know what the screen says. ,Unanswerable.,0.0,1.0,False,unanswerable; web photos; music player
+What does this screen look like?,Unanswerable,0.0,1.0,True,paper cup; unanswerable; pink
+Where is the white cup?,Room,0.0,0.0,False,near laptop; left; on table
+Can you see a bottle in this picture and if so what is it?,No.,0.0,1.0,False,unanswerable; no; no
+Is the same screen still up? Or did it change? I just--tried to hit finish. ,Unanswerable.,0.0,1.0,True,change; unanswerable; still up
+"Please can you tell me what this writing says on the picture that I've taken a photo of, thank you?",Beat the burgler,0.0,0.0,False,burglar alarm; unanswerable; unanswerable
+Letters for numbers? Thank you.,Password,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What is this T-shirt please?,Unanswerable,0.0,0.0,False,minnesota twins; twins t shirt; minnesota twins
+What letters do I type in to claim the prize?,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What action is currently selected?,Projects,0.0,0.0,True,unanswerable; 0; devices
+What is it?,Laptop,0.0,1.0,False,dell laptop; dell laptop; laptop
+Please tell what the title of this book is. Thank you for your time.,Silver cussler,0.0,0.0,False,olive cussler dirk cussler; clive cussler dirk cussler; unanswerable
+What hours are they open?,2-4pm,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Can you please tell me in detail what's on this computer screen? Thank you very much. ,"A computer screen with a message that says ""Your computer was unable to start. Repair is checking your system for problems.",0.0,0.0,True,unanswerable; unanswerable; computer cant start message
+Was I able to clear either of the mirrors of the OK button?,No.,0.0,0.3333333333333333,True,unanswerable; unanswerable; unanswerable
+Can you please tell me the ETA or progress that Scan Disk has completed so far? Thank you very much. ,unanswerable,0.0,1.0,False,unanswerable; stage 5 5; stage 4 5
+Ok guys. Me again. Just need to have this security card on the screen read to me. It's a captcha. So that would be appreciated. Normal service isn't working for me for some reason.,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Has that brought those buttons into focus? I'm thinking that one of them might be a skip button. ,No,0.0,0.0,False,unanswerable; unanswerable; yes
+"Can you tell me what the error message is and how I need to clear it, what I need to do to clear it?",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you please tell me not to compare skin cells? Thank you very much.,Unanswerable,0.0,1.0,True,unanswerable; dont compare skin cells; unanswerable
+what is this?,Trader joe's,0.0,0.0,False,milk thistle; milk thistle; trader joes milk thistle
+can you tell me what this is a picture of?,Screen.,0.0,0.6666666666666666,False,unanswerable; screen; computer screen
+"I'm sorry I'm in the hospital and I'm trying to get this set up so that I can use it for accessibiliy. What does the screen show? Give a general idea, thank you.",Screen,0.0,0.0,False,no terms match your search; nothing no items match your search; document search screen
+Is my computer screen lit up?,Yes,0.0,1.0,False,yes; yes; yes
+There should be a skin of a document on the screen. Can you please tell me if that's true or not? Thank you very much,No.,0.0,0.3333333333333333,False,yes; yes; not true
+What is written on the screen?,Google,0.0,1.0,False,google search text box; google; google
+I'm trying to find the model number of this device.  It's probably PB10 or PB12 can you read the label or let me know how to rotate so you can.,PB10,0.0,0.0,False,pb12; pb12; pb12
+What is the capture code on this page?,2008,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What does it say?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+of my driver's license.  Not that I can drive or anything.,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me what this warning is?,User account control,0.0,0.0,False,changes; do you want following program to make changes to this computer java auto updater; no
+just curious to see whether you could read what was on the computer screen just testing this application.,Unanswerable.,0.0,0.6666666666666666,False,google screen; unanswerable; yes google
+is there text on this side of the car?,Greenbacks,0.0,0.0,False,unanswerable; unanswerable; no
+What is written on the screen?,Tempo,0.0,0.0,False,unanswerable; unanswerable; free memo state phantom
+Can you tell us what this text says? Thank you.,Unanswerable,0.0,0.0,False,password for your account 3 password blanks; set password for your account; set up window
+"Hi thanks for letting me know this is startup repair.  It might take a while here, but I really want to try and actually get myself back into windows, I'm an IT Technician, so all I really need...",Unanswerable,0.0,1.0,True,hit enter to finish; unanswerable; yes
+What is on the screen?,Keyboard,0.0,0.0,True,unanswerable; unanswerable; disk check
+I'm trying again.  I moved the camera.  Can you tell me where this piece of mail is from?  Thank you.,unanswerable,0.0,1.0,True,no; vancouver washington; unanswerable
+Does my computer screen need cleaning?,No,0.0,0.6666666666666666,False,no; no; yes
+Can you tell me what CD this is?,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is the computer screen showing?,Blue,0.0,0.0,False,unanswerable; blank screen; blank
+Can you please tell me what the computer screen says?,Now.,0.0,0.0,False,your computer will restart several times during; computer will restart; unanswerable
+What does it say on the computer screen?,unanswerable,0.0,1.0,True,light; unanswerable; unanswerable
+Can you read everything on my TV screen?,No.,0.0,1.0,False,no; no; yes
+"Can you see which of this option is for booting into safe mode? Is it above or below the highlighted area? How many lines up or down, looking for safe mode, boot into safe mode. Thank you. ",Above,0.0,0.0,True,1; unanswerable; unanswerable
+"Tell me if there's text what it says on this computer screen, please?",Startup repair,0.0,1.0,False,startup repair; repair; startup repair
+What is written on the back of this sofa,unanswerable,0.0,1.0,False,boston; code; boston
+Can you please describe this picture to me? Thank you.,Comic.,0.0,0.3333333333333333,False,cartoon; unanswerable; cartoon
+What is on this page?,unanswerable,0.0,0.6666666666666666,False,dollar amounts; account statement; numbers
+I want to know what my screen says.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is on the monitor?,Screen,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What does that say?,Chap coorinding,0.0,0.0,True,unanswerable; coordin; chapter coordinator maybe
+What does my computer screen show?,YouTube,0.0,1.0,False,youtube; youtube; youtube
+"Is this computer actually on a state where it's still sorting itself out? And getting ready to boot? Or, is it already booted? ",Booting,0.0,0.0,False,already booted; already booted; booted
+Can you read the screen? Thank you.,Yes,0.0,0.6666666666666666,False,unanswerable; yes; no
+"There are four sets of five numbers on this ticket, can you read them for me?",0707-0192-49-03 04 13 1,0.0,0.0,False,yes; unanswerable; 0103041329 0304111325 0407121320 1307131525
+ok as requested i've moved my camera to the left and can you please tell me what the screen says thank you very much,Unanswerable.,0.0,0.0,False,yes; copying windows files; installing windows
+Hi there are 4 sets of 5 numbers on this ticket could you read them for me? Thanks.,unanswerable,0.0,0.0,False,yes; question unrelated to image; 0103041329 0304111325 0407121320 1307131525
+What is the code on this iTunes gift card?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+On the left.,Unanswerable,0.0,1.0,True,unanswerable; red picture frame; unanswerable
+What numbers are marked on this ticket?,40-7-10-25-42,0.0,0.0,False,04 35 36 42 50 01 02; 04 35 36 42 50 01 02; 04 35 36 42 50 01 02
+"Can you tell me what this medicine is, please?",Night time,0.0,1.0,False,night time cough syrup; night time cough syrup; store brand nyquil
+"Ok, ummm I need to do a full system recovery on my laptop and I got a guided prompt screen. It is asking me to do a number of different things and to be three different screens. I just need to tell you to tell me...",Unanswerable,0.0,1.0,True,warning; unanswerable; unanswerable
+"Can you tell by looking at this, at the label, what it is, I think it's a piece, a dvd in the mail.",Unanswerable,0.0,0.6666666666666666,False,yes; yes dvd; no
+can you tell what restaurant this is?,House Favorites,0.0,0.0,False,big 1; no; no
+Have I started the system restore? Thanks.,No.,0.0,0.6666666666666666,True,yes; no; unanswerable
+What is the name of this book?  Thank you.,Slive cussler,0.0,0.0,True,unanswerable; clive cussler dirk cussler; unanswerable
+Can you please describe to me what this picture looks like? Thank you.,Screen.,0.0,0.0,False,turned sideways comic strip about ufo; unanswerable; unanswerable
+What is this item?,Toy,0.0,0.6666666666666666,False,plastic pig another on his back; unanswerable; plastic pig
+What does this label say? Come on.,Unanswerable,0.0,1.0,True,ce fc unreadable numbers; unanswerable; unanswerable
+What does it say underneath windows cannot repair this system automatically? It says start something.,Startup repair case and repair automatically.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What CD is this?,Course 2761,0.0,0.6666666666666666,False,iphone ipad programming: hands on; iphone ipad programming; iphone ipad programming
+Does practice make perfect? We'll try this later again.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this label say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this say?,unanswerable,0.0,1.0,True,unanswerable; address but unreadable; sauce mix
+Could you tell me if I need to hit enter or can you actually tell if I need to do something else?,Unanswerable.,0.0,0.0,False,yes accept terms; probably hit enter; you must agree license terms
+What is this and what color is it?,Brown,0.0,0.0,False,brown teddy bear; teddy bear brown; brown plush toy
+What does it show on this computer monitor screen?,Screen,0.0,0.0,True,unanswerable; blurry pop up message; unanswerable
+What was in this box? thank you.,Unanswerable,0.0,1.0,True,unanswerable; software something in box; unanswerable
+Can you read this these numbers please?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; no
+In this photo here is it showing me or the back facing camera? If its showing the back of the camera you should see a computer of some sort if its showing me you should see a person.,unanswerable,0.0,1.0,True,showing computer but super blurry; unanswerable; back
+What is this thing?,Picture,0.0,0.0,False,laptop screen; unanswerable; monitor
+What text is on the screen?,Check risk of 32 of 14108 of 188888888,0.0,0.0,False,system ntfs something needs to be checked for consistency something recommended; unanswerable; system check
+Is it box?,No,0.0,1.0,False,unanswerable; no; no
+What does the text in this captcha image say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this? What is this?,TV.,0.0,1.0,False,television; police officer on television; television
+What does the error message say?,An invalid product key,0.0,1.0,False,invalid product key; invalid product key; invalid product key
+My computer won't talk. Can you tell me what's on the screen?,Restore,0.0,0.3333333333333333,False,restore your computer to earlier point; asking if you want to restore system restore; pop up asking if you want to do system restore
+Well if this has a product name on it that I need to look up on the internet something no this so I just need something product name model or any information.,Unanswerable,0.0,0.0,False,05n5801 veritas set up blocks; veritas set up blocks 05n5801; 05n5801 veritas set up blocks
+What's on the screen?,Screen,0.0,0.0,False,unanswerable; reboot screen; script
+Can you tell me whose name tag this it? Thank you.,Personal pickup,0.0,0.0,True,no; unanswerable; no
+What is the magnitude of the current through the capacitor?,110,0.0,0.3333333333333333,True,unanswerable; unanswerable; 110
+What it is a?,Keyboard,0.0,0.0,True,laptop lots cords; unanswerable; unknown
+What does this say?,unanswerable,0.0,1.0,True,unanswerable; pc; unknown
+What was that?,Emergency system,0.0,0.0,False,unanswerable; television; program
+Please tell me the model number from this label on this oven. ,GB745WEA7WN.,0.0,0.0,False,rgb745wea7ww; rgb745wea7ww; rgb745wea7ww
+"Give me cheat code, please.",ZLW,0.0,0.0,True,unanswerable; z lw; unanswerable
+"testing, testing",Unanswerable,0.0,1.0,True,unanswerable; 123; unanswerable
+What gift card is this?,Rewards,0.0,0.0,False,speedy rewards membership card; speedway; speedy rewards membership card
+What is this?,Hydrant.,0.0,0.0,False,fire hydrant by sign on grass near woods; street sign fire hydrant; fire hydrant water valve below sign next to
+what does this say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me the verification code?,No.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What's on the screen?,Screen,0.0,0.0,False,unanswerable; pop up window; startup repair
+What's on the screen,Unanswerable,0.0,0.6666666666666666,False,text; website url; please visit: wwwhpcom go techcenter
+What does this screen say please?,unanswerable,0.0,1.0,True,unanswerable; 1 program still needs to close; unanswerable
+What is written on the paper?,Australia Post,0.0,0.6666666666666666,False,australia post; customer address; australia post
+"What does this label say? Before you said China, can you try and give me more information please",unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Is this valium?,Unanswerable.,0.0,1.0,True,no; unanswerable; unanswerable
+"Please, I need to know what is this screen.  What is written in this screen?  Thank you.",Windows,0.0,0.3333333333333333,False,unanswerable; repair message in spanish; spanish language
+What is the screen saying?,Your computer is unable to start.,0.0,0.0,False,do you want to restore your computer; your computer was unable to restart do you want to restart system restore; do you want to restore computer system your computer was unable to start
+Whats on my screen? Come on you guys! Whats on the screen?,Screen,0.0,0.0,False,select boot device; please select boot device 3 choices; unanswerable
+"Hi, please tell me what is showing in the message on my computer screen. Thank you.",Keyboard,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Why is this computer not booting up?,JAWS (No Responding),0.0,0.0,False,need to close programs; unanswerable; close program
+What's on the screen?,Live security,0.0,1.0,False,live security; live security update screen; live security platinum
+"Ok, I can't tell what screen this is on at all. And, it won't do anything.",Jaws,0.0,0.3333333333333333,True,jaws; jaws for windows; unanswerable
+"I pushed the finish button, or at least pressed enter, but nothing seems to be happening.  What does the computer want me to do now?",Close,0.0,0.3333333333333333,False,press enter again to close this pop up; close; hit close
+Can you tell me what this message says on my computer screen?,Unanswerable,0.0,0.6666666666666666,False,repair message but too far for details; repair details; box word close
+I said what is the title of this paper? Tell me if I need to move it. Thanks.,Coordinate Plan Graphing Project,0.0,1.0,False,coordinate plan graphing project; coordinate plan graphing project; coordinate plan graphing project
+Is this shot better? Can you read what's on the screen and the options for me now? Thank you.,Yes,0.0,0.6666666666666666,False,no your on advanced boot options but have character limit; yes mode mode networking; yes
+What's on the screen?,Asus,0.0,0.0,True,unanswerable; unanswerable; text image
+What is the word capture on this picture?,Us product registrations.,0.0,0.0,True,unanswerable; unanswerable; oyinom wagons
+Can you tell what this visual challenge is on the computer please?  Thank you.,Register,0.0,0.0,False,your login name email address; enter login name email address; signing in
+What am I really seeing here?,TV.,0.0,0.6666666666666666,False,family guy on tv; television items in room; tv
+What is this magazine? ,Evidence of coverage,0.0,0.0,False,medicare coverage 2012; medicare; drug coverage
+What is displayed on the computer screen?,Window.,0.0,0.3333333333333333,False,start up window; message asking if you want to restart your computer; unsure
+What does this say?,Desktop,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Calculate this.,Windows,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+I need a description of the layout of the program. I know there's a document list. I know there's some status bars. But I need to know --,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is this a gift card for?,Unanswerable.,0.0,1.0,True,unanswerable; unanswerable; unanswerable image
+Just say.,Answer: unanswerable,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What's on the screen?,Triforce,0.0,0.0,False,file folders; electronic documents; monitor
+What does it say on the screen?,Welcome to Recovery Manager. HP's tool that lets you quickly get your operating system back up and running if it ever becomes,0.0,0.0,True,unanswerable; unanswerable; cannot read screen unreadable
+What's on the screen?,Installing windows.,0.0,1.0,False,windows installation screen; unanswerable; installing windows
+What does this say?,I need immediate help,0.0,0.0,False,i need immediate help id like to perform maintenance tasks customer service; unanswerable; welcome to hp recovery manager
+"What is, what is on the screen?",Screen,0.0,0.0,False,startup repair screen; unanswerable; computer menu for your startup repair
+What is the 5-digit code?,402353,0.0,0.0,False,unanswerable; unanswerable; 46b15
+What is this a receipt for? Sorry about this.,Food.,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+Is Windows up on the computer? Am I at the desktop?,Yes,0.0,1.0,False,yes; yes; no
+What does the text at the top of this screen say?,Checking file system on system C:,0.0,0.0,False,checking file system on c:; checking file system on c:; checking file system on c:
+What is displayed on my screen?,Diagnose,0.0,0.0,False,text; computer; windows boot manager
+Can you tell me what the screen is saying?,unanswerable,0.0,1.0,False,processed; computer; no
+What is this? ,Keyboard,0.0,0.0,False,computer; web page computer; news article
+What does this say?,Unanswerable,0.0,1.0,True,unanswerable; box; nutrition facts
+What's written on this paper?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is on the screen?,Screen,0.0,0.0,True,unanswerable; unanswerable; windows
+What does the directions say?,Directions,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What's highlighted right now and is there an option to boot from a USB flash drive somewhere?,Yes,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What does it say on this computer monitor?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+I would like your best description of the grass that's in the picture that's from a power point presentation.  Thank you.,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"Is this a receipt? If not, generally what is this piece of paper?",Receipt,0.0,0.0,False,business card; unanswerable; no
+"Can you see if there's a year and date, and the team that Ricky Henderson is on, on the back of this baseball card? Thank you.",No,0.0,1.0,False,1991 athletes; 1991 no date; 1991 oakland athletics
+What is this paper for?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"Hello there, could you give me an idea of what's on the screen?  Please be as specific as possible.  Thank you.",Window open,0.0,0.0,False,error message; windows recovery system error message; error message
+What does it show on the screen?,Ed boot options,0.0,0.0,False,windows setup; edit boot options; boot options
+"Yes, I need a summary of the information that is on the screen as text of a website.  Thank you.",unanswerable,0.0,1.0,False,printing digital imaging bindery finishing data processing mailing lists mailing production; unanswerable; unanswerable
+What does this say?,Fujitsu,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+tell me about color.,Black,0.0,0.0,False,red blue grey silver black white purple; borders computer screen blue background red white text black; unanswerable
+What are the words on the piece of paper?,Random.,0.0,0.0,False,ransom down dark hall stranger my face by lois duncan; ransom down dark hall *stranger my face by lois duncan; ransom down dark hll stranger my
+What do you see on my computer screen?,Restart,0.0,0.0,False,other media restart; says remove disks other media press any key to restart; unanswerable
+What is my computer screen showing?,Safe mode,0.0,0.0,True,unanswerable; unanswerable; nothing
+What is this thing?,Screen,0.0,0.0,False,computer message; laptop; computer screen
+How much is the total?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+Can you tell me who this is from?,Enihealth,0.0,0.0,False,emi health; emi health; emi health
+Is it a mobile?,No,0.0,1.0,False,no; yes; yes
+What does this screen say?,Window boot mager start.,0.0,0.0,False,windows boot manager; windows boot manager; unanswerable
+please let me know what's on my screen right now.,Computer.,0.0,0.0,False,unanswerable; unanswerable; unanswerable image
+What is the model number?,004007,0.0,0.0,True,unanswerable; unanswerable; unanswerable
+What options are on my screen?,Vao recovery center.,0.0,0.0,True,no options in recovery center; left info on tools: hardware diagnostics restore c drive restore complete system rescue data; unanswerable
+Can you tell me what this message says on my computer screen?,Startup Repair,0.0,1.0,False,some sort repair finish button in lower right; startup repair last successful boot 9 20 2012 1 repair attempt close back finish cancel; unanswerable
+I am wondering what is happening with my computer?,Screen.,0.0,0.0,False,exiting something; top: exiting middle: you top blue button: yes bottom button: no; unanswerable
+Could you tell me what these options say? Do this list from top to bottom.,unanswerable,0.0,1.0,True,different chapter titles; unanswerable; unanswerable
+What does it say on the screen?,Latitude E640.,0.0,0.0,True,next cancel; big white box next l cancel r buttons bottom r below latitude e6420 installing drivers; unanswerable
+"Can you tell me what the number is on my King Soopers card, please?",0.,0.0,0.0,True,turn over; unanswerable; unanswerable
+What is on my computer screen?,Screen,0.0,0.0,False,press any key to restart; disk error; english
+What does this business card have on it?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What is in this picture?,Macbook pro,0.0,0.0,False,login screen; computer login screen; monitor
+"Hi, that's great, okay, I'm in recovery options, are you able to see from the picture any of the options that I can select from? Is it a menu? Is it a numbered system? Will number one take me out of the",No,0.0,0.3333333333333333,True,unanswerable; no; first hit ok to get off first pop up then not sure
+What is that a picture of?,Computer.,0.0,0.6666666666666666,False,keyboard wine glass; laptop; laptop keyboard wine beer
+What does the computer screen say?,Unanswerable,0.0,1.0,False,unanswerable; windows; just has icons
+How do you activate spoken answers?,No.,0.0,0.0,True,unanswerable; turn on; unanswerable
+What does it say in the shaded area?,DELL,0.0,0.3333333333333333,True,unanswerable; dell; internet
+Can you tell what this dialogue box says?,Unanswerable,0.0,1.0,False,no; no; no
+What is this?,Screen.,0.0,0.0,False,computer screen; webpage; unanswerable
+What's on this card?,05/18,0.0,0.0,False,05 18; date; 05 18
+What answers do I type in to win the prize,Unanswerable,0.0,0.6666666666666666,False,xqb; xqb; kq8
+What's being displayed on my screen?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; prompt for windows operating system selection
+What is this?,Computer.,0.0,0.0,False,unanswerable; laptop; laptop screen showing oyster online
+Can you tell me what's on the screen?,Macbook Air,0.0,0.0,True,unanswerable; 4 boxes; unanswerable
+Yes I'm wondering if this one's too blurry or not. i'm trying to get a good picture of my medicine bottle. I wanna know what's inside of it before I take it because if I take the wrong it could mean serious trouble. Could someone help me. Thank you.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What's on the screen?,Google.,0.0,0.3333333333333333,False,unanswerable; google; web page
+What is this cream?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this captcha say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What's on this screen?,unanswerable,0.0,1.0,False,unanswerable; black square; blank window
+What is this and does it have a name on it?,Yes.,0.0,0.0,False,dell charger; dell computer plug in; power supply dell
+Is there some sort of error message on the screen? Thanks!,No,0.0,0.0,False,yes; unanswerable; yes
+Did that help any?,Unanswerable,0.0,1.0,True,unanswerable; unanswerable; no
+The instantaneous voltage across a 27mh inductor is E=5800 sine.,Answer: 63.5,0.0,0.0,False,calculate instantaneous current when t 63 ms; unanswerable; yes
+What is this computer doing?,Running a test.,0.0,0.0,False,checking system; unanswerable; disc check
+What is this thing?,Screen,0.0,0.0,False,laptop; unanswerable; laptop
+What does this dialog box say?,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+"I need to know what is in the contents of this box, if you could tell me please. I didn't understand the last answer; it didn't sound like anything I owned, but I know that I may-",unanswerable,0.0,1.0,True,wave man; unanswerable; unanswerable
+What's this?,Unanswerable,0.0,0.6666666666666666,False,laptop; unanswerable; computer screen showing access apple
+Please read the counter.,unanswerable,0.0,1.0,True,unanswerable; unanswerable; unanswerable
+What does this screen say on the laptop?,Startup repair,0.0,1.0,True,unanswerable; unanswerable; startup repair
+"Hi, can you tell me what this captcha says on the screen? I just tried one and I think it timed out, sorry about that, thank you.",Unanswerable,0.0,0.6666666666666666,False,aktir; aktrr; arktr
