@@ -1,0 +1,35 @@
+# PLACEHOLDER seed list for development/testing only — NOT a verified drug database.
+# Replace with a real source (e.g. CDSCO/NPPA export, or a licensed drug-name dataset)
+# before the safety guardrail in app/drug_db.py can be trusted for real use.
+# One generic/brand name per line; '#' starts a comment.
+
+Paracetamol
+Crocin
+Dolo 650
+Ibuprofen
+Combiflam
+Azithromycin
+Azithral
+Amoxicillin
+Amoxyclav
+Cetirizine
+Cetrizine
+Metformin
+Glycomet
+Atorvastatin
+Amlodipine
+Pantoprazole
+Pan 40
+Omeprazole
+Ranitidine
+Ors
+Domperidone
+Ondansetron
+Levocetirizine
+Montelukast
+Cough Syrup
+Vitamin D3
+Vitamin B12
+Iron Folic Acid
+Insulin
+Losartan
