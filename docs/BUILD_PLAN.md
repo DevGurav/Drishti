@@ -7,8 +7,9 @@
 >
 > **Last updated:** 2026-08-02 · **Phase:** 1 of 6 · **Academic year:** 2026–27
 >
-> **Baseline established:** stock SmolVLM-Instruct scores **0.308** on 500 VizWiz-val
-> samples (1.21 s/answer, T4). This is the number Phase 3 must beat.
+> **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
+> Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
+> fine-tuning must beat **0.533**, not 0.308 — see `DEC-016`.
 
 ---
 
@@ -35,7 +36,8 @@
 | Medicine mode end-to-end | ✅ Works | Real OCR → `"This is Paracetamol. It is valid until OCT.2026…"` |
 | Read mode (English) | ✅ Works | via same engine |
 | Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **untested** | no photo with Devanagari text yet |
-| VizWiz baseline | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
+| VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
+| VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | ⬜ Not started | no dataset, no model |
 | Scene / Ask modes | 🟡 SmolVLM wired, not yet run through `app/` | `app/engines/smolvlm.py` |
 | Translation + TTS | 🟡 Wired, not yet run through `app/` | `app/speech.py`, `--lang mr --speak` |
@@ -69,9 +71,9 @@
 - [x] **Run notebook 01 → VizWiz baseline = 0.308** (answerable 0.310 / unanswerable 0.306)
 - [x] Record 3 failure patterns — over-answering, fine-grained OCR misses, question-form misreads
 - [x] Save `vizwiz_baseline_results.csv` to `eval/results/`, run `eval/analyze_results.py`
-- [ ] **Run `notebooks/02_abstention_prompts.ipynb`** (see `DEC-013`) — cheapest available
-      win: recall 0.258 with precision 0.913 means the threshold, not the capability, is
-      wrong. ~30 min on a T4; sweeps 5 prompts on 200 samples, confirms the winner on 500
+- [x] **Run `notebooks/02_abstention_prompts.ipynb`** — `stakes` prompt won; overall
+      0.308 → **0.533**, abstention recall 0.258 → 0.639. Hypothesis in `DEC-013`
+      confirmed: it was a calibration problem, and prompting fixed most of it
 - [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `--ocr-lang mr`
 - [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
 - [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
@@ -109,7 +111,11 @@ integration exercise. Protocol: `docs/data_collection_guide.md`.
 **Goal:** the core ML contribution. *Without this the project is an app that calls existing
 models — an integration project, not a final-year AI&DS project.*
 
-**Beat: 0.308.** The baseline analysis says exactly where to aim — see `DEC-011`.
+**Beat: 0.533**, the tuned-prompt result — not the 0.308 stock baseline (`DEC-017`).
+
+Remaining headroom after prompting: abstention recall is 0.639 (88 of 244 still missed) and
+precision has fallen to 0.726. Fine-tuning should aim to raise **both**, which prompting
+alone could not do — every variant traded one for the other.
 
 - [ ] LoRA fine-tune the base VLM on VizWiz train split (free Colab/Kaggle T4)
 - [ ] **Weight abstention examples** — teaching "unanswerable" is worth up to +0.34 overall,
@@ -186,6 +192,9 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-013 | **Try prompt engineering before LoRA fine-tuning** | Baseline abstention is precision **0.913** / recall **0.258** — when the model says "unanswerable" it is almost always right, it just says it far too rarely (69 times against 244 opportunities). The capability exists; the *threshold* is miscalibrated. Recalibration may be reachable by prompt alone, which is a ~15-minute experiment against days of fine-tuning. Fine-tune only if prompting plateaus |
 | DEC-014 | Report abstention precision **and** recall, never aggregate accuracy alone | A model that abstains on everything scores well on the unanswerable subset while being useless. Splitting the two makes that degenerate solution visible; `eval/analyze_results.py` computes both and a unit test guards the degenerate case |
 | DEC-015 | Evaluation CSVs are versioned, not gitignored | Every claim in the report traces to one; they are ~60 KB. `.gitignore` negates `eval/results/*.csv` so results are reproducible and comparable across runs |
+| DEC-016 | **Ship the `stakes` prompt; accept the precision drop** | Sweep of 5 variants on the baseline's own 500 samples. Naming the stakes ("the person asking is blind and cannot check your answer") beat listing failure criteria (0.508), stating the base rate (0.477) and demanding caution (0.302). Overall 0.308 → **0.533**; abstention recall 0.258 → 0.639 at the cost of precision 0.913 → 0.726. The trade is deliberate and asymmetric: a false abstention costs a retaken photo, a false answer can cost a wrong medicine |
+| DEC-017 | **Phase 3 is measured against 0.533, not 0.308** | The +0.225 came from prompting and is already banked. Comparing a fine-tuned model to the stock-prompt baseline would credit fine-tuning with a gain it did not produce |
+| DEC-018 | Strip an `Answer:` prefix before abstention matching | SmolVLM emits `"Answer: unanswerable"` intermittently (4 of 500). Unhandled, the app reads that string aloud to a blind user instead of offering retake guidance — a correctness bug in the product, not just 0.008 of unscored metric |
 
 ---
 
