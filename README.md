@@ -1,0 +1,101 @@
+# Drishti — Offline AI Vision Assistant for Blind Users in Indian Languages
+
+Final-year AI&DS major project (2026–27). A fully **offline** assistant that lets blind users
+read medicine strips, identify currency, read Devanagari/English text, and hear scene
+descriptions — spoken in **Marathi/Hindi/English**, with zero internet and zero cloud upload.
+
+**Why:** ~5M blind / ~70M visually-impaired Indians. Existing tools (Be My AI, Seeing AI,
+Lookout) need internet + English and upload private photos (prescriptions, money, your home)
+to the cloud. Drishti runs on a ₹10k Android phone, offline.
+
+## Task modes
+
+| Mode | What it does | Engine |
+|---|---|---|
+| Read | OCR printed text (incl. Devanagari), speak it | PaddleOCR (`lang=devanagari`) |
+| Medicine | Drug name, expiry, MRP + "expired" warning | OCR + date parser + **drug-DB guardrail** |
+| Currency | Identify ₹ note | Tiny MobileNet classifier |
+| Scene | Describe surroundings | Quantized small VLM |
+| Ask | Free-form visual Q&A | Quantized small VLM |
+
+**Routing principle:** easy tasks go to small fast specialist models; only open-ended queries
+hit the VLM. **Safety:** Medicine mode never lets the VLM guess a drug name — OCR text must
+match a drug database or the app declines.
+
+## Architecture
+
+```
+camera → mode router ├─ MobileNet (currency)
+                     ├─ OCR + parsers (read/medicine)
+                     └─ 4-bit VLM (scene/ask)  → English answer
+                                                  → IndicTrans2 dist-200M (en→mr/hi)
+                                                  → offline Indic TTS → speaker
+```
+
+- VLM candidates: Moondream-2 (~1.9B), SmolVLM (~2B), Qwen2.5-VL 3B, Gemma 3 4B — 4-bit GGUF
+- Fine-tuning: LoRA on **VizWiz** (real blind-user photos) + self-collected Indian data
+  (medicine strips, ₹ notes, MRP/expiry labels) — on free Colab/Kaggle GPUs
+- Local dev machine has no NVIDIA GPU (Intel Iris Xe, 16 GB RAM) → **all training on Colab;
+  laptop runs CPU inference of quantized models** (llama.cpp); Android port is the stretch goal
+
+## Repo layout
+
+```
+data/        datasets + download scripts (large files gitignored)
+notebooks/   00_feasibility_spike (Colab GPU) · 00b_ocr_spike (laptop CPU) · 01_vizwiz_baseline (Colab GPU)
+models/      downloaded/quantized weights (gitignored)
+app/         demo app: router, mode handlers, engine interfaces, CLI (laptop first, Android later)
+tests/       unit tests for app/ (pure Python, no GPU/model needed — run with `python -m unittest discover -s tests -t .`)
+eval/        evaluation results
+docs/        synopsis.md (college submission draft)
+```
+
+### App architecture
+
+`app/interfaces.py` defines `Protocol`s (`OCREngine`, `VLMEngine`, `Classifier`,
+`Translator`, `TTSEngine`) that mode handlers depend on but don't implement — real
+models (chosen via the notebooks) get wired in later without touching routing/mode
+logic. `app/router.py` dispatches `--mode` to `app/modes/{read,medicine,currency,scene,ask}.py`.
+`app/parsers.py` has the expiry/MRP extraction (pulled from the notebook 00 spike)
+plus real date parsing. `app/drug_db.py` is the medicine-mode safety guardrail —
+`data/drug_names_seed.txt` is a placeholder list, not a verified drug database.
+
+**OCR engine: PaddleOCR** — see `DEC-003` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md) for why
+Surya and Tesseract were rejected, plus the mandatory config flags (`DEC-004`, `DEC-005`,
+`DEC-008`).
+
+Read and medicine modes work today. Scene/ask (VLM) and currency (CNN) still raise
+`NotImplementedError` pointing at the work that will supply them:
+
+```powershell
+pip install paddlepaddle paddleocr           # only needed for read/medicine
+python -m app.cli --mode medicine --image some_strip.jpg
+python -m app.cli --mode read --image sign.jpg --lang mr    # Devanagari
+python -m unittest discover -s tests -t .    # 39 tests, no models required
+```
+
+## Setup (local, Windows)
+
+```powershell
+./setup.ps1        # creates .venv with Python 3.12 and installs core deps
+```
+
+**Where each notebook runs.** `00_feasibility_spike_colab` and `01_vizwiz_baseline` load
+multi-GB VLMs and need Colab's free T4 GPU.
+
+The OCR spike was split into `00b_ocr_spike` because running PaddleOCR in a process that
+already has the VLMs loaded **hard-kills the kernel** — the process dies, so you get a
+kernel restart with no Python traceback. Two causes stack: PyTorch and PaddlePaddle each
+bundle their own OpenMP runtime (co-loading them is a known segfault source), and the two
+VLMs (~8.5 GB) leave little of Colab's ~12.7 GB system RAM spare. `00b_ocr_spike` imports
+neither torch nor transformers, needs no GPU, and runs in a **fresh Colab runtime** or
+locally in VS Code. Run it in a fresh runtime — not the one that loaded the VLMs.
+
+## Planning, status and decisions
+
+All of it lives in **[docs/BUILD_PLAN.md](docs/BUILD_PLAN.md)** — the six phases, current
+status, the decision log (why SmolVLM over Moondream, why PaddleOCR over Surya, and the
+mandatory config flags), the risk register, and the final success criteria.
+
+Deliberately not duplicated here: a timeline in two files drifts, and the stale copy gets
+believed. Update the build plan in the same commit as the work it describes.
