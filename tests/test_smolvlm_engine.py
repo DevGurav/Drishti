@@ -29,6 +29,12 @@ class TestAbstentionDetection(unittest.TestCase):
         """Guards against substring matching -- this is a real answer, not a refusal."""
         self.assertFalse(is_abstention('the question is unanswerable because it is dark'))
 
+    def test_answer_prefix_is_stripped(self):
+        """SmolVLM emits 'Answer: unanswerable' intermittently -- 4 of 500 in the
+        notebook-02 run. Unhandled, the app reads that aloud instead of guiding a retake."""
+        for raw in ('Answer: unanswerable', 'answer:unanswerable', 'Answer: Unanswerable.'):
+            self.assertTrue(is_abstention(raw), raw)
+
 
 class TestHumanize(unittest.TestCase):
     def test_abstention_becomes_actionable_guidance(self):
@@ -45,12 +51,22 @@ class TestHumanize(unittest.TestCase):
 
 
 class TestPromptSuffix(unittest.TestCase):
+    """Pins the 'stakes' prompt that won the notebook-02 sweep (0.308 -> 0.533 overall).
+    These assert the properties that made it win, so an edit-by-intuition trips a test."""
+
     def test_suffix_requests_terse_answers(self):
         """VizWiz scores by exact match, so verbose answers score ~0 even when correct."""
         self.assertIn('one to three words', ABSTENTION_SUFFIX)
 
     def test_suffix_names_the_exact_abstention_token(self):
         self.assertIn('unanswerable', ABSTENTION_SUFFIX)
+
+    def test_suffix_states_the_stakes(self):
+        """Naming that the user cannot verify the answer is what beat the four other
+        variants -- listing criteria and demanding caution both scored lower."""
+        lowered = ABSTENTION_SUFFIX.lower()
+        self.assertIn('blind', lowered)
+        self.assertIn('cannot check', lowered)
 
 
 if __name__ == '__main__':

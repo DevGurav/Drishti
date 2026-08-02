@@ -5,12 +5,22 @@ transformers classes rather than `trust_remote_code`, which broke on transformer
 
 The abstention suffix is the important part. On VizWiz-val, 49% of questions are
 unanswerable -- photos too blurry, dark or mis-framed, which is what happens when the
-photographer cannot see. Stock SmolVLM abstains with precision 0.913 but recall 0.258: its
-judgement is sound, it simply says so too rarely. For a blind user a confident wrong answer
-is worse than "I can't tell", so the prompt pushes toward abstention deliberately.
+photographer cannot see.
 
-ABSTENTION_SUFFIX should be replaced with whatever wins in
-notebooks/02_abstention_prompts.ipynb.
+ABSTENTION_SUFFIX is the 'stakes' variant, which won the sweep in
+notebooks/02_abstention_prompts.ipynb over five candidates (500 samples, same slice as
+the baseline):
+
+    metric          stock prompt   stakes    delta
+    overall             0.308       0.533   +0.225
+    unanswerable acc    0.306       0.673   +0.367
+    abstention recall   0.258       0.639   +0.381
+    abstention prec.    0.913       0.726   -0.187
+
+Naming the stakes -- that the user cannot verify the answer -- beat listing failure
+criteria, stating the base rate, and simply demanding more caution. The precision drop is
+an accepted trade: a false abstention costs a retaken photo, a false answer can cost a
+wrong medicine. See DEC-016 in docs/BUILD_PLAN.md.
 """
 from __future__ import annotations
 
@@ -18,10 +28,12 @@ from pathlib import Path
 
 MODEL_ID = 'HuggingFaceTB/SmolVLM-Instruct'
 
-# Baseline prompt from notebooks/01. Update once notebook 02 picks a winner.
+# Winner of the notebook-02 sweep. Changing this changes measured behaviour -- re-run
+# notebooks/02_abstention_prompts.ipynb rather than editing it by intuition.
 ABSTENTION_SUFFIX = (
-    " Answer in one to three words. If the question cannot be answered"
-    " from the image, answer exactly: unanswerable"
+    " The person asking is blind and cannot check your answer, so a confident wrong"
+    " answer is worse than no answer. Answer in one to three words only if the image"
+    " clearly shows it. Otherwise answer exactly: unanswerable"
 )
 
 SCENE_PROMPT = 'Describe what is in this image in one or two short sentences.'
@@ -36,8 +48,16 @@ MAX_SIDE = 1536
 
 def is_abstention(answer: str) -> bool:
     """True if the model declined. Kept pure and separate so callers can distinguish
-    'declined' from 'answered' without string-matching in five places."""
-    cleaned = answer.lower().strip().strip('.!,')
+    'declined' from 'answered' without string-matching in five places.
+
+    The `Answer:` prefix is stripped because SmolVLM emits it intermittently -- 4 of 500
+    abstentions in the notebook-02 run came back as "Answer: unanswerable". Left unhandled
+    the app would read that string aloud to a blind user instead of offering the retake
+    guidance, which is the failure this function exists to prevent.
+    """
+    cleaned = answer.lower().strip().strip('.!,').strip()
+    if cleaned.startswith('answer:'):
+        cleaned = cleaned[len('answer:'):].strip()
     return cleaned == ABSTENTION_TOKEN
 
 
