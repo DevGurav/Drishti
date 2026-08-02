@@ -1,0 +1,57 @@
+"""Tests for SmolVLM engine logic that does not require the model.
+
+The abstention handling is the part worth pinning: on VizWiz-val 49% of questions are
+unanswerable, and for a blind user a confident wrong answer is worse than "I can't tell".
+"""
+import unittest
+
+from app.engines.smolvlm import (
+    ABSTENTION_MESSAGE,
+    ABSTENTION_SUFFIX,
+    humanize,
+    is_abstention,
+)
+
+
+class TestAbstentionDetection(unittest.TestCase):
+    def test_plain_token(self):
+        self.assertTrue(is_abstention('unanswerable'))
+
+    def test_tolerates_case_whitespace_and_trailing_punctuation(self):
+        for raw in ('Unanswerable', '  UNANSWERABLE  ', 'unanswerable.', 'Unanswerable!'):
+            self.assertTrue(is_abstention(raw), raw)
+
+    def test_real_answers_are_not_abstentions(self):
+        for raw in ('Paracetamol', '500', 'a blue cup', ''):
+            self.assertFalse(is_abstention(raw), raw)
+
+    def test_answer_merely_containing_the_word_is_not_an_abstention(self):
+        """Guards against substring matching -- this is a real answer, not a refusal."""
+        self.assertFalse(is_abstention('the question is unanswerable because it is dark'))
+
+
+class TestHumanize(unittest.TestCase):
+    def test_abstention_becomes_actionable_guidance(self):
+        spoken = humanize('unanswerable')
+        self.assertEqual(spoken, ABSTENTION_MESSAGE)
+        self.assertNotIn('unanswerable', spoken.lower())
+
+    def test_real_answers_pass_through_unchanged(self):
+        self.assertEqual(humanize('Paracetamol'), 'Paracetamol')
+
+    def test_guidance_tells_the_user_what_to_do(self):
+        """A blind user cannot see why the photo failed, so the message must suggest a fix."""
+        self.assertTrue(any(w in ABSTENTION_MESSAGE.lower() for w in ('light', 'framing')))
+
+
+class TestPromptSuffix(unittest.TestCase):
+    def test_suffix_requests_terse_answers(self):
+        """VizWiz scores by exact match, so verbose answers score ~0 even when correct."""
+        self.assertIn('one to three words', ABSTENTION_SUFFIX)
+
+    def test_suffix_names_the_exact_abstention_token(self):
+        self.assertIn('unanswerable', ABSTENTION_SUFFIX)
+
+
+if __name__ == '__main__':
+    unittest.main()
