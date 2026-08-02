@@ -69,8 +69,9 @@
 - [x] **Run notebook 01 → VizWiz baseline = 0.308** (answerable 0.310 / unanswerable 0.306)
 - [x] Record 3 failure patterns — over-answering, fine-grained OCR misses, question-form misreads
 - [x] Save `vizwiz_baseline_results.csv` to `eval/results/`, run `eval/analyze_results.py`
-- [ ] **Prompt-engineering experiment on abstention** (see `DEC-013`) — cheapest available
-      win: recall 0.258 with precision 0.913 means the threshold, not the capability, is wrong
+- [ ] **Run `notebooks/02_abstention_prompts.ipynb`** (see `DEC-013`) — cheapest available
+      win: recall 0.258 with precision 0.913 means the threshold, not the capability, is
+      wrong. ~30 min on a T4; sweeps 5 prompts on 200 samples, confirms the winner on 500
 - [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `lang='mr'`
 - [ ] Wire the chosen VLM into `app/engines/` as a `VLMEngine` → unblocks scene/ask modes
 - [ ] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
@@ -224,6 +225,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | `notebooks/00_feasibility_spike_colab.ipynb` | VLM comparison + translation/TTS spike (Colab GPU) |
 | `notebooks/00b_ocr_spike.ipynb` | OCR engine selection (CPU, no GPU) |
 | `notebooks/01_vizwiz_baseline.ipynb` | The baseline number (Colab GPU) |
+| `notebooks/02_abstention_prompts.ipynb` | Prompt sweep to recalibrate abstention (Colab GPU) |
 | `eval/results/` | Downloaded run artifacts — the evidence trail |
 
 **Maintenance rule:** update the status dashboard and decision log in the same commit as the
