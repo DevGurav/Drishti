@@ -37,7 +37,22 @@ class IndicTrans2Translator:
         if self._model is None:
             import torch
             from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-            from IndicTransToolkit.processor import IndicProcessor
+
+            try:
+                from IndicTransToolkit.processor import IndicProcessor
+            except ImportError as e:
+                # IndicTransToolkit imports PreTrainedTokenizerBase from
+                # transformers.tokenization_utils, which moved in transformers v5. The
+                # bare ImportError points at a transformers internal and reads like a
+                # broken install, so name the actual constraint instead.
+                raise ImportError(
+                    f'IndicTransToolkit could not be imported ({e}).\n'
+                    'It requires transformers 4.x -- v5 moved the tokenizer base class '
+                    'it depends on.\n'
+                    "Install with:  pip install 'transformers<5' IndicTransToolkit\n"
+                    'and restart the runtime afterwards; a pip downgrade cannot replace '
+                    'an already-imported module.'
+                ) from e
 
             device = self._device or ('cuda' if torch.cuda.is_available() else 'cpu')
             self._tokenizer = AutoTokenizer.from_pretrained(self.model_id, trust_remote_code=True)
