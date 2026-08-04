@@ -69,3 +69,23 @@ def is_expired(raw_expiry: str, today: date | None = None) -> bool | None:
     if parsed is None:
         return None
     return parsed < (today or date.today())
+
+
+def earliest_expiry(candidates: list[str]) -> str | None:
+    """Pick the earliest parseable expiry from several candidates.
+
+    Indian strips routinely carry more than one date — a carton date and a blister
+    date, or the photo catches two panels at once. A real capture of the Paracip strip
+    yields both 'OCT.2026' and 'APR.28'. Taking `candidates[0]` means trusting OCR's
+    line ordering, which is arbitrary, and on that strip it silently reported the date
+    18 months *later* than the true one.
+
+    The earliest date is the only safe reading: the medicine cannot be trusted past it.
+    Unparseable strings are ignored here — `is_expired` still reports None for them, so
+    'cannot verify' is preserved when nothing parses at all.
+    """
+    dated = [(parse_expiry_date(c), c) for c in candidates]
+    dated = [(d, raw) for d, raw in dated if d is not None]
+    if not dated:
+        return candidates[0] if candidates else None
+    return min(dated, key=lambda pair: pair[0])[1]

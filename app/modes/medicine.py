@@ -11,7 +11,12 @@ from pathlib import Path
 
 from app.drug_db import DrugDatabase
 from app.interfaces import OCREngine
-from app.parsers import extract_expiry_candidates, extract_mrp_candidates, is_expired
+from app.parsers import (
+    earliest_expiry,
+    extract_expiry_candidates,
+    extract_mrp_candidates,
+    is_expired,
+)
 
 
 @dataclass
@@ -37,9 +42,11 @@ def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResu
             ),
         )
 
-    expiry_candidates = extract_expiry_candidates(text)
+    # Strips often show two dates (carton and blister, or two panels in one photo).
+    # Take the earliest -- the medicine cannot be trusted past it, and OCR line order
+    # is arbitrary. See parsers.earliest_expiry.
+    expiry_raw = earliest_expiry(extract_expiry_candidates(text))
     mrp_candidates = extract_mrp_candidates(text)
-    expiry_raw = expiry_candidates[0] if expiry_candidates else None
     mrp = mrp_candidates[0] if mrp_candidates else None
     expired = is_expired(expiry_raw) if expiry_raw else None
 
