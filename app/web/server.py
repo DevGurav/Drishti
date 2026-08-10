@@ -45,7 +45,10 @@ def build_service(enable_vlm: bool = True, enable_speech: bool = True) -> Answer
         drug_db=DrugDatabase.from_file(),
     )
     return AnswerService(engines=engines, upload_dir=UPLOAD_DIR,
-                         translator=translator, tts=tts)
+                         translator=translator, tts=tts,
+                         # Read mode in Devanagari needs a `mr`/`hi` engine; without this
+                         # the request's ocr_lang was discarded (DEC-045).
+                         ocr_factory=lambda script: PaddleOCREngine(lang=script))
 
 
 def create_app(service: AnswerService | None = None) -> Flask:

@@ -63,6 +63,75 @@ def _service(tmp, **engine_kw):
                          translator=FakeTranslator(), tts=FakeTTS())
 
 
+class ScriptOCR:
+    """An OCR engine that reports which script it was built for."""
+
+    def __init__(self, script):
+        self.script = script
+
+    def read(self, image_path):
+        return f'text-in-{self.script}'
+
+
+class TestOcrLangRouting(unittest.TestCase):
+    """`ocr_lang` was accepted, validated, and then discarded.
+
+    The service held one English engine, so reading a Devanagari page ran the Latin
+    recogniser and returned transliterated noise -- 'Tach taaRa firast HoH HEST' from a
+    Marathi newspaper. Nothing raised, so a blind user simply heard confident gibberish.
+    See DEC-045; on real weights the same request went from 0 to 1010 Devanagari
+    characters once the engine was selected per request.
+    """
+
+    def setUp(self):
+        self._tmpdir = TemporaryDirectory()
+        self.addCleanup(self._tmpdir.cleanup)
+        self.tmp = self._tmpdir.name
+        self.built = []
+
+    def _svc(self):
+        def factory(script):
+            self.built.append(script)
+            return ScriptOCR(script)
+
+        engines = Engines(ocr=ScriptOCR('en'), drug_db=DrugDatabase.from_file())
+        return AnswerService(engines=engines, upload_dir=Path(self.tmp),
+                             translator=FakeTranslator(), tts=FakeTTS(),
+                             ocr_factory=factory)
+
+    def test_requested_script_reaches_the_engine(self):
+        """'mr' is the code PaddleOCR accepts; it resolves to devanagari_PP-OCRv5_mobile_rec
+        inside the library (`DEC-005`). What matters here is that the request's script, not
+        the service's default, is what the engine was built for."""
+        r = self._svc().handle(
+            AnswerRequest(mode='read', image_bytes=JPEG, ocr_lang='mr'))
+        self.assertTrue(r.ok)
+        self.assertEqual(self.built, ['mr'])
+        self.assertIn('text-in-mr', r.text_en)
+        self.assertNotIn('text-in-en', r.text_en, 'the English default was used instead')
+
+    def test_default_is_used_when_no_script_requested(self):
+        svc = self._svc()
+        r = svc.handle(AnswerRequest(mode='read', image_bytes=JPEG))
+        self.assertIn('text-in-en', r.text_en)
+        self.assertEqual(svc._ocr_by_lang, {}, 'no engine should be built without a request')
+
+    def test_engines_are_cached_per_script(self):
+        """Each PaddleOCR language is a full pipeline costing ~60s to load; rebuilding one
+        per photo would make the mode unusable."""
+        svc = self._svc()
+        for _ in range(3):
+            svc.handle(AnswerRequest(mode='read', image_bytes=JPEG, ocr_lang='mr'))
+        self.assertEqual(len(self.built), 1, f'built {len(self.built)} engines, expected 1')
+
+    def test_only_requested_scripts_are_loaded(self):
+        """Two live pipelines peaked at 11.65 GB on Colab (DEC-035), so they must not be
+        pre-built for every supported language."""
+        svc = self._svc()
+        svc.handle(AnswerRequest(mode='read', image_bytes=JPEG, ocr_lang='hi'))
+        self.assertEqual(len(self.built), 1)
+
+
 class TestValidation(unittest.TestCase):
     def test_unknown_mode_rejected(self):
         with self.assertRaises(ValidationError):

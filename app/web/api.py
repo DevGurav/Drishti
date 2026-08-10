@@ -6,7 +6,7 @@ and no HTTP server. `server.py` is a thin routing layer over these functions.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from app import languages
@@ -90,7 +90,30 @@ class AnswerService:
     upload_dir: Path
     translator: object | None = None
     tts: object | None = None
+    # Builds an OCR engine for a script code ('en', 'mr', ...). Without it `ocr_lang` was
+    # accepted, validated, and then silently ignored: the service held one English engine,
+    # so asking to read Devanagari ran the Latin recogniser and returned transliterated
+    # noise ("Tach taaRa firast HoH HEST" from a Marathi newspaper). Nothing errored, which
+    # is the worst version of this -- the user hears confident gibberish. See DEC-045.
+    ocr_factory: object | None = None
     _audio: dict[str, Path] = field(default_factory=dict)
+    _ocr_by_lang: dict[str, object] = field(default_factory=dict)
+
+    def _ocr_for(self, ocr_lang: str | None):
+        """The OCR engine for this request's script, built once per language.
+
+        Engines are cached rather than rebuilt because loading costs ~60s. They are *not*
+        pre-built for every language: each PaddleOCR language is a full pipeline, and
+        holding two at once peaked at 11.65 GB on Colab (`DEC-035`). Lazily loading only
+        the scripts actually asked for keeps a single-language session at one pipeline.
+        """
+        if not ocr_lang or self.ocr_factory is None:
+            return self.engines.ocr
+
+        script = languages.get(ocr_lang).ocr
+        if script not in self._ocr_by_lang:
+            self._ocr_by_lang[script] = self.ocr_factory(script)
+        return self._ocr_by_lang[script]
 
     def handle(self, req: AnswerRequest) -> AnswerResponse:
         try:
@@ -103,7 +126,8 @@ class AnswerService:
         image_path.write_bytes(req.image_bytes)
 
         try:
-            answer_en = route(req.mode, image_path, self.engines, question=req.question)
+            engines = replace(self.engines, ocr=self._ocr_for(req.ocr_lang))
+            answer_en = route(req.mode, image_path, engines, question=req.question)
             result = deliver(answer_en, lang=req.lang, translator=self.translator,
                              tts=self.tts, speak=req.speak)
         except CheckpointMissingError:

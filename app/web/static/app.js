@@ -117,9 +117,18 @@ async function capture() {
   form.append('lang', els.lang.value);
   form.append('question', els.question.value);
   form.append('speak', String(els.speak.checked));
-  /* Medicine strips print the drug name and expiry in Latin script even on Marathi
-     packaging, so OCR stays English while the answer is spoken in the chosen language. */
+  /* OCR script and spoken language are different choices.
+
+     Medicine strips print the drug name and expiry in Latin script even on Marathi
+     packaging, so OCR stays English there while the answer is spoken in the chosen
+     language. Read mode is the opposite: a Marathi signboard or newspaper is *printed*
+     in Devanagari, so the recogniser has to match the page, not the listener.
+
+     Read mode previously sent no ocr_lang at all, which meant Devanagari went through the
+     Latin recogniser and came back as transliterated noise -- no error, just confident
+     gibberish read aloud to someone who cannot check it (DEC-045). */
   if (selectedMode === 'medicine') form.append('ocr_lang', 'en');
+  else if (selectedMode === 'read') form.append('ocr_lang', els.lang.value);
 
   try {
     const res = await fetch('/api/answer', { method: 'POST', body: form });
