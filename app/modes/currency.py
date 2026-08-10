@@ -8,7 +8,18 @@ from pathlib import Path
 
 from app.interfaces import Classifier
 
-CONFIDENCE_THRESHOLD = 0.85
+# Measured, not assumed (DEC-040). Notebook 03's sweep on 600 held-out test images,
+# 2026-08-10:
+#
+#     thresh   answered   acc|answered   Rs error
+#       0.50      98.7%         0.9916       1.32
+#       0.85      90.3%         0.9945       1.00
+#       0.90      85.0%         0.9961       0.71   <- chosen
+#       0.95      61.5%         0.9973       0.49   (answers too rarely)
+#
+# 0.90 is the least expensive setting that still answers most of the time. The 0.85 here
+# before was a scaffolding guess and cost Rs 0.29 more per identification.
+CONFIDENCE_THRESHOLD = 0.90
 
 # The training set carries a class of photos containing no note at all, so "there is no
 # note here" is something the model can actually predict rather than a gap it must fill
