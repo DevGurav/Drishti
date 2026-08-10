@@ -41,6 +41,41 @@ class DrugDatabase:
         ]
         return cls(names)
 
+    def find_matches(self, ocr_text: str) -> list[str]:
+        """Every distinct database drug present in `ocr_text`, in the order printed.
+
+        Combination products are ordinary in India -- `IBUPROFEN 400mg PARACETAMOL 325mg`
+        is a single tablet -- and reporting one name means a user is told half of what
+        they are holding. `find_match` answers the "which name" question; this answers
+        "which names", which is what medicine mode actually needs.
+
+        The hard part is that reporting *more* names must not reintroduce the nesting bug
+        `DEC-033` fixed. `Adrenaline` is a substring of `Noradrenaline`, so a naive
+        "return everything that matches" turns one Noradrenaline vial into two drugs, one
+        of which is not in the user's hand -- worse than the original bug, because it
+        invents a medicine rather than merely mislabelling one.
+
+        Occurrence counting separates the two cases without guessing. A short name is
+        reported only when it appears more often than the longer names containing it can
+        account for:
+
+            'NORADRENALINE 2MG'              adrenaline x1, noradrenaline x1
+                                             -> 1 - 1 = 0, so Adrenaline is not present
+            'ADRENALINE 1MG NORADRENALINE'   adrenaline x2, noradrenaline x1
+                                             -> 2 - 1 = 1, so both are genuinely present
+        """
+        text = _normalize(ocr_text)
+        hits = {key: text.count(key) for key in self._by_normalized if key in text}
+
+        present = [
+            key for key, count in hits.items()
+            if count > sum(c for other, c in hits.items() if other != key and key in other)
+        ]
+        # Printed order, so the spoken answer tracks the strip left to right rather than
+        # dictionary order -- the user is matching what they hear against what they hold.
+        present.sort(key=text.index)
+        return [self._by_normalized[key] for key in present]
+
     def find_match(self, ocr_text: str) -> str | None:
         """Return the canonical drug name if any part of `ocr_text` matches the
         database, else None. Substring matching over normalized text so e.g.

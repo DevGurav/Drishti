@@ -6,7 +6,7 @@ than letting a VLM guess.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.drug_db import DrugDatabase
@@ -23,17 +23,36 @@ from app.parsers import (
 class MedicineResult:
     ok: bool
     message_en: str
-    drug_name: str | None = None
+    drug_names: list[str] = field(default_factory=list)
     expiry_raw: str | None = None
     expired: bool | None = None
     mrp: str | None = None
+
+    @property
+    def drug_name(self) -> str | None:
+        """The first verified name, for callers that predate combination support."""
+        return self.drug_names[0] if self.drug_names else None
+
+
+def name_phrase(names: list[str]) -> str:
+    """How the verified names are spoken.
+
+    A combination is announced as one, rather than as a list of separate medicines: a
+    user holding a single tablet of `IBUPROFEN 400 + PARACETAMOL 325` should not come
+    away thinking they are holding two.
+    """
+    if len(names) == 1:
+        return f"This is {names[0]}."
+    if len(names) == 2:
+        return f"This is a combination of {names[0]} and {names[1]}."
+    return f"This is a combination of {', '.join(names[:-1])} and {names[-1]}."
 
 
 def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResult:
     text = ocr.read(image_path)
 
-    drug_name = drug_db.find_match(text)
-    if drug_name is None:
+    drug_names = drug_db.find_matches(text)
+    if not drug_names:
         return MedicineResult(
             ok=False,
             message_en=(
@@ -51,7 +70,7 @@ def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResu
     mrp = mrp_candidates[0] if mrp_candidates else None
     expired = is_expired(expiry_raw) if expiry_raw else None
 
-    parts = [f"This is {drug_name}."]
+    parts = [name_phrase(drug_names)]
     if expired is True:
         parts.append(f"Warning: it expired on {expiry_raw}. Do not use it.")
     elif expired is False:
@@ -64,7 +83,7 @@ def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResu
     return MedicineResult(
         ok=True,
         message_en=" ".join(parts),
-        drug_name=drug_name,
+        drug_names=drug_names,
         expiry_raw=expiry_raw,
         expired=expired,
         mrp=mrp,

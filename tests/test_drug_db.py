@@ -59,6 +59,58 @@ class TestShippedDatabase(unittest.TestCase):
         ocr = "PARACIP-500 PARACETAMOL TABLETS IP EXP.OCT.2026 Rs.10.30"
         self.assertEqual(self.db.find_match(ocr), "Paracetamol")
 
+    def test_combination_strip_reports_every_ingredient(self):
+        """A user holding IBUPROFEN+PARACETAMOL was told about one of them."""
+        db = DrugDatabase(["Ibuprofen", "Paracetamol"])
+        self.assertEqual(
+            db.find_matches("IBUPROFEN 400 mg AND PARACETAMOL 325 mg TABLETS"),
+            ["Ibuprofen", "Paracetamol"],
+        )
+
+    def test_names_come_back_in_printed_order(self):
+        """Spoken order should track the strip, so the user can follow along."""
+        db = DrugDatabase(["Ibuprofen", "Paracetamol"])
+        self.assertEqual(
+            db.find_matches("PARACETAMOL 325 mg AND IBUPROFEN 400 mg"),
+            ["Paracetamol", "Ibuprofen"],
+        )
+
+    def test_nested_name_is_not_invented_as_a_second_drug(self):
+        """Reporting every match would turn one Noradrenaline vial into two drugs, one
+        of which is not in the user's hand -- worse than DEC-033's original bug."""
+        db = DrugDatabase(["Adrenaline", "Noradrenaline"])
+        self.assertEqual(db.find_matches("NORADRENALINE BITARTRATE INJECTION IP"),
+                         ["Noradrenaline"])
+
+    def test_both_reported_when_both_are_genuinely_printed(self):
+        """Occurrence counting, not blanket suppression: 'adrenaline' appears twice, and
+        only one of those is explained by 'noradrenaline'."""
+        db = DrugDatabase(["Adrenaline", "Noradrenaline"])
+        self.assertEqual(
+            db.find_matches("ADRENALINE 1mg/ml AND NORADRENALINE 2mg/ml"),
+            ["Adrenaline", "Noradrenaline"],
+        )
+
+    def test_nesting_holds_against_the_real_database(self):
+        """The 14 nesting pairs in NLEM are the point; a synthetic two-name db could
+        pass while the shipped list fails."""
+        db = DrugDatabase.from_file()
+        for text, expected in [
+            ("INSULIN GLARGINE 100IU/ML", ["Insulin Glargine"]),
+            ("HYDROXYCHLOROQUINE SULPHATE 200", ["Hydroxychloroquine"]),
+            ("METHYLPREDNISOLONE TABLETS", ["Methylprednisolone"]),
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(db.find_matches(text), expected)
+
+    def test_find_match_still_answers_the_single_name_question(self):
+        db = DrugDatabase(["Ibuprofen", "Paracetamol"])
+        self.assertIn(db.find_match("IBUPROFEN 400 PARACETAMOL 325"),
+                      ("Ibuprofen", "Paracetamol"))
+
+    def test_no_matches_is_an_empty_list_not_none(self):
+        self.assertEqual(DrugDatabase(["Paracetamol"]).find_matches("BATCH NO 4471"), [])
+
     def test_declines_on_text_with_no_drug_name(self):
         self.assertIsNone(self.db.find_match("BATCH NO 4471 MFD 09/2025 STORE BELOW 30C"))
 
