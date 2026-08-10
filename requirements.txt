@@ -4,6 +4,7 @@
 
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
+torchvision      # currency mode: MobileNetV3 + the eval transforms in currency_cnn.py
 transformers
 datasets
 pillow
@@ -26,8 +27,10 @@ jupyter
 #   3. VLM (scene + ask modes)       ~4.5 GB (SmolVLM-Instruct)
 #      already covered by transformers above
 #
-# Budget roughly 6 GB of disk. On a CPU-only machine SmolVLM answers in tens of
-# seconds, not the 1.2s measured on a Colab T4 -- expected, not a fault.
+# Budget roughly 6 GB of disk. Measured on a CPU-only runtime 2026-08-10: SmolVLM
+# takes 481s for a scene description and 315s for a question, against 1.2s on a
+# Colab T4. Minutes, not "tens of seconds" -- see RISK-1 and DEC-038. OCR is 56s
+# per photo; currency and the parsers are fast.
 # ---------------------------------------------------------------------------
 
 # Optional, only for data/scripts/download_currency.py:
