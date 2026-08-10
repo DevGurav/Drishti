@@ -25,6 +25,9 @@ class FakeVLM:
     def answer(self, image_path, question):
         return 'a blue cup on a table'
 
+    def describe(self, image_path):
+        return 'a blue cup on a table'
+
 
 class ExplodingOCR:
     def read(self, image_path):

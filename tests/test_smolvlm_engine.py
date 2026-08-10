@@ -8,6 +8,8 @@ import unittest
 from app.engines.smolvlm import (
     ABSTENTION_MESSAGE,
     ABSTENTION_SUFFIX,
+    SCENE_PROMPT,
+    SmolVLMEngine,
     humanize,
     is_abstention,
 )
@@ -67,6 +69,26 @@ class TestPromptSuffix(unittest.TestCase):
         lowered = ABSTENTION_SUFFIX.lower()
         self.assertIn('blind', lowered)
         self.assertIn('cannot check', lowered)
+
+
+class TestScenePrompt(unittest.TestCase):
+    """Scene description and abstention-aware VQA want opposite things (DEC-031)."""
+
+    def test_scene_prompt_asks_for_sentences(self):
+        self.assertIn('sentences', SCENE_PROMPT.lower())
+
+    def test_scene_prompt_does_not_contain_the_abstention_suffix(self):
+        """The suffix caps answers at three words. Concatenating the two produces a
+        prompt that contradicts itself, which is what returned 'Paracip-500' for a
+        whole-scene description on the first real run."""
+        self.assertNotIn(ABSTENTION_SUFFIX.strip(), SCENE_PROMPT)
+        self.assertNotIn('one to three words', SCENE_PROMPT.lower())
+
+    def test_engine_exposes_both_verbs(self):
+        """Constructing the engine loads no weights, so this is free to assert."""
+        engine = SmolVLMEngine()
+        self.assertTrue(callable(engine.answer))
+        self.assertTrue(callable(engine.describe))
 
 
 if __name__ == '__main__':

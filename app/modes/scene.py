@@ -5,8 +5,10 @@ from pathlib import Path
 
 from app.interfaces import VLMEngine
 
-_SCENE_PROMPT = "Describe what is in this image in one or two short sentences."
-
 
 def run(image_path: Path, vlm: VLMEngine) -> str:
-    return vlm.answer(image_path, _SCENE_PROMPT)
+    # describe(), not answer(): answering carries an abstention suffix demanding one to
+    # three words, which contradicts a description request and made this mode reply
+    # `Paracip-500` on its first real run. The prompt now lives in the engine, next to
+    # the suffix it has to stay consistent with. See DEC-031.
+    return vlm.describe(image_path)

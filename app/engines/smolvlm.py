@@ -108,17 +108,34 @@ class SmolVLMEngine:
             img = img.resize((int(w * s), int(h * s)), Image.LANCZOS)
         return img
 
-    def answer(self, image_path: Path, question: str) -> str:
+    def _generate(self, image_path: Path, prompt_text: str, max_new_tokens: int) -> str:
         import torch
 
         self._load()
         img = self._open(image_path)
         msgs = [{'role': 'user',
-                 'content': [{'type': 'image'},
-                             {'type': 'text', 'text': question + self.suffix}]}]
+                 'content': [{'type': 'image'}, {'type': 'text', 'text': prompt_text}]}]
         prompt = self._processor.apply_chat_template(msgs, add_generation_prompt=True)
         inputs = self._processor(text=prompt, images=[img], return_tensors='pt').to(self._device)
         with torch.no_grad():
-            out = self._model.generate(**inputs, max_new_tokens=64, do_sample=False)
+            out = self._model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
         text = self._processor.batch_decode(out, skip_special_tokens=True)[0]
         return humanize(text.split('Assistant:')[-1].strip())
+
+    def answer(self, image_path: Path, question: str) -> str:
+        """Terse, abstention-aware VQA — the behaviour measured at 0.533 on VizWiz."""
+        return self._generate(image_path, question + self.suffix, max_new_tokens=64)
+
+    def describe(self, image_path: Path) -> str:
+        """Scene description, deliberately without `self.suffix`.
+
+        The abstention suffix demands one to three words or the literal token
+        `unanswerable`, which flatly contradicts asking for a sentence or two. Sharing
+        it made the first real run answer `Paracip-500` for a whole-scene description.
+        Editing the suffix to suit both would invalidate the measured 0.533 (`DEC-016`),
+        so description simply does not carry it (`DEC-031`).
+
+        `humanize` still applies: the model can decline unprompted, and reading the raw
+        token aloud to a blind user is the bug it exists to prevent.
+        """
+        return self._generate(image_path, SCENE_PROMPT, max_new_tokens=128)

@@ -21,7 +21,24 @@ class OCREngine(Protocol):
 @runtime_checkable
 class VLMEngine(Protocol):
     def answer(self, image_path: Path, question: str) -> str:
-        """Return a short natural-language answer to `question` about the image."""
+        """Return a short natural-language answer to `question` about the image.
+
+        Answers are terse and may decline — see `describe` for why that matters.
+        """
+        ...
+
+    def describe(self, image_path: Path) -> str:
+        """Describe the whole image in a sentence or two.
+
+        Separate from `answer` because the two tasks want opposite prompts. Answering
+        carries an abstention instruction ("one to three words … otherwise answer
+        exactly: unanswerable") that won the notebook-02 sweep and is measured into
+        the 0.533 baseline. Applied to a description request it contradicts it, and
+        the first real run returned `Paracip-500` where a sentence was asked for.
+
+        One verb per task keeps the measured prompt intact instead of weakening it
+        to serve both.
+        """
         ...
 
 
