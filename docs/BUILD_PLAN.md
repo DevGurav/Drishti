@@ -33,17 +33,17 @@
 |---|---|---|
 | App skeleton (router, 5 modes, guardrail) | ✅ Done | 39 tests passing |
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`, proven on a real strip |
-| Medicine mode end-to-end | ✅ Works | Real OCR → `"This is Paracetamol. It is valid until OCT.2026…"` |
+| Medicine mode end-to-end | ✅ Works | Colab 2026-08-10: real OCR → `"This is Paracetamol. It is valid until OCT.2026. MRP is 10.30 rupees."` |
 | Read mode (English) | ✅ Works | via same engine |
 | Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **untested** | no photo with Devanagari text yet |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | 🟡 Notebook + engine ready | needs a Kaggle dataset, then training |
-| Scene / Ask modes | 🟡 SmolVLM wired, not yet run through `app/` | `app/engines/smolvlm.py` |
-| Translation + TTS | 🟡 Wired, not yet run through `app/` | `app/speech.py`, `--lang mr --speak` |
+| Scene / Ask modes | 🟡 Run through `app/`; scene answers too tersely | Scene returned `Paracip-500` — abstention suffix contradicts the scene prompt (`DEC-031`). Ask correctly abstained on text, validating `DEC-012` |
+| Translation + TTS | ✅ Works end-to-end | Colab 2026-08-10: Marathi and Hindi text + audio from medicine mode's answer |
 | Android port | ⬜ Not started | Phase 5 |
 | NGO / user study | 🔴 **Not contacted** | long lead time — start now |
-| Latency vs <8s target | 🔴 **~30s/image** | unresolved, see RISK-1 |
+| Latency vs <8s target | 🔴 **Measured: OCR 42.9s · translate+TTS 33.8s cold / 9.7s warm · VLM 65.5s** | all far past target; cold figures include model loading. See RISK-1 |
 
 ---
 
@@ -77,9 +77,10 @@
 - [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `--ocr-lang mr`
 - [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
 - [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
-- [ ] **Run the full pipeline once on real hardware** — `--mode medicine --ocr-lang en
-      --lang mr --speak`. Logic is unit-tested with fakes, but no model has actually been
-      loaded through `app/` yet; that is the Phase-1 exit criterion, not the wiring
+- [x] **Run the full pipeline once on real hardware** — done on Colab T4, 2026-08-10 via
+      `notebooks/04_app_end_to_end.ipynb`. Photographed strip → OCR → guardrail → Marathi
+      and Hindi text → speech, every model loaded for the first time. Findings in §8 of
+      that notebook; the run also exposed `DEC-030` and `DEC-031`
 - [ ] Source a real drug-name database (replace `data/drug_names_seed.txt` placeholder)
 - [ ] **Send NGO / blind-school outreach emails** ← *long lead time, do immediately*
 - [ ] Get synopsis approved by guide (names + roll numbers still blank)
@@ -149,6 +150,8 @@ Brought forward while model installs were pending — the interface needs no wei
 - [x] Captures deleted immediately after answering, including on engine error
 - [ ] Run the browser app against **real** engines (currently verified with fakes)
 - [ ] Latency budget enforced per mode (see RISK-1)
+- [ ] Give scene mode its own `SmolVLMEngine(suffix='')` — the shared abstention suffix
+      makes it answer in two words (`DEC-031`)
 
 **Exit criteria:** end-to-end spoken answer in Marathi from a photo, offline, <8s on laptop.
 
@@ -211,6 +214,8 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-027 | **`import paddle` must precede `import paddleocr`**, and OCR runs in its own process | Found by stack trace, not inference. `paddleocr` defers loading paddle to `paddlex.utils.import_guard`, which imports torch and TensorFlow first; `libpaddle` then initializes into a process that already owns the glog/gflags/OpenMP symbols it needs and segfaults inside `paddle/base/core.py`. This is the real mechanism behind `DEC-006` — a **load-time** crash, which is why `max_side` and `fast` (both inference-time) changed nothing across three days of attempts. Fixed in `app/engines/paddle_ocr.py::_load()`; notebook 04 additionally runs OCR as a subprocess so the memory is reclaimed and a crash reports an exit code instead of killing the session |
 | DEC-028 | **Debug native crashes with `faulthandler` + unbuffered output, never by hypothesis** | Three wrong diagnoses preceded the right one (OpenMP collision, then OOM, then unwarping memory), each costing a Colab run. `faulthandler.enable()` before the first import, plus `python -u` so a signal-killed process does not discard its buffered stdout, produced the answer in a single run. Staged progress markers reporting which heavy modules are loaded turned "it crashed" into "it crashed importing libpaddle with torch already resident" |
 | DEC-029 | **`ai4bharat/indictrans2-en-indic-dist-200M` is a gated repo** — a first fetch needs an accepted licence and `HF_TOKEN` | Discovered when §6 failed with a 401 that transformers surfaces as a 22-frame traceback ending in a bare `OSError`, indistinguishable from a network fault. Does **not** compromise the offline claim: weights cache locally and run in airplane mode afterwards. It does mean a machine that has never downloaded them cannot be provisioned without credentials — see RISK-9. The translator now names the repo and the three fix steps, and notebook 04 preflights every model repo before downloading any of them |
+| DEC-030 | **`max_side` is a safety parameter, not a performance knob** | Downscaling to 1280 to escape an out-of-memory kernel made OCR miss the carton's `EXP.OCT.2026`, leaving only the blister's `EXP.APR.28` — the app then told the user a medicine was valid 18 months past its expiry. `earliest_expiry()` was correct throughout: it can only choose among dates OCR actually returns. `DEC-025` guards against OCR line *ordering*, not against a *missing* line, and nothing downstream can tell the two apart. Any future change to `max_side`, `fast`, or the det model must be re-checked against the two-date strip, not just against "did it still find a drug name" |
+| DEC-031 | **Scene mode needs a `SmolVLMEngine` without the abstention suffix** | `ABSTENTION_SUFFIX` says "answer in one to three words … otherwise answer exactly: unanswerable", which directly contradicts the scene prompt's "one or two short sentences". First real run returned `Paracip-500` for a scene description. The suffix is right for VizWiz-style VQA (`DEC-016`) and wrong for description, so the fix is a second engine instance, not a changed constant — changing it would invalidate the measured 0.533 |
 | DEC-022 | **Currency is scored by rupee error, not just accuracy** | Misclassification cost is asymmetric: ₹500→₹100 costs the user ₹400, ₹10→₹20 costs ₹10. Two models with equal accuracy are not equally good. Notebook 03 reports expected rupee error per identification and ranks the confusion matrix by rupee impact rather than frequency |
 | DEC-022 | **Currency is scored by rupee error, not just accuracy** | Misclassification cost is asymmetric: ₹500→₹100 costs the user ₹400, ₹10→₹20 costs ₹10. Two models with equal accuracy are not equally good. Notebook 03 reports expected rupee error per identification and ranks the confusion matrix by rupee impact rather than frequency |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
@@ -222,7 +227,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 
 | ID | Risk | Severity | Mitigation |
 |---|---|---|---|
-| RISK-1 | **OCR latency ~30s/image vs <8s target** | 🔴 High | Try PP-OCR *mobile* det model, smaller `max_side`, per-mode budgets. If unfixable, restate the target honestly and report measured numbers |
+| RISK-1 | **Latency far past the <8s target** — measured 2026-08-10: OCR 42.9s, translate+TTS 33.8s cold / 9.7s warm, VLM 65.5s | 🔴 High | Try the PP-OCR *mobile* det model and per-mode budgets. **`max_side` is no longer available as a lever** — lowering it costs expiry dates (`DEC-030`). Needs a dedicated warm-cache measurement pass before any claim is made; if unfixable, restate the target honestly and report measured numbers |
 | RISK-2 | **Dataset collection not started** (3 of ~700 photos) | 🔴 High | 20 photos/day starting now; blocks Phase 3 entirely |
 | RISK-3 | **No NGO contact yet** | 🔴 High | Email 5–6 today; replies take weeks, scheduling weeks more. Without this, objective 5 fails |
 | RISK-4 | Android port may not fit the timeline | 🟡 Medium | Laptop demo is the committed deliverable; Android is explicitly a stretch goal |
