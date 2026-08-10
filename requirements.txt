@@ -5,7 +5,13 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
 torchvision      # currency mode: MobileNetV3 + the eval transforms in currency_cnn.py
-transformers
+
+# Pinned below 5, per DEC-009. IndicTransToolkit imports
+# transformers.tokenization_utils, removed in v5, so Marathi/Hindi speech breaks
+# outright on a v5 install. Unpinned, this resolved to 5.15.0 on 2026-08-10 and every
+# notebook already pins `transformers<5` for the same reason -- requirements.txt was
+# the one place that did not.
+transformers<5
 datasets
 pillow
 numpy
