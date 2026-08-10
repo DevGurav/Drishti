@@ -5,9 +5,11 @@
 > document. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-11 (currency trained and verified on the laptop; `DEC-040`–`DEC-042`).
-> 2026-08-10: full end-to-end run — every mode verified against real
-> models; `DEC-035`–`DEC-037`) · **Phase:** 1 of 6 · **Academic year:** 2026–27
+> **Last updated:** 2026-08-11 — currency mode trained and verified on the laptop
+> (`DEC-040`–`DEC-042`). Previously 2026-08-10: full end-to-end run, every mode verified
+> against real models (`DEC-035`–`DEC-037`).
+>
+> **Phase:** 1 of 6 · **Academic year:** 2026–27
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
 > Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
