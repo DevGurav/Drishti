@@ -32,7 +32,7 @@
 
 | Component | State | Evidence |
 |---|---|---|
-| App skeleton (router, 5 modes, guardrail) | ✅ Done | 144 tests passing |
+| App skeleton (router, 5 modes, guardrail) | ✅ Done | 148 tests passing |
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`, proven on a real strip |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
