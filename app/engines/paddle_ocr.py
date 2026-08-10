@@ -101,6 +101,19 @@ class PaddleOCREngine:
 
     def _load(self):
         if self._ocr is None:
+            # Import paddle BEFORE paddleocr, and keep it first.
+            #
+            # paddleocr defers loading paddle to paddlex's import_guard, by which point
+            # paddlex has already dragged torch and TensorFlow into the process. libpaddle
+            # then initializes second and segfaults in its static initializers -- observed
+            # on Colab as SIGSEGV inside paddle/base/core.py, at import time, with no image
+            # involved. Paddle, torch and TF each link their own glog/gflags/OpenMP; the
+            # loser is whichever loads last.
+            #
+            # This is the same conflict as DEC-006, but it fires inside PaddleOCR's own
+            # dependency chain, so it happens even when nothing else in Drishti is loaded.
+            # Load-time, not inference-time: neither `fast` nor `max_side` affects it.
+            import paddle  # noqa: F401  -- ordering, not use
             from paddleocr import PaddleOCR
 
             kwargs = build_kwargs(self.lang, self.fast)
