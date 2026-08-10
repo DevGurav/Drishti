@@ -1,6 +1,6 @@
 # Custom Dataset Collection Guide (Phase 2)
 
-Protocol for the Indian dataset described in `data/README.md` and `docs/synopsis.md`.
+Protocol for the Indian dataset described in `data/README.md` and `docs/OVERVIEW.md`.
 Read this before taking a single photo — the guiding principle, borrowed from VizWiz's own
 findings, is: **a blind photographer can't verify framing, so a dataset of only perfect
 studio shots will not match deployment conditions.** Deliberately include tilted, blurry,

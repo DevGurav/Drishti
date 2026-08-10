@@ -1,6 +1,6 @@
 # Drishti — Offline AI Vision Assistant for Blind Users in Indian Languages
 
-Final-year AI&DS major project (2026–27). A fully **offline** assistant that lets blind users
+A personal project. A fully **offline** assistant that lets blind users
 read medicine strips, identify currency, read Devanagari/English text, and hear scene
 descriptions — spoken in **Marathi/Hindi/English**, with zero internet and zero cloud upload.
 
@@ -47,7 +47,7 @@ models/      downloaded/quantized weights (gitignored)
 app/         demo app: router, mode handlers, engine interfaces, CLI (laptop first, Android later)
 tests/       unit tests for app/ (pure Python, no GPU/model needed — run with `python -m unittest discover -s tests -t .`)
 eval/        evaluation results
-docs/        synopsis.md (college submission draft)
+docs/        OVERVIEW.md (what the project is) + BUILD_PLAN.md (status, decisions, risks)
 ```
 
 ### App architecture
@@ -95,7 +95,7 @@ rather than minutes on CPU. Scene and ask are shown as a recording, with the GPU
 requirement stated out loud — see `DEC-038` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
 
 Start the server and run one photo through it *before* the audience arrives: the ~59s model
-load is one-time, and there is no reason to spend it on stage.
+load is one-time, and there is no reason to spend it in front of an audience.
 
 ## Running it
 

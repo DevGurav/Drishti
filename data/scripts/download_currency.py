@@ -1,5 +1,5 @@
 """Download an Indian-currency-notes image dataset from Kaggle for the currency-mode
-classifier (docs/synopsis.md objective 2: MobileNet CNN, >=99% target accuracy).
+classifier (docs/OVERVIEW.md objective 2: MobileNet CNN, >=99% target accuracy).
 
 We deliberately do NOT hardcode a specific Kaggle dataset slug: several exist with
 different licenses, denomination coverage, and quality, and data/README.md already

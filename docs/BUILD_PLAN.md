@@ -1,15 +1,15 @@
 # Drishti — Build Plan
 
 > **This is the single source of truth for scope, phases, status and decisions.**
-> `README.md` describes *what the system is*. `synopsis.md` is the college submission
-> document. Neither carries a timeline — if a date or milestone appears anywhere else,
+> `README.md` describes *what the system is*. `OVERVIEW.md` explains the problem and the
+> approach. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
 > **Last updated:** 2026-08-11 — currency mode trained and verified on the laptop
 > (`DEC-040`–`DEC-042`). Previously 2026-08-10: full end-to-end run, every mode verified
 > against real models (`DEC-035`–`DEC-037`).
 >
-> **Phase:** 1 of 6 · **Academic year:** 2026–27
+> **Phase:** 1 of 6 · **Personal project by Devendra Ramesh Gurav**
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
 > Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
@@ -19,17 +19,21 @@
 
 ## 1. Status dashboard
 
-| Phase | Window | State |
-|---|---|---|
-| 0 — Feasibility & setup | Jul 2026 | ✅ **Complete** |
-| 1 — Baselines & core pipeline | Aug – Sep 2026 | 🟢 **Exit criteria met** — all five modes verified against real models 2026-08-10; only the two non-code items remain (synopsis approval, NGO outreach) |
-| 2 — Data collection | Sep – Nov 2026 | 🔴 Barely started (3 photos of ~700) |
-| 3 — Fine-tuning | Nov – Dec 2026 | ⬜ Not started |
-| 4 — Integration | Jan 2027 | ⬜ Not started |
-| 5 — On-device + user study | Feb 2027 | ⬜ Not started |
-| 6 — Evaluation & report | Mar 2027 | ⬜ Not started |
+| Phase | State |
+|---|---|
+| 0 — Feasibility & setup | ✅ **Complete** |
+| 1 — Baselines & core pipeline | 🟢 **Complete** — every mode verified against real models on the laptop, 2026-08-11. NGO outreach is the one open item, and it belongs to Phase 5's user study |
+| 2 — Data collection | 🔴 Barely started (3 photos of ~700) |
+| 3 — Fine-tuning | ⬜ Not started |
+| 4 — Integration | ⬜ Not started |
+| 5 — On-device + user study | ⬜ Not started |
+| 6 — Evaluation & report | ⬜ Not started |
 
-**Hard gates:** Sem-7 review ≈ Oct 2026 (needs Phase 1 done) · Final submission ≈ Mar–Apr 2027.
+**Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
+demoable end to end ≈ **Oct 2026** · project complete ≈ **Mar–Apr 2027**.
+
+Per-phase month windows are deliberately absent. The order below is real; pretending to
+know which month Phase 3 lands in is not.
 
 ### Component status
 
@@ -53,11 +57,11 @@
 
 ## 2. Phases
 
-### Phase 0 — Feasibility & setup · Jul 2026 · ✅ Complete
+### Phase 0 — Feasibility & setup · ✅ Complete
 
 **Goal:** prove nothing in the stack is impossible before committing eight months.
 
-- [x] Problem selected, synopsis drafted
+- [x] Problem selected, overview written
 - [x] Repo scaffolded; app skeleton with router + mode handlers + safety guardrail
 - [x] VLM candidates compared on real VizWiz photos (notebook 00)
 - [x] OCR engine selected by measurement (notebook 00b)
@@ -67,10 +71,10 @@
 
 ---
 
-### Phase 1 — Baselines & core pipeline · Aug – Sep 2026 · 🟢 Exit criteria met
+### Phase 1 — Baselines & core pipeline · 🟢 Exit criteria met
 
 **Goal:** a measured baseline to improve on, and three modes running on a laptop.
-**This is what the Sem-7 review is graded against.**
+**This is the part that has to work before anything else is worth doing.**
 
 - [x] **Run notebook 01 → VizWiz baseline = 0.308** (answerable 0.310 / unanswerable 0.306)
 - [x] Record 3 failure patterns — over-answering, fine-grained OCR misses, question-form misreads
@@ -93,8 +97,8 @@
       medicines of India's National List of Essential Medicines 2022, extracted from the
       CDSCO publication by `data/scripts/build_drug_db.py` (`DEC-032`). Building it
       exposed a latent matcher bug — see `DEC-033`
-- [ ] **Send NGO / blind-school outreach emails** ← *long lead time, do immediately*
-- [ ] Get synopsis approved by guide (names + roll numbers still blank)
+- [ ] **Send NGO / blind-school outreach emails** ← *long lead time; replies take weeks and
+      scheduling takes weeks more, so this gates Phase 5 rather than Phase 1*
 
 **Exit criteria — all met on the laptop, 2026-08-11:** baseline recorded (0.308 → 0.533) ·
 read, medicine and currency answering locally, scene mode too (294 s) · spoken Marathi
@@ -104,7 +108,7 @@ Only the two items above that depend on other people remain.
 
 ---
 
-### Phase 2 — Data collection · Sep – Nov 2026 · 🔴 Barely started
+### Phase 2 — Data collection · 🔴 Barely started
 
 **Goal:** the custom Indian dataset that makes this project original rather than an
 integration exercise. Protocol: `docs/data_collection_guide.md`.
@@ -127,10 +131,10 @@ integration exercise. Protocol: `docs/data_collection_guide.md`.
 
 ---
 
-### Phase 3 — Fine-tuning · Nov – Dec 2026 · ⬜ Not started
+### Phase 3 — Fine-tuning · ⬜ Not started
 
 **Goal:** the core ML contribution. *Without this the project is an app that calls existing
-models — an integration project, not a final-year AI&DS project.*
+models — an integration exercise rather than a project with a result of its own.*
 
 **Beat: 0.533**, the tuned-prompt result — not the 0.308 stock baseline (`DEC-017`).
 
@@ -154,7 +158,7 @@ an ablation table produced, and abstention behaviour reported separately.
 
 ---
 
-### Phase 4 — Integration · Jan 2027 · 🟡 Started early
+### Phase 4 — Integration · 🟡 Started early
 
 **Goal:** one coherent app rather than five scripts.
 
@@ -184,7 +188,7 @@ Brought forward while model installs were pending — the interface needs no wei
 
 ---
 
-### Phase 5 — On-device + user study · Feb 2027 · ⬜ Not started
+### Phase 5 — On-device + user study · ⬜ Not started
 
 **Goal:** prove the "offline on a ₹10k phone" claim, and that blind users can actually use it.
 
@@ -200,18 +204,19 @@ Brought forward while model installs were pending — the interface needs no wei
 
 ---
 
-### Phase 6 — Evaluation & report · Mar 2027 · ⬜ Not started
+### Phase 6 — Evaluation & report · ⬜ Not started
 
 - [ ] Final metrics: VizWiz accuracy vs baseline, per-mode precision/recall, latency
 - [ ] Success bar: medicine ≥95% guardrailed precision · currency ≥99% · <8s for the OCR
       modes, with the VLM modes reported separately and honestly (`DEC-038`)
-- [ ] Black-book report; decision log below feeds the methodology section
+- [ ] Write up the results; the decision log below is the methodology section, already written
 - [ ] **Demo rehearsal, in this order** (`DEC-038`): airplane mode on → medicine strip
       (expiry + MRP spoken in Marathi) → ₹500 note → Marathi newspaper read aloud →
       *then* the recorded scene-mode clip, introduced as needing a GPU
 - [ ] Pre-load every model on the demo machine and leave the server warm — the 59s model
-      load is one-time and must not happen on stage (`RISK-9` covers the gated repos)
-- [ ] Rehearse the two questions the panel will ask: "why is it slow?" (RISK-1, with the
+      load is one-time and should not happen in front of anyone (`RISK-9` covers the
+      gated repos)
+- [ ] Rehearse the two questions anyone watching will ask: "why is it slow?" (RISK-1, with the
       measured table) and "does it ever make things up?" (`DEC-037`, with scene mode's own
       30-tablets paragraph and the guardrail that stops it reaching the user)
 
@@ -258,7 +263,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-035 | **One OCR language per process, and the checkpoint is written after every phase** | `DEC-027` established that paddle must be imported first, into a clean process. The 2026-08-10 run found the second half of that constraint: each *language* is a full pipeline (doc_ori + UVDoc + textline_ori + det + rec), and `mr` resolves to `PP-OCRv5_server_det` rather than a mobile det, so holding `en` open while loading `mr` passed 3.9 GB of 10.8 GB and was SIGKILLed. The expensive part was not the crash but the bookkeeping: the checkpoint was written once at the end, so a correct medicine result computed five minutes earlier died with the process and §6–§7 had nothing to run on. Phases are now separate subprocesses that persist before the next begins, and a Devanagari failure is a warning rather than fatal — nothing downstream depends on it. **Lesson for the report:** long pipelines need durable intermediate state, or an unrelated failure costs all the work upstream of it |
 | DEC-036 | **`max_side=1280` is the default: 25–35% faster at no measured accuracy cost** | ~~First written as "neither a safety parameter nor a latency lever"~~ — that reading came from two passes on one Colab machine (46.5/54.5s at 1280 against 53.7/52.8s at 1600) where within-setting spread matched the between-setting gap. A controlled back-to-back comparison the same day, one process, one loaded model, three photos, disagrees consistently: medicine **56.2s vs 76.1s**, newspaper **69.4s vs 103.6s**, foil **58.0s vs 76.6s**. Accuracy is unaffected — identical drug name, expiry and MRP, and **1010 Devanagari chars at both sizes** on the fixture most likely to suffer from a downscale. **Method note for the report:** this knob has now been called dangerous (`DEC-030`), irrelevant (this entry's first version), then useful, and only the last came from a controlled comparison. Cross-session Colab timings are not evidence; same-session, same-process, same-model comparisons are |
 | DEC-037 | **Scene mode's own output is the guardrail's best evidence — quote it in the report** | **Reproduced word for word on Colab (2026-08-10) and the laptop (2026-08-11)**, which makes it a repeatable property of the shipped model rather than one unlucky sample. Asked to describe the Paracip strip, SmolVLM produced fluent prose that was right about the drug and dosage and invented the rest: "contains **30 tablets**" (it holds 10, printed on the strip) and "made of a **clear plastic material** and has a **white backing**" (opaque foil). The invented details are indistinguishable in tone from the true ones. `DEC-007` was argued from a Moondream anecdote during selection; this is the *shipped* model on a *committed* fixture, reproducible from `notebooks/04_app_end_to_end_devnagari.ipynb`. Consequences: scene mode is framed as orientation, never as fact; every actionable field (drug, expiry, MRP) stays on OCR + database; and the report quotes this paragraph verbatim rather than asserting that VLMs hallucinate |
-| DEC-038 | **The live demo is OCR-first; scene and ask are shown as a recording, with the GPU dependency stated** | Measured on a GPU-less runtime: medicine 56s, read 69s, but scene **481s** and ask **315s**. Medicine, read and currency never touch the VLM, so the three modes that carry the project's actual claim — a blind user reading a medicine strip offline in Marathi — are the three that stay demoable on a laptop. Rejected alternatives: *demo everything live* (five to eight minutes of silence on stage, and the panel remembers the hang rather than the guardrail); *quantise until scene fits* (4-bit GGUF is Phase 5, unbuilt, and betting the review on unfinished work is how demos fail); *quietly drop scene and ask* (they are in the synopsis, and hiding a working feature because it is slow invites the question anyway, unprepared). Saying "this needs a GPU, here it is running on one, here is the measured CPU cost" is a stronger position than any of them — the honest number is defensible, a claimed 8s is not, and `RISK-1` stays visible instead of being papered over. Consequence for the report: latency is stated per mode tier, never as one aggregate |
+| DEC-038 | **The live demo is OCR-first; scene and ask are shown as a recording, with the GPU dependency stated** | Measured on a GPU-less runtime: medicine 56s, read 69s, but scene **481s** and ask **315s**. Medicine, read and currency never touch the VLM, so the three modes that carry the project's actual claim — a blind user reading a medicine strip offline in Marathi — are the three that stay demoable on a laptop. Rejected alternatives: *demo everything live* (five to eight minutes of silence on stage, and what gets remembered is the hang rather than the guardrail); *quantise until scene fits* (4-bit GGUF is Phase 5, unbuilt, and betting the review on unfinished work is how demos fail); *quietly drop scene and ask* (they are in the overview, and hiding a working feature because it is slow invites the question anyway, unprepared). Saying "this needs a GPU, here it is running on one, here is the measured CPU cost" is a stronger position than any of them — the honest number is defensible, a claimed 8s is not, and `RISK-1` stays visible instead of being papered over. Consequence for the report: latency is stated per mode tier, never as one aggregate |
 | DEC-039 | **Currency has an eighth class, `background`: "no note in frame"** | The Kaggle dump (`DEC-022`'s dataset) ships 431 `Background__*.jpg` images with no note in them. `organize_currency.py` first treated these as unparseable junk and refused to run. Keeping them is strictly better: with seven denomination classes and nothing else, a softmax **must** name an amount, so a photo of a table, a hand, or a badly-missed shot returns a denomination — and money mode speaks it. The class gives the model somewhere honest to put that. Note this is a *different* failure from low confidence, so `app/modes/currency.py` answers it differently: `background` asks the user to reframe, `CONFIDENCE_THRESHOLD` asks for better light. Two consequences for evaluation: `background` is ~11% of the data, so headline accuracy is doubly misleading; and `class_value('background')` is ₹0, so a real ₹500 called `background` scores as a ₹500 error when it is in truth the *cheap* failure — the expensive one is calling an empty table ₹500. Report those separately rather than averaging them |
 | DEC-040 | **`CONFIDENCE_THRESHOLD = 0.90`, chosen by rupee error rather than by answer rate** | The 0.85 in the code was a scaffolding guess (`DEC-024` promised to measure it). Notebook 03's sweep over 600 held-out images: `0.50` → 98.7% answered, ₹1.32 expected error; `0.85` → 90.3%, ₹1.00; **`0.90` → 85.0%, 0.9961 accuracy, ₹0.71**; `0.95` → 61.5%, ₹0.49 but answers too rarely. The notebook's original rule picked the *lowest* viable threshold and so recommended 0.50 — optimising for answering often, which contradicts `DEC-022`'s whole premise that rupee cost is the metric. The rule now minimises rupee error subject to answering ≥80%, and flags rows with fewer than 50 answered samples as noise (the 0.99 row scored 0.9667 off 30 samples and one error, which reads misleadingly as "stricter is worse") |
 | DEC-041 | **The model's errors cluster on denominations whose numerals are prefixes of one another** | The costliest confusions are not random: `20 → 200` three times (₹540), `50 → 500` once (₹450), `2000 → 10` once (₹1990). Both frequent pairs differ by a trailing zero, and both err *upward* — the user is told they hold ten times what they do, which is the direction that gets someone short-changed at a counter. One `background → 200` is the same class of harm: phantom money where there is no note. Two consequences: Phase-2 note photography should over-sample the 20/200 and 50/500 pairs rather than spreading evenly across denominations, and the report should show this table instead of the 0.9883 headline, because "98.8% accurate" hides that the residual errors are concentrated in the expensive direction |
@@ -308,7 +313,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 |---|---|
 | **`docs/BUILD_PLAN.md`** | **This file — phases, status, decisions, risks. The single source of truth.** |
 | `README.md` | What the system is; architecture; how to run it |
-| `docs/synopsis.md` | College submission document (abstract, objectives, literature) |
+| `docs/OVERVIEW.md` | What the project is and why: problem, objectives, literature, methodology |
 | `docs/data_collection_guide.md` | Phase-2 protocol: counts, privacy rules, labelling |
 | `notebooks/00_feasibility_spike_colab.ipynb` | VLM comparison + translation/TTS spike (Colab GPU) |
 | `notebooks/00b_ocr_spike.ipynb` | OCR engine selection (CPU, no GPU) |

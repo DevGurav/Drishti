@@ -1,6 +1,6 @@
 """Medicine mode: OCR -> drug-name guardrail -> expiry/MRP extraction -> spoken result.
 
-Safety rule (docs/synopsis.md, objective 3): a drug name is only ever reported if it
+Safety rule (docs/OVERVIEW.md, objective 3): a drug name is only ever reported if it
 matches DrugDatabase. If OCR can't produce a verified match, the mode declines rather
 than letting a VLM guess.
 """

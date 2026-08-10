@@ -1,5 +1,5 @@
 """Drug-name guardrail: medicine mode may only report a name that matches this
-database (see docs/synopsis.md, objective 3). This is what stops the OCR/VLM
+database (see docs/OVERVIEW.md, objective 3). This is what stops the OCR/VLM
 pipeline from reporting a drug name it merely guessed at from blurry or partial
 text — a wrong medicine name is a safety hazard, not a UX nuisance.
 

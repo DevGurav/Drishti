@@ -1,4 +1,4 @@
-# Project Synopsis
+# Drishti — Project Overview
 
 **Title:** Drishti — An Offline, Privacy-Preserving AI Vision Assistant for Visually-Impaired
 Users in Indian Languages
@@ -6,8 +6,10 @@ Users in Indian Languages
 **Domain:** Artificial Intelligence & Data Science (Computer Vision · Multimodal Deep Learning
 · Edge AI · Accessibility)
 
-**Submitted by:** Devendra Ramesh Gurav (individual project) · **Roll No.:** _<roll number>_
-· **Guide:** _<guide name>_ · **Academic year:** 2026–27
+**By:** Devendra Ramesh Gurav · **Started:** July 2026
+
+A personal project. `docs/BUILD_PLAN.md` carries the live status, decision log and risks;
+this document explains what Drishti is and why it is built this way.
 
 ---
 
@@ -17,7 +19,7 @@ India has an estimated 5 million blind and about 70 million visually-impaired ci
 Existing AI assistance tools (Be My AI, Microsoft Seeing AI, Google Lookout) require constant
 internet connectivity, respond primarily in English, and upload private images — prescriptions,
 currency, the user's home — to cloud servers. This excludes rural, non-English-speaking, and
-privacy-conscious users. We propose **Drishti**, a fully offline assistant that runs a
+privacy-conscious users. **Drishti** is a fully offline assistant that runs a
 quantized vision-language model (VLM) on commodity hardware and speaks its answers in Marathi,
 Hindi, or English. Drishti provides five task modes — text reading (including Devanagari),
 medicine-strip identification with expiry warnings, currency recognition, scene description,
@@ -69,7 +71,7 @@ existing assistive AI requires internet, English literacy, and cloud upload of p
 5. **Deployment (M5–6):** 4-bit GGUF quantization; laptop demo app; Android port via
    llama.cpp/MediaPipe LLM Inference (stretch); NGO user testing.
 6. **Evaluation (M7–8):** VizWiz accuracy vs baseline; per-mode precision/recall; latency;
-   user task-success study; final report.
+   user task-success study; a written record of what worked and what did not.
 
 ## System requirements
 
@@ -81,16 +83,16 @@ existing assistive AI requires internet, English literacy, and cloud upload of p
 
 A working offline assistant (laptop demo + Android stretch goal), measurable improvement over
 the stock-model baseline on VizWiz, ≥95% guardrailed precision in medicine mode, ≥99% currency
-accuracy, a small user-study with visually-impaired participants, and the final project report.
+accuracy, and a small user study with visually-impaired participants — plus an honest writeup
+of the measurements, including the ones that did not go the way they were expected to.
 
-## Timeline
+## Targets
 
-Summary for submission. The working plan — six phases with tasks, live status, decision log
-and risk register — is `docs/BUILD_PLAN.md`, which is authoritative if the two ever differ.
+Two dates, self-imposed, kept because a plan with no date cannot tell you when something is
+slipping. The ordered work — six phases, live status, decision log and risk register — is in
+`docs/BUILD_PLAN.md`, which is authoritative if the two ever differ.
 
-| Phase | Months | Deliverable |
+| Target | By | What "done" means |
 |---|---|---|
-| Feasibility spike + baselines | Jul–Sep 2026 | 3 modes on laptop (Sem-7 review) |
-| Data collection + fine-tuning | Oct–Dec 2026 | Fine-tuned VLM beats baseline |
-| Deployment + user testing | Jan–Feb 2027 | Android/laptop app, NGO study |
-| Evaluation + report | Feb–Mar 2027 | Black-book report + demo |
+| Demoable end to end | ~Oct 2026 | Read, medicine and currency answering on a laptop, offline, spoken in Marathi |
+| Project complete | ~Mar–Apr 2027 | Fine-tuned model beating the baseline, a user study, and the results written up |
