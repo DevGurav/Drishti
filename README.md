@@ -57,8 +57,9 @@ docs/        synopsis.md (college submission draft)
 models (chosen via the notebooks) get wired in later without touching routing/mode
 logic. `app/router.py` dispatches `--mode` to `app/modes/{read,medicine,currency,scene,ask}.py`.
 `app/parsers.py` has the expiry/MRP extraction (pulled from the notebook 00 spike)
-plus real date parsing. `app/drug_db.py` is the medicine-mode safety guardrail —
-`data/drug_names_seed.txt` is a placeholder list, not a verified drug database.
+plus real date parsing. `app/drug_db.py` is the medicine-mode safety guardrail, backed by
+`data/drug_names_nlem2022.txt` — the 384 medicines of India's National List of Essential
+Medicines 2022, extracted from the CDSCO publication by `data/scripts/build_drug_db.py`.
 
 **OCR engine: PaddleOCR** — see `DEC-003` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md) for why
 Surya and Tesseract were rejected, plus the mandatory config flags (`DEC-004`, `DEC-005`,

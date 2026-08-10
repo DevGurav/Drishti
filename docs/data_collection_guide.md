@@ -20,7 +20,7 @@ ones, in roughly the same proportion you'd expect a real user's camera roll to h
 
 | Mode | Target | What to vary |
 |---|---|---|
-| Medicine | ~300 | drug (use `data/drug_names_seed.txt` as a checklist, then go beyond it), strip vs. box, front vs. back, lighting (bright/dim), angle (straight/15–30° tilt), distance, partial finger/fold occlusion, faded/worn print |
+| Medicine | ~300 | drug (use `data/drug_names_seed.txt` as a brand checklist, then go beyond it; the guardrail matches the *generic* name from `data/drug_names_nlem2022.txt`, so capture packs where the generic line is legible), strip vs. box, front vs. back, lighting (bright/dim), angle (straight/15–30° tilt), distance, partial finger/fold occlusion, faded/worn print |
 | Currency | ~250 | every denomination in circulation (₹10/20/50/100/200/500), roughly balanced per class (~40 each), fresh/worn/folded, front and back, partial note half out of frame, varied backgrounds |
 | Read / labels | ~200 | MRP tags, product labels, food packet text, mixed English + Devanagari, expiry/net-weight print |
 | Scene | ~150 | indoor + outdoor, multiple rooms, varied lighting, single-object vs. cluttered, some deliberately blurry/handheld |

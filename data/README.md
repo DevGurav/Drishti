@@ -25,5 +25,20 @@ token — see the script's docstring for one-time setup).
 
 ## 4. Drug-name database (medicine-mode guardrail)
 
-Options to evaluate in M2: open lists derived from CDSCO-approved drug names / India
-generic-medicine lists. Needed: one text file of valid drug names for fuzzy string matching.
+**`data/drug_names_nlem2022.txt`** — 391 names expanded from the 384 entries of the
+**National List of Essential Medicines 2022**, published by the Ministry of Health and Family
+Welfare via CDSCO. Government-issued, dated and citable, which is what `DEC-007`'s promise of
+a *verified* database requires.
+
+- Regenerate: `python data/scripts/build_drug_db.py`
+- Verify the committed file still matches the source: `python data/scripts/build_drug_db.py --check`
+- The file is committed rather than downloaded at runtime: Drishti is offline-first, and a
+  demo machine cannot depend on cdsco.gov.in being reachable.
+
+**Generic names only.** Indian labelling requires the generic name on the pack, so brand
+strips still match (`CROCIN … PARACETAMOL TABLETS IP` → `Paracetamol`). The ~250k brand names
+have no authoritative public list, and inventing one would defeat the point of the guardrail.
+A strip whose generic name OCR cannot read declines rather than guesses.
+
+`data/drug_names_seed.txt` is no longer used by the app. It survives as the photography
+checklist for Phase-2 data collection — common Indian brands worth capturing.
