@@ -22,14 +22,22 @@ notebooks/00b_ocr_spike.ipynb on real photographed medicine strips:
   ``devanagari_PP-OCRv5_mobile_rec`` model. ``lang='devanagari'`` does NOT exist in
   3.7.0 and raises ``ValueError`` on every ``ocr_version``.
 
-Latency note: ~30s/image on Colab CPU is still far above the project's <8s end-to-end
-target. That gap is unresolved and is a known open issue, not a solved problem.
+Latency note: ~56s/image on Colab CPU at the 1280 default, plus a one-time ~59s model
+load, is far above the project's <8s end-to-end target. That gap is unresolved and is a
+known open issue, not a solved problem. The next lever is the model tier: this loads
+``PP-OCRv6_medium_det``/``_rec`` for English and ``PP-OCRv5_server_det`` for Devanagari,
+none of them the mobile variants the Android target needs anyway.
 """
 from __future__ import annotations
 
 from pathlib import Path
 
-DEFAULT_MAX_SIDE = 1600
+# Measured 2026-08-10, one process, one loaded model, three photos: 1280 is 25-35% faster
+# than 1600 (medicine 56.2s vs 76.1s, newsprint 69.4s vs 103.6s, foil 58.0s vs 76.6s) with
+# no accuracy cost -- identical drug name, expiry and MRP, and 1010 Devanagari characters
+# recognized at both sizes on the fixture most likely to suffer from a downscale. See
+# DEC-036; two earlier readings of this knob were wrong in opposite directions.
+DEFAULT_MAX_SIDE = 1280
 
 # Devanagari script codes that PaddleOCR 3.7.0 actually accepts (verified in notebook 00b).
 # 'devanagari', 'hindi', 'marathi' and 'deva' all raise ValueError.
