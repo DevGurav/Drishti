@@ -36,7 +36,7 @@
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`, proven on a real strip |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
-| Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **untested** | no photo with Devanagari text yet |
+| Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **fixture ready, run pending** | `data/samples/newspaper-marathi.png` (Maharashtra Times page) + the Devanagari on the Paracip foil; notebook 04 §5 reads both at 1280 and 1600 and counts Devanagari codepoints |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | 🟡 Notebook + engine ready | needs a Kaggle dataset, then training |
@@ -75,7 +75,9 @@
 - [x] **Run `notebooks/02_abstention_prompts.ipynb`** — `stakes` prompt won; overall
       0.308 → **0.533**, abstention recall 0.258 → 0.639. Hypothesis in `DEC-013`
       confirmed: it was a calibration problem, and prompting fixed most of it
-- [ ] Photograph a strip **with Marathi/Hindi text**; verify Read mode with `--ocr-lang mr`
+- [ ] **Verify Read mode with `--ocr-lang mr`** — fixture committed
+      (`data/samples/newspaper-marathi.png`), notebook 04 §5 wired to read it and the
+      Paracip foil at both `max_side` settings; needs the Colab run to close `RISK-7`
 - [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
 - [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
 - [x] **Run the full pipeline once on real hardware** — done on Colab T4, 2026-08-10 via
@@ -246,7 +248,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | RISK-4 | Android port may not fit the timeline | 🟡 Medium | Laptop demo is the committed deliverable; Android is explicitly a stretch goal |
 | RISK-5 | Fine-tuning may not beat the stock baseline | 🟡 Medium | Even a negative result is publishable if measured honestly; ablation table makes it defensible |
 | RISK-6 | Upstream dependency churn breaks a working pipeline | 🟡 Medium | Pins + `requirements.txt` + DEC-009; re-verify before the demo |
-| RISK-7 | Devanagari OCR quality unknown | 🟡 Medium | Untested — no Devanagari photo yet. Test early in Phase 1; fallback is English-only Read mode for Sem-7 |
+| RISK-7 | Devanagari OCR quality unknown | 🟡 Medium | **Fixture committed, run pending.** `newspaper-marathi.png` (dense newsprint) and the Devanagari on the Paracip foil are read at both `max_side` settings in notebook 04 §5, scored by **Devanagari codepoint count** rather than by eye — PaddleOCR returning Latin only is the failure a visual check would miss. Zero across all four runs means `DEC-005` gains a caveat and Read mode ships English-only for Sem-7, which stays the fallback |
 | RISK-8 | Single-person bus factor on Colab sessions | 🟢 Low | Notebooks are committed; results downloaded to `eval/results/` |
 | RISK-9 | **Gated model repos block provisioning a fresh machine** (`DEC-029`) | 🟡 Medium | Runtime offline-ness is unaffected — weights cache locally. But a demo laptop set up from scratch needs an HF account, an accepted licence and a token. Download the weights onto the demo machine *before* review week, and keep a local copy; a gate added upstream in March 2027 would otherwise surface on stage |
 
