@@ -40,7 +40,7 @@ if ($LASTEXITCODE -ne 0) { throw "dependency installation failed (exit $LASTEXIT
 Write-Host "Verifying imports..."
 $check = @'
 import importlib.util, sys   # importlib alone does not expose .util
-required = ['torch', 'torchvision', 'PIL', 'numpy', 'flask', 'transformers']
+required = ['torch', 'torchvision', 'PIL', 'numpy', 'flask', 'transformers', 'accelerate']
 missing = [m for m in required if importlib.util.find_spec(m) is None]
 if missing:
     print('MISSING: ' + ', '.join(missing))

@@ -12,6 +12,12 @@ torchvision      # currency mode: MobileNetV3 + the eval transforms in currency_
 # notebook already pins `transformers<5` for the same reason -- requirements.txt was
 # the one place that did not.
 transformers<5
+
+# scene/ask: SmolVLMEngine passes device_map=, which transformers refuses to honour
+# without accelerate -- "requires `accelerate`" at from_pretrained, before any inference.
+# The Colab notebooks install it explicitly in their own pip cell, so this gap only ever
+# showed up on the laptop.
+accelerate
 datasets
 pillow
 numpy

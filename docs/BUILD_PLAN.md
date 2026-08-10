@@ -35,7 +35,7 @@
 
 | Component | State | Evidence |
 |---|---|---|
-| App skeleton (router, 5 modes, guardrail) | ✅ Done | 159 tests passing |
+| App skeleton (router, 5 modes, guardrail) | ✅ Done | 162 tests passing |
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`. Verified on the **laptop** 2026-08-11: medicine and read modes both run locally, after fixing an inverted paddle/torch import order on Windows (`DEC-044`) |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
