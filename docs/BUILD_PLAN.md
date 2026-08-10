@@ -5,8 +5,8 @@
 > document. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-10 (decision-log audit, `DEC-034`) · **Phase:** 1 of 6 ·
-> **Academic year:** 2026–27
+> **Last updated:** 2026-08-10 (second Colab run: Devanagari confirmed, `DEC-035`/`DEC-036`) ·
+> **Phase:** 1 of 6 · **Academic year:** 2026–27
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
 > Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
@@ -36,7 +36,7 @@
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`, proven on a real strip |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
-| Read mode (Devanagari) | 🟡 Lang code found (`mr`/`hi`), **fixture ready, run pending** | `data/samples/newspaper-marathi.png` (Maharashtra Times page) + the Devanagari on the Paracip foil; notebook 04 §5 reads both at 1280 and 1600 and counts Devanagari codepoints |
+| Read mode (Devanagari) | ✅ **Works** | Colab 2026-08-10: `newspaper-marathi.png` @ 1280 → **1010 Devanagari chars of 1238**, 60.8 s. Headline and body both legible (`खंक तिजोरीमुळे भिवंडी भकास`, `ठाणे : अरुंद रस्ते…`). Closes the core of `RISK-7`; the 1600 comparison and the foil case were cut short by the OOM |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | 🟡 Notebook + engine ready | needs a Kaggle dataset, then training |
@@ -44,7 +44,7 @@
 | Translation + TTS | ✅ Works end-to-end | Colab 2026-08-10: Marathi and Hindi text + audio from medicine mode's answer |
 | Android port | ⬜ Not started | Phase 5 |
 | NGO / user study | 🔴 **Not contacted** | long lead time — start now |
-| Latency vs <8s target | 🔴 **Measured: OCR 42.9s · translate+TTS 33.8s cold / 9.7s warm · VLM 65.5s** | all far past target; cold figures include model loading. See RISK-1 |
+| Latency vs <8s target | 🔴 **OCR ~50s per photo, model load 54.1s separately** | Colab 2026-08-10 with load excluded: 46.5/54.5s @1280, 53.7/52.8s @1600 — `max_side` makes no measurable difference, pass-to-pass variance exceeds it. Devanagari 60.8s. Translate+TTS 33.8s cold / 9.7s warm; VLM 65.5s. See RISK-1 |
 
 ---
 
@@ -75,9 +75,9 @@
 - [x] **Run `notebooks/02_abstention_prompts.ipynb`** — `stakes` prompt won; overall
       0.308 → **0.533**, abstention recall 0.258 → 0.639. Hypothesis in `DEC-013`
       confirmed: it was a calibration problem, and prompting fixed most of it
-- [ ] **Verify Read mode with `--ocr-lang mr`** — fixture committed
-      (`data/samples/newspaper-marathi.png`), notebook 04 §5 wired to read it and the
-      Paracip foil at both `max_side` settings; needs the Colab run to close `RISK-7`
+- [x] **Verify Read mode with `--ocr-lang mr`** — Colab 2026-08-10:
+      `data/samples/newspaper-marathi.png` → **1010 Devanagari chars of 1238** in 60.8 s,
+      headline and body both accurate. `RISK-7` retired; English-only fallback not needed
 - [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
 - [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
 - [x] **Run the full pipeline once on real hardware** — done on Colab T4, 2026-08-10 via
@@ -205,7 +205,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-002 | Base VLM = **SmolVLM-Instruct**, not Moondream-2 | Measured on real VizWiz photos: 2.5× faster (1.75s vs 4.4s), terse answers (VizWiz scores by *exact match*, so verbosity ≈ 0), and native transformers classes instead of `trust_remote_code` |
 | DEC-003 | OCR = **PaddleOCR**, not Surya or Tesseract | Surya 2.x needs a vllm/Docker inference server — incompatible with offline on-device. Tesseract returned noise on curved foil strips. PaddleOCR read every needed field at ≥0.96 |
 | DEC-004 | PaddleOCR document preprocessing stays **ON** | Disabling it saved 13% wall time but destroyed accuracy (lost drug name, expiry, MRP). A hand-held strip is curved and rotated, so orientation/unwarping is load-bearing |
-| DEC-005 | Devanagari via `lang='mr'` / `'hi'` | `'devanagari'`, `'hindi'`, `'marathi'`, `'deva'` all raise `ValueError` in PaddleOCR 3.7.0. Working codes resolve to `devanagari_PP-OCRv5_mobile_rec` — a *mobile* model, good for the Android target |
+| DEC-005 | Devanagari via `lang='mr'` / `'hi'` | `'devanagari'`, `'hindi'`, `'marathi'`, `'deva'` all raise `ValueError` in PaddleOCR 3.7.0. Working codes resolve to `devanagari_PP-OCRv5_mobile_rec`. **Correction (2026-08-10):** only the *recogniser* is mobile — the run showed `lang='mr'` also pulling `PP-OCRv5_server_det` (87.9 MB), so the earlier "good for the Android target" was half right. Quality is confirmed regardless (1010 Devanagari chars of 1238 on real newsprint); the det model is a Phase-5 swap, and part of why `mr` and `en` cannot share a process (`DEC-035`) |
 | DEC-006 | VLM and OCR must run in **separate processes** | PyTorch and PaddlePaddle each bundle an OpenMP runtime; co-loading kills the process with no traceback. A notebook annoyance now, an architecture constraint on Android |
 | DEC-007 | Medicine names come **only** from a verified DB | Moondream fabricated a drug classification *and* ingredient list when asked about a medicine. A wrong drug name is a safety hazard, so the VLM is never trusted for it |
 | DEC-008 | `enable_mkldnn=False` is mandatory | PaddleOCR 3.7.0 + PaddlePaddle 3.3.x crash on the PIR/oneDNN CPU path (Paddle #77340) |
@@ -233,6 +233,8 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-031 | **Description and VQA are separate verbs on `VLMEngine`, not one call with a flag** | `ABSTENTION_SUFFIX` says "answer in one to three words … otherwise answer exactly: unanswerable", contradicting the scene prompt's "one or two short sentences"; the first real run returned `Paracip-500` for a scene description. Rejected: editing the suffix (invalidates the measured 0.533, `DEC-016`) and a second `SmolVLMEngine` instance (loads 4.5 GB of weights twice). `describe()` alongside `answer()` keeps the measured prompt intact, keeps one model in memory, and puts the prompt next to the suffix it must stay consistent with instead of in the mode handler |
 | DEC-022 | **Currency is scored by rupee error, not just accuracy** | Misclassification cost is asymmetric: ₹500→₹100 costs the user ₹400, ₹10→₹20 costs ₹10. Two models with equal accuracy are not equally good. Notebook 03 reports expected rupee error per identification and ranks the confusion matrix by rupee impact rather than frequency |
 | DEC-034 | **Two sample strips were mistaken for one, inventing a safety bug that never existed** | `notebooks/00b` OCRs both fixtures in a single cell, so `expiry_candidates` printed `['OCT.2026', 'APR.28']`. The spike itself recorded this correctly — *"from two different strips. Harmless"* — but a week later the pair was written into `DEC-025` and `DEC-030` as one strip carrying a carton date and a blister date. It does not: `strip_paracip.jpg` (Paracip-500, 10 tabs) reads `MFD.MAY 25 EXP.APR.28`, and `strip_partial.jpg` (20 tabs, no drug name in frame) reads `MFG.NOV.2024 EXP.OCT.2026`. Two products. Consequences: `DEC-030` withdrawn, `DEC-025` demoted to a precaution, `max_side=1280` restored as a legitimate latency lever (RISK-1), and the fixture README now states the two are different strips. **Method lesson for the report:** the raw spike output was right and the summary written from memory was wrong — verify a claim against the artifact before promoting it to a decision, especially one that asserts a safety failure |
+| DEC-035 | **One OCR language per process, and the checkpoint is written after every phase** | `DEC-027` established that paddle must be imported first, into a clean process. The 2026-08-10 run found the second half of that constraint: each *language* is a full pipeline (doc_ori + UVDoc + textline_ori + det + rec), and `mr` resolves to `PP-OCRv5_server_det` rather than a mobile det, so holding `en` open while loading `mr` passed 3.9 GB of 10.8 GB and was SIGKILLed. The expensive part was not the crash but the bookkeeping: the checkpoint was written once at the end, so a correct medicine result computed five minutes earlier died with the process and §6–§7 had nothing to run on. Phases are now separate subprocesses that persist before the next begins, and a Devanagari failure is a warning rather than fatal — nothing downstream depends on it. **Lesson for the report:** long pipelines need durable intermediate state, or an unrelated failure costs all the work upstream of it |
+| DEC-036 | **`max_side` is neither a safety parameter nor a latency lever — it is measured, and it is neither** | `DEC-030` claimed it cost accuracy; `DEC-034` withdrew that. This decision closes the other half: 46.5s then 54.5s at 1280, against 53.7s then 52.8s at 1600, on the same loaded model. Pass-to-pass variance exceeds the gap between settings, and both sizes returned identical drug name, expiry and MRP. So the ~50s is the *pipeline*, not the pixel count, and RISK-1 must be attacked at the model tier (medium/server → mobile) or the preprocessing stages, not by downscaling. Recorded because two separate intuitions about this knob — that it was dangerous, then that it was fast — were both wrong, and the only thing that settled either was measuring it |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
@@ -242,13 +244,13 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 
 | ID | Risk | Severity | Mitigation |
 |---|---|---|---|
-| RISK-1 | **Latency far past the <8s target** — measured 2026-08-10: OCR 42.9s **at `max_side=1280`**, translate+TTS 33.8s cold / 9.7s warm, VLM 65.5s | 🔴 High | Try the PP-OCR *mobile* det model and per-mode budgets. **`max_side` is available as a lever again** — `DEC-030` withdrew the claim that lowering it costs expiry dates (`DEC-034`). Note the 42.9s was itself measured at 1280, and the fixtures are already 1600px on the long side, so the engine default is a no-op on them: the true cost of `max_side=1600` on a full-resolution phone photo is **unmeasured**. **Instrumented:** notebook 04 §4 now sweeps `max_side` over 1280 and 1600 on one loaded model, runs each twice, and reports model load separately from per-photo cost — so the next run answers this without a second session. The warm per-photo figure is what <8s should be argued against; if it still can't be met, restate the target honestly and report measured numbers |
+| RISK-1 | **Latency far past the <8s target** — 2026-08-10, model load excluded: OCR **46.5–54.5s** per photo at *either* `max_side`, translate+TTS 33.8s cold / 9.7s warm, VLM 65.5s | 🔴 High | **`max_side` is not the lever** — measured, `DEC-036`: 1280 and 1600 are within noise of each other, so the ~50s is the pipeline, not the pixels. Remaining levers, in order of expected payoff: (1) **swap the medium models for mobile** — `en` currently resolves to `PP-OCRv6_medium_det`/`_rec` and `mr` to `PP-OCRv5_server_det`, none of them the mobile variants the Android target needs anyway, so this serves Phase 5 too; (2) drop `use_doc_unwarping` selectively — `DEC-004` measured it at only 13% and destroying accuracy on foil, but a *flat* newspaper may not need it, making it a per-mode rather than global choice; (3) per-mode latency budgets. Model load (54.1s) is one-time and must be quoted separately, never folded into the per-photo figure. If <8s still can't be met, restate the target honestly and report measured numbers — a demo that answers in 15s is defensible, a false claim of 8s is not |
 | RISK-2 | **Dataset collection not started** (3 of ~700 photos) | 🔴 High | 20 photos/day starting now; blocks Phase 3 entirely |
 | RISK-3 | **No NGO contact yet** | 🔴 High | Email 5–6 today; replies take weeks, scheduling weeks more. Without this, objective 5 fails |
 | RISK-4 | Android port may not fit the timeline | 🟡 Medium | Laptop demo is the committed deliverable; Android is explicitly a stretch goal |
 | RISK-5 | Fine-tuning may not beat the stock baseline | 🟡 Medium | Even a negative result is publishable if measured honestly; ablation table makes it defensible |
 | RISK-6 | Upstream dependency churn breaks a working pipeline | 🟡 Medium | Pins + `requirements.txt` + DEC-009; re-verify before the demo |
-| RISK-7 | Devanagari OCR quality unknown | 🟡 Medium | **Fixture committed, run pending.** `newspaper-marathi.png` (dense newsprint) and the Devanagari on the Paracip foil are read at both `max_side` settings in notebook 04 §5, scored by **Devanagari codepoint count** rather than by eye — PaddleOCR returning Latin only is the failure a visual check would miss. Zero across all four runs means `DEC-005` gains a caveat and Read mode ships English-only for Sem-7, which stays the fallback |
+| RISK-7 | ~~Devanagari OCR quality unknown~~ **Largely retired** | 🟢 Low | Measured 2026-08-10: 1010 Devanagari chars of 1238 on a photographed Maharashtra Times page, headline and body both accurate. `devanagari_PP-OCRv5_mobile_rec` works on real newsprint, so the English-only fallback is no longer needed. Still open: the foil case (`पॅरासिप-500`) and the 1600 comparison, both cut short by the OOM — neither threatens the mode |
 | RISK-8 | Single-person bus factor on Colab sessions | 🟢 Low | Notebooks are committed; results downloaded to `eval/results/` |
 | RISK-9 | **Gated model repos block provisioning a fresh machine** (`DEC-029`) | 🟡 Medium | Runtime offline-ness is unaffected — weights cache locally. But a demo laptop set up from scratch needs an HF account, an accepted licence and a token. Download the weights onto the demo machine *before* review week, and keep a local copy; a gate added upstream in March 2027 would otherwise surface on stage |
 
