@@ -53,9 +53,33 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "currency"
 # seen one will confidently call it something else, which is the worse failure.
 KNOWN_DENOMINATIONS = (10, 20, 50, 100, 200, 500, 2000)
 
+# The dataset ships 431 `Background__*.jpg` images containing no note at all. They are kept
+# as a real class, not discarded: without it the model's only options are seven
+# denominations, so a photo of a table or a hand must come back as *some* amount. With it,
+# "no note here" is an answer the model can give, which is the behaviour currency mode
+# already wants -- `CONFIDENCE_THRESHOLD` declines on low confidence, and this declines on
+# high confidence that there is nothing to read.
+BACKGROUND_CLASS = "background"
+_BACKGROUND_PREFIX = re.compile(r"^background", re.IGNORECASE)
+
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 _LEADING_DIGITS = re.compile(r"^(\d+)")
+
+
+def parse_class(filename: str) -> int | str | None:
+    """Class for a filename: a denomination, BACKGROUND_CLASS, or None if neither.
+
+    >>> parse_class('Background__302.jpg')
+    'background'
+    >>> parse_class('500__9.jpg')
+    500
+    >>> parse_class('screenshot.png') is None
+    True
+    """
+    if _BACKGROUND_PREFIX.match(filename):
+        return BACKGROUND_CLASS
+    return parse_denomination(filename)
 
 
 def parse_denomination(filename: str) -> int | None:
@@ -86,37 +110,47 @@ def parse_denomination(filename: str) -> int | None:
     return value if value in KNOWN_DENOMINATIONS else None
 
 
-def collect(src: Path) -> tuple[dict[int, list[Path]], list[Path]]:
-    """Group every image under `src` by denomination, and list what could not be parsed."""
-    by_denomination: dict[int, list[Path]] = defaultdict(list)
+def sort_key(cls: int | str) -> tuple[int, float, str]:
+    """Order classes as 10, 20, ... 2000, background -- ints and str cannot be compared."""
+    return (1, 0.0, str(cls)) if isinstance(cls, str) else (0, float(cls), "")
+
+
+def collect(src: Path) -> tuple[dict[int | str, list[Path]], list[Path]]:
+    """Group every image under `src` by class, and list what could not be parsed."""
+    by_class: dict[int | str, list[Path]] = defaultdict(list)
     unrecognised: list[Path] = []
 
     for path in sorted(src.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in IMAGE_SUFFIXES:
             continue
-        denomination = parse_denomination(path.name)
-        if denomination is None:
+        cls = parse_class(path.name)
+        if cls is None:
             unrecognised.append(path)
         else:
-            by_denomination[denomination].append(path)
+            by_class[cls].append(path)
 
-    return dict(by_denomination), unrecognised
+    return dict(by_class), unrecognised
 
 
-def report(by_denomination: dict[int, list[Path]], unrecognised: list[Path]) -> None:
-    total = sum(len(v) for v in by_denomination.values())
-    print(f"\n{'class':>8} {'images':>8}   share")
-    print("-" * 34)
-    for denomination in sorted(by_denomination):
-        count = len(by_denomination[denomination])
+def report(by_class: dict[int | str, list[Path]], unrecognised: list[Path]) -> None:
+    total = sum(len(v) for v in by_class.values())
+    print(f"\n{'class':>10} {'images':>8}   share")
+    print("-" * 36)
+    for denomination in sorted(by_class, key=sort_key):
+        count = len(by_class[denomination])
         share = count / total if total else 0
         bar = "#" * round(share * 20)
-        print(f"{denomination:>8} {count:>8}   {share:5.1%} {bar}")
-    print("-" * 34)
-    print(f"{'total':>8} {total:>8}")
+        print(f"{str(denomination):>10} {count:>8}   {share:5.1%} {bar}")
+    print("-" * 36)
+    print(f"{'total':>10} {total:>8}")
 
-    if by_denomination:
-        counts = [len(v) for v in by_denomination.values()]
+    if BACKGROUND_CLASS in by_class:
+        print(f"\n'{BACKGROUND_CLASS}' is images with no note in frame. Kept as a class so "
+              f"the model can\nanswer \"no note here\" instead of being forced to name a "
+              f"denomination.")
+
+    if by_class:
+        counts = [len(v) for v in by_class.values()]
         imbalance = max(counts) / max(min(counts), 1)
         if imbalance > 3:
             print(
@@ -133,9 +167,10 @@ def report(by_denomination: dict[int, list[Path]], unrecognised: list[Path]) -> 
             print(f"  ... and {len(unrecognised) - 15} more")
 
 
-def organize(by_denomination: dict[int, list[Path]], out: Path, exclude: set[int]) -> int:
+def organize(by_class: dict[int | str, list[Path]], out: Path,
+             exclude: set[int | str]) -> int:
     written = Counter()
-    for denomination, paths in sorted(by_denomination.items()):
+    for denomination, paths in sorted(by_class.items(), key=lambda kv: sort_key(kv[0])):
         if denomination in exclude:
             continue
         class_dir = out / str(denomination)
@@ -162,8 +197,8 @@ def main() -> int:
                         help="folder the Kaggle zip was extracted into")
     parser.add_argument("--out", type=Path, default=DATA_DIR,
                         help=f"ImageFolder root to create (default: {DATA_DIR})")
-    parser.add_argument("--exclude", type=int, nargs="*", default=[],
-                        help="denominations to leave out, e.g. --exclude 2000")
+    parser.add_argument("--exclude", nargs="*", default=[],
+                        help="classes to leave out, e.g. --exclude 2000 background")
     parser.add_argument("--dry-run", action="store_true",
                         help="report what would be written and change nothing")
     parser.add_argument("--force", action="store_true",
@@ -174,17 +209,21 @@ def main() -> int:
         print(f"error: --src {args.src} is not a directory", file=sys.stderr)
         return 1
 
-    by_denomination, unrecognised = collect(args.src)
-    if not by_denomination:
+    exclude: set[int | str] = {
+        int(x) if str(x).isdigit() else str(x).lower() for x in args.exclude
+    }
+
+    by_class, unrecognised = collect(args.src)
+    if not by_class:
         print(f"error: no recognisable currency images under {args.src}", file=sys.stderr)
         print("       expected filenames beginning with a denomination, e.g. 500__12.jpg",
               file=sys.stderr)
         return 1
 
-    report(by_denomination, unrecognised)
+    report(by_class, unrecognised)
 
     missing = [d for d in KNOWN_DENOMINATIONS
-               if d not in by_denomination and d not in set(args.exclude)]
+               if d not in by_class and d not in exclude]
     if missing:
         print(f"\nnote: no images found for {missing} -- currency mode cannot identify a "
               f"denomination it was never trained on.")
@@ -201,7 +240,7 @@ def main() -> int:
         print("\n(dry run -- nothing written)")
         return 0
 
-    total = organize(by_denomination, args.out, set(args.exclude))
+    total = organize(by_class, args.out, exclude)
     print(f"\nwrote {total} images to {args.out}")
     print(f"point DATA_DIR in notebooks/03_currency_classifier.ipynb at: {args.out}")
     return 0

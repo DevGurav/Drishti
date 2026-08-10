@@ -11,7 +11,7 @@ from app.engines.currency_cnn import (
     CurrencyClassifier,
     denomination,
 )
-from app.modes.currency import CONFIDENCE_THRESHOLD
+from app.modes.currency import BACKGROUND_LABEL, CONFIDENCE_THRESHOLD
 from app.modes.currency import run as run_currency
 
 
@@ -62,6 +62,40 @@ class TestMoneyMode(unittest.TestCase):
     def test_threshold_is_high_enough_to_be_meaningful(self):
         """Guards against someone lowering the bar to make the demo look good."""
         self.assertGreaterEqual(CONFIDENCE_THRESHOLD, 0.80)
+
+
+class TestNoNoteInFrame(unittest.TestCase):
+    """The training set has a `background` class of photos with no note in them, so the
+    model can answer 'nothing here' instead of being forced to name a denomination."""
+
+    def test_background_never_becomes_a_denomination(self):
+        out = run_currency(Path('n.jpg'), FakeClassifier(BACKGROUND_LABEL, 0.97))
+        self.assertNotIn('rupee note', out)
+        self.assertIn("can't see a note", out.lower())
+
+    def test_background_wins_even_at_high_confidence(self):
+        """Confidence is about *which* class, not whether there is a note. A confident
+        background prediction is the model working, not failing."""
+        for confidence in (0.99, CONFIDENCE_THRESHOLD, 0.50):
+            with self.subTest(confidence=confidence):
+                out = run_currency(Path('n.jpg'), FakeClassifier(BACKGROUND_LABEL, confidence))
+                self.assertIn("can't see a note", out.lower())
+
+    def test_background_label_casing_from_the_checkpoint_is_tolerated(self):
+        """ImageFolder takes class names from directories, and DEC-023 says the checkpoint
+        is authoritative -- so casing depends on how the folder was created."""
+        for raw in ('background', 'Background', 'BACKGROUND', ' Background '):
+            with self.subTest(raw=raw):
+                out = run_currency(Path('n.jpg'), FakeClassifier(raw, 0.95))
+                self.assertIn("can't see a note", out.lower())
+
+    def test_advice_differs_from_the_low_confidence_advice(self):
+        """Framing and lighting are different problems; identical wording would send the
+        user to fix the thing that was not wrong."""
+        no_note = run_currency(Path('n.jpg'), FakeClassifier(BACKGROUND_LABEL, 0.95))
+        unsure = run_currency(Path('n.jpg'), FakeClassifier('500', 0.10))
+        self.assertNotEqual(no_note, unsure)
+        self.assertIn('frame', no_note.lower())
 
 
 class TestMissingCheckpoint(unittest.TestCase):
