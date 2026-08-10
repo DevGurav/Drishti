@@ -87,6 +87,16 @@ Captured photos are deleted immediately after answering, including when a model 
 Users point this at prescriptions and bank documents; keeping them would contradict the
 privacy claim the project rests on.
 
+### Demoing it on a laptop
+
+Run with `--no-vlm` and drive the demo through **medicine, read and currency**. Those three
+never touch the VLM, they carry the project's actual claim, and they answer in seconds
+rather than minutes on CPU. Scene and ask are shown as a recording, with the GPU
+requirement stated out loud — see `DEC-038` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
+
+Start the server and run one photo through it *before* the audience arrives: the ~59s model
+load is one-time, and there is no reason to spend it on stage.
+
 ## Running it
 
 **No model needs downloading by hand** — every engine fetches its weights on first use
@@ -95,7 +105,7 @@ privacy claim the project rests on.
 Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-# 0. tests need nothing at all - 139 tests, no models
+# 0. tests need nothing at all - 140 tests, no models
 python -m unittest discover -s tests -t .
 
 # 1. OCR: read + medicine modes            (~100 MB downloaded on first run)

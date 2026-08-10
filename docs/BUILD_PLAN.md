@@ -32,11 +32,11 @@
 
 | Component | State | Evidence |
 |---|---|---|
-| App skeleton (router, 5 modes, guardrail) | ✅ Done | 139 tests passing |
+| App skeleton (router, 5 modes, guardrail) | ✅ Done | 140 tests passing |
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`, proven on a real strip |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
-| Read mode (Devanagari) | ✅ **Works** | Colab 2026-08-10: `newspaper-marathi.png` @ 1280 → **1010 Devanagari chars of 1238**, 60.8 s. Headline and body both legible (`खंक तिजोरीमुळे भिवंडी भकास`, `ठाणे : अरुंद रस्ते…`). Closes the core of `RISK-7`; the 1600 comparison and the foil case were cut short by the OOM |
+| Read mode (Devanagari) | ✅ **Works** | Colab 2026-08-10: `newspaper-marathi.png` → **1010 Devanagari chars of 1238** at *both* 1280 (69.4 s) and 1600 (103.6 s). Headline and body both legible (`खंक तिजोरीमुळे भिवंडी भकास`, `ठाणे : अरुंद रस्ते…`). Foil is thin as expected: 14 chars @1280, 12 @1600. `RISK-7` retired |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | 🟡 Notebook + engine ready | needs a Kaggle dataset, then training |
@@ -64,7 +64,7 @@
 
 ---
 
-### Phase 1 — Baselines & core pipeline · Aug – Sep 2026 · 🟡 In progress
+### Phase 1 — Baselines & core pipeline · Aug – Sep 2026 · 🟢 Exit criteria met
 
 **Goal:** a measured baseline to improve on, and three modes running on a laptop.
 **This is what the Sem-7 review is graded against.**
@@ -80,11 +80,12 @@
       headline and body both accurate. `RISK-7` retired; English-only fallback not needed
 - [x] Wire SmolVLM into `app/engines/` as a `VLMEngine` → scene/ask modes now routable
 - [x] Integrate IndicTrans2 + MMS-TTS as `Translator`/`TTSEngine` implementations
-- [x] **Run the full pipeline once on real hardware** — done on Colab T4, 2026-08-10 via
-      `notebooks/04_app_end_to_end.ipynb`. Photographed strip → OCR → guardrail → Marathi
-      and Hindi text → speech, every model loaded for the first time. Findings in §8 of
-      that notebook; the run also exposed `DEC-031`, and the conclusion first drawn from
-      it was later withdrawn (`DEC-034`)
+- [x] **Run the full pipeline on real hardware** — three runs on 2026-08-10. The first
+      reached translation and speech but drew a conclusion later withdrawn (`DEC-034`);
+      the second was SIGKILLed with two OCR languages in one process (`DEC-035`); the
+      third completed every mode, evidence committed as
+      `notebooks/04_app_end_to_end_devnagari.ipynb` with findings in its §8. That run
+      confirmed `DEC-031`, corrected `DEC-036`, and produced `DEC-037`
 - [x] **Source a real drug-name database** — `data/drug_names_nlem2022.txt`: the 384
       medicines of India's National List of Essential Medicines 2022, extracted from the
       CDSCO publication by `data/scripts/build_drug_db.py` (`DEC-032`). Building it
@@ -189,9 +190,17 @@ Brought forward while model installs were pending — the interface needs no wei
 ### Phase 6 — Evaluation & report · Mar 2027 · ⬜ Not started
 
 - [ ] Final metrics: VizWiz accuracy vs baseline, per-mode precision/recall, latency
-- [ ] Success bar: medicine ≥95% guardrailed precision · currency ≥99% · <8s spoken answer
+- [ ] Success bar: medicine ≥95% guardrailed precision · currency ≥99% · <8s for the OCR
+      modes, with the VLM modes reported separately and honestly (`DEC-038`)
 - [ ] Black-book report; decision log below feeds the methodology section
-- [ ] Demo rehearsal: airplane mode → medicine strip → ₹500 note → scene description
+- [ ] **Demo rehearsal, in this order** (`DEC-038`): airplane mode on → medicine strip
+      (expiry + MRP spoken in Marathi) → ₹500 note → Marathi newspaper read aloud →
+      *then* the recorded scene-mode clip, introduced as needing a GPU
+- [ ] Pre-load every model on the demo machine and leave the server warm — the 59s model
+      load is one-time and must not happen on stage (`RISK-9` covers the gated repos)
+- [ ] Rehearse the two questions the panel will ask: "why is it slow?" (RISK-1, with the
+      measured table) and "does it ever make things up?" (`DEC-037`, with scene mode's own
+      30-tablets paragraph and the guardrail that stops it reaching the user)
 
 ---
 
@@ -236,6 +245,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-035 | **One OCR language per process, and the checkpoint is written after every phase** | `DEC-027` established that paddle must be imported first, into a clean process. The 2026-08-10 run found the second half of that constraint: each *language* is a full pipeline (doc_ori + UVDoc + textline_ori + det + rec), and `mr` resolves to `PP-OCRv5_server_det` rather than a mobile det, so holding `en` open while loading `mr` passed 3.9 GB of 10.8 GB and was SIGKILLed. The expensive part was not the crash but the bookkeeping: the checkpoint was written once at the end, so a correct medicine result computed five minutes earlier died with the process and §6–§7 had nothing to run on. Phases are now separate subprocesses that persist before the next begins, and a Devanagari failure is a warning rather than fatal — nothing downstream depends on it. **Lesson for the report:** long pipelines need durable intermediate state, or an unrelated failure costs all the work upstream of it |
 | DEC-036 | **`max_side=1280` is the default: 25–35% faster at no measured accuracy cost** | ~~First written as "neither a safety parameter nor a latency lever"~~ — that reading came from two passes on one Colab machine (46.5/54.5s at 1280 against 53.7/52.8s at 1600) where within-setting spread matched the between-setting gap. A controlled back-to-back comparison the same day, one process, one loaded model, three photos, disagrees consistently: medicine **56.2s vs 76.1s**, newspaper **69.4s vs 103.6s**, foil **58.0s vs 76.6s**. Accuracy is unaffected — identical drug name, expiry and MRP, and **1010 Devanagari chars at both sizes** on the fixture most likely to suffer from a downscale. **Method note for the report:** this knob has now been called dangerous (`DEC-030`), irrelevant (this entry's first version), then useful, and only the last came from a controlled comparison. Cross-session Colab timings are not evidence; same-session, same-process, same-model comparisons are |
 | DEC-037 | **Scene mode's own output is the guardrail's best evidence — quote it in the report** | Asked to describe the Paracip strip, SmolVLM produced fluent prose that was right about the drug and dosage and invented the rest: "contains **30 tablets**" (it holds 10, printed on the strip) and "made of a **clear plastic material** and has a **white backing**" (opaque foil). The invented details are indistinguishable in tone from the true ones. `DEC-007` was argued from a Moondream anecdote during selection; this is the *shipped* model on a *committed* fixture, reproducible from `notebooks/04_app_end_to_end_devnagari.ipynb`. Consequences: scene mode is framed as orientation, never as fact; every actionable field (drug, expiry, MRP) stays on OCR + database; and the report quotes this paragraph verbatim rather than asserting that VLMs hallucinate |
+| DEC-038 | **The live demo is OCR-first; scene and ask are shown as a recording, with the GPU dependency stated** | Measured on a GPU-less runtime: medicine 56s, read 69s, but scene **481s** and ask **315s**. Medicine, read and currency never touch the VLM, so the three modes that carry the project's actual claim — a blind user reading a medicine strip offline in Marathi — are the three that stay demoable on a laptop. Rejected alternatives: *demo everything live* (five to eight minutes of silence on stage, and the panel remembers the hang rather than the guardrail); *quantise until scene fits* (4-bit GGUF is Phase 5, unbuilt, and betting the review on unfinished work is how demos fail); *quietly drop scene and ask* (they are in the synopsis, and hiding a working feature because it is slow invites the question anyway, unprepared). Saying "this needs a GPU, here it is running on one, here is the measured CPU cost" is a stronger position than any of them — the honest number is defensible, a claimed 8s is not, and `RISK-1` stays visible instead of being papered over. Consequence for the report: latency is stated per mode tier, never as one aggregate |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
@@ -264,7 +274,8 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | VizWiz accuracy | Fine-tuned model **beats** the stock baseline on the same slice |
 | Medicine mode precision | ≥95%, guardrailed (declines rather than guesses) |
 | Currency accuracy | ≥99% |
-| End-to-end spoken answer | <8s on laptop CPU |
+| End-to-end spoken answer, **OCR modes** (medicine, read, currency) | <8s on laptop CPU — the live-demo path (`DEC-038`). Currently 56s; the gap is RISK-1 |
+| End-to-end spoken answer, **VLM modes** (scene, ask) | <8s **with a GPU**. On CPU it is 315–481s, measured, and no realistic optimisation closes that — reported honestly rather than targeted |
 | Offline operation | Zero network calls — verified in airplane mode |
 | User study | 5–10 visually-impaired participants, task-success rate recorded |
 
