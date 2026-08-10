@@ -151,6 +151,20 @@ class TestAnswerService(unittest.TestCase):
         self.assertFalse(r.ok)
         self.assertTrue(r.error)
 
+    def test_no_vlm_is_announced_as_a_choice_not_a_breakage(self):
+        """--no-vlm is the laptop demo configuration (DEC-038): on CPU the VLM modes take
+        minutes. Announcing 'something went wrong' would tell a blind user their photo
+        failed and invite them to retake one that was never the problem."""
+        for mode in ('scene', 'ask'):
+            with self.subTest(mode=mode):
+                r = _service(self.tmp).handle(
+                    AnswerRequest(mode=mode, image_bytes=JPEG, question='what is this?'))
+                self.assertFalse(r.ok)
+                self.assertIn('switched off', r.error)
+                self.assertIn('Medicine and read modes still work', r.error)
+                self.assertNotIn('went wrong', r.error)
+                self.assertNotIn('Error', r.error)
+
     def test_validation_failure_short_circuits_before_touching_disk(self):
         svc = _service(self.tmp, ocr=FakeOCR())
         svc.handle(AnswerRequest(mode='teleport', image_bytes=JPEG))

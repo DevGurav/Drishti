@@ -11,7 +11,7 @@ from pathlib import Path
 
 from app import languages
 from app.engines.currency_cnn import CheckpointMissingError
-from app.router import MODES, Engines, route
+from app.router import MODES, Engines, MissingEngineError, route
 from app.speech import deliver
 
 # Modes with no engine at all. Availability that depends on a trained model is decided at
@@ -112,6 +112,16 @@ class AnswerService:
             return AnswerResponse(
                 ok=False, lang=req.lang,
                 error='Money recognition is not available yet. Try another mode.')
+        except MissingEngineError:
+            # Running with --no-vlm is a deliberate configuration, not a fault: on CPU the
+            # VLM modes take minutes, so the laptop demo turns them off (DEC-038). Falling
+            # through to the generic handler would announce "something went wrong" to a
+            # blind user, reporting a choice as a breakage and inviting them to retake a
+            # photo that was never the problem.
+            return AnswerResponse(
+                ok=False, lang=req.lang,
+                error=f'{req.mode.capitalize()} mode is switched off in this session. '
+                      'Medicine and read modes still work.')
         except NotImplementedError as e:
             return AnswerResponse(ok=False, error=str(e), lang=req.lang)
         except Exception as e:  # noqa: BLE001 - surface a speakable message, log the rest
