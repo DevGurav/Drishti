@@ -95,6 +95,19 @@ class IndicTrans2Translator:
         inputs = self._tokenizer(
             batch, truncation=True, padding='longest', return_tensors='pt').to(self._device)
         with torch.no_grad():
-            out = self._model.generate(**inputs, max_length=256, num_beams=4)
+            # use_cache=False is required, not a tuning choice. IndicTrans2 ships its own
+            # modeling code via trust_remote_code, written against the legacy tuple-of-tuples
+            # KV cache:
+            #     past_key_values[0][0].shape[2] if past_key_values is not None else 0
+            # transformers 4.54+ passes an EncoderDecoderCache object instead. It is not
+            # None, so that guard passes, but [0][0] is None on the first decode step and
+            # the model dies with AttributeError. Disabling the cache keeps past_key_values
+            # None throughout and takes the else branch.
+            #
+            # Cost: no KV reuse, so decoding is quadratic in output length. Irrelevant here
+            # -- Drishti's answers are one or two short sentences, and the alternative is
+            # pinning transformers to a 4.4x that predates the cache change, which
+            # SmolVLM (Idefics3, needs >=4.46) would not tolerate.
+            out = self._model.generate(**inputs, max_length=256, num_beams=4, use_cache=False)
         decoded = self._tokenizer.batch_decode(out, skip_special_tokens=True)
         return self._processor.postprocess_batch(decoded, lang=tag)[0]
