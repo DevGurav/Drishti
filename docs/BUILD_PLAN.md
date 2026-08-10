@@ -5,7 +5,8 @@
 > document. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-10 (full end-to-end run — every mode verified against real
+> **Last updated:** 2026-08-11 (currency trained and verified on the laptop; `DEC-040`–`DEC-042`).
+> 2026-08-10: full end-to-end run — every mode verified against real
 > models; `DEC-035`–`DEC-037`) · **Phase:** 1 of 6 · **Academic year:** 2026–27
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
@@ -39,7 +40,7 @@
 | Read mode (Devanagari) | ✅ **Works** | Colab 2026-08-10: `newspaper-marathi.png` → **1010 Devanagari chars of 1238** at *both* 1280 (69.4 s) and 1600 (103.6 s). Headline and body both legible (`खंक तिजोरीमुळे भिवंडी भकास`, `ठाणे : अरुंद रस्ते…`). Foil is thin as expected: 14 chars @1280, 12 @1600. `RISK-7` retired |
 | VizWiz baseline (stock prompt) | ✅ **0.308** | notebook 01, 500 samples, 1.21 s/answer |
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
-| Currency mode | ✅ **Trained** | Colab T4 2026-08-10, 12 epochs on 4002 images / 8 classes: test accuracy **0.9883**, expected error **₹5.37** unconditional; at `CONFIDENCE_THRESHOLD=0.90` it answers 85% of the time at **0.9961** accuracy and **₹0.71** (`DEC-040`). Checkpoint 6.2 MB. Misses the ≥99% bar *unconditionally* — it clears it only by declining |
+| Currency mode | ✅ **Trained** | Colab T4 2026-08-10, 12 epochs on 4002 images / 8 classes: test accuracy **0.9883**, expected error **₹5.37** unconditional; at `CONFIDENCE_THRESHOLD=0.90` it answers 85% of the time at **0.9961** accuracy and **₹0.71** (`DEC-040`). Checkpoint 6.2 MB. Misses the ≥99% bar *unconditionally* — it clears it only by declining. **Validated on notes, not on arbitrary scenes** (`DEC-042`) |
 | Scene / Ask modes | ✅ **Both work** | Colab 2026-08-10: scene returned a full descriptive paragraph, confirming `DEC-031` against the real model. Ask answered `Paracip-500`, correctly. **But scene confabulated** — "contains 30 tablets" (it holds 10) and "clear plastic… white backing" (it is opaque foil): `DEC-007` demonstrated, not merely argued |
 | Translation + TTS | ✅ Works end-to-end | Colab 2026-08-10: Marathi and Hindi text + audio from medicine mode's answer |
 | Android port | ⬜ Not started | Phase 5 |
@@ -104,7 +105,13 @@ laptop · spoken Marathi output working end-to-end for at least one mode.
 integration exercise. Protocol: `docs/data_collection_guide.md`.
 
 - [ ] ~300 medicine strips (varied drugs, lighting, angles, wear)
-- [ ] ~250 currency notes (₹10–500, ~40 each, worn/folded/partial)
+- [ ] ~250 currency notes (₹10–500, ~40 each, worn/folded/partial). **Over-sample ₹20/₹200
+      and ₹50/₹500** — the trained model's errors concentrate on denominations whose
+      numerals are prefixes of one another, always erring upward (`DEC-041`)
+- [ ] **~100 note-free negatives** — household surfaces, packaging, paper, fabric, floors.
+      The Kaggle `background` class is tables and hands from one session and does not
+      generalise: a medicine strip scored `50` at 0.870 (`DEC-042`). Without these, the
+      confidence threshold is the only thing preventing phantom denominations
 - [ ] ~200 labels + Devanagari signage
 - [ ] ~150 scene photos
 - [ ] `data/custom/labels.csv` maintained per-photo, all three languages represented
@@ -249,6 +256,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-039 | **Currency has an eighth class, `background`: "no note in frame"** | The Kaggle dump (`DEC-022`'s dataset) ships 431 `Background__*.jpg` images with no note in them. `organize_currency.py` first treated these as unparseable junk and refused to run. Keeping them is strictly better: with seven denomination classes and nothing else, a softmax **must** name an amount, so a photo of a table, a hand, or a badly-missed shot returns a denomination — and money mode speaks it. The class gives the model somewhere honest to put that. Note this is a *different* failure from low confidence, so `app/modes/currency.py` answers it differently: `background` asks the user to reframe, `CONFIDENCE_THRESHOLD` asks for better light. Two consequences for evaluation: `background` is ~11% of the data, so headline accuracy is doubly misleading; and `class_value('background')` is ₹0, so a real ₹500 called `background` scores as a ₹500 error when it is in truth the *cheap* failure — the expensive one is calling an empty table ₹500. Report those separately rather than averaging them |
 | DEC-040 | **`CONFIDENCE_THRESHOLD = 0.90`, chosen by rupee error rather than by answer rate** | The 0.85 in the code was a scaffolding guess (`DEC-024` promised to measure it). Notebook 03's sweep over 600 held-out images: `0.50` → 98.7% answered, ₹1.32 expected error; `0.85` → 90.3%, ₹1.00; **`0.90` → 85.0%, 0.9961 accuracy, ₹0.71**; `0.95` → 61.5%, ₹0.49 but answers too rarely. The notebook's original rule picked the *lowest* viable threshold and so recommended 0.50 — optimising for answering often, which contradicts `DEC-022`'s whole premise that rupee cost is the metric. The rule now minimises rupee error subject to answering ≥80%, and flags rows with fewer than 50 answered samples as noise (the 0.99 row scored 0.9667 off 30 samples and one error, which reads misleadingly as "stricter is worse") |
 | DEC-041 | **The model's errors cluster on denominations whose numerals are prefixes of one another** | The costliest confusions are not random: `20 → 200` three times (₹540), `50 → 500` once (₹450), `2000 → 10` once (₹1990). Both frequent pairs differ by a trailing zero, and both err *upward* — the user is told they hold ten times what they do, which is the direction that gets someone short-changed at a counter. One `background → 200` is the same class of harm: phantom money where there is no note. Two consequences: Phase-2 note photography should over-sample the 20/200 and 50/500 pairs rather than spreading evenly across denominations, and the report should show this table instead of the 0.9883 headline, because "98.8% accurate" hides that the residual errors are concentrated in the expensive direction |
+| DEC-042 | **`background` learned *this dataset's* backgrounds, not "no note present"** | Verified on the laptop 2026-08-11 against three note-free images. The medicine strip returned `50` at **0.870** confidence with `background` at 0.038; the partial strip `500` at 0.578; the Marathi newspaper `100` at 0.705. All three declined only because `CONFIDENCE_THRESHOLD` is 0.90 — the strip missed being announced as a ₹50 note by 0.03. So `DEC-039` is right that the class is necessary and wrong that it is sufficient: its 431 training images are tables and hands from one capture session, which does not generalise to foil, newsprint or anything else a camera gets pointed at. Consequences: the threshold is currently the *only* real defence and must not be lowered on answer-rate grounds; Phase 2 must collect **diverse negatives** — household surfaces, packaging, paper, fabric, floors — not just more notes; and the report should state that money mode is validated on notes and on this dataset's backgrounds, not on arbitrary scenes |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
