@@ -99,9 +99,11 @@ class SmolVLMEngine:
         return self._model
 
     def _open(self, image_path: Path):
-        from PIL import Image
+        from PIL import Image      # for the resample constant
 
-        img = Image.open(image_path).convert('RGB')
+        from app.imaging import load_upright
+
+        img = load_upright(image_path)
         w, h = img.size
         if max(w, h) > self.max_side:
             s = self.max_side / max(w, h)

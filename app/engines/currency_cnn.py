@@ -77,8 +77,9 @@ class CurrencyClassifier:
         return self._model
 
     def _preprocess(self, image_path: Path):
-        from PIL import Image
         from torchvision import transforms
+
+        from app.imaging import load_upright
 
         size = self._meta.get('img_size', 224)
         tf = transforms.Compose([
@@ -88,7 +89,7 @@ class CurrencyClassifier:
             transforms.Normalize(self._meta.get('mean', [0.485, 0.456, 0.406]),
                                  self._meta.get('std', [0.229, 0.224, 0.225])),
         ])
-        return tf(Image.open(image_path).convert('RGB')).unsqueeze(0)
+        return tf(load_upright(image_path)).unsqueeze(0)
 
     def classify(self, image_path: Path) -> tuple[str, float]:
         """Return (denomination, confidence). The caller decides whether to trust it —
