@@ -117,8 +117,19 @@ is the usual combination.
 
 Currency mode still raises `NotImplementedError` — it needs the MobileNet training run.
 
-On a CPU-only machine SmolVLM answers in tens of seconds rather than the 1.2 s measured on
-a Colab T4. That is expected. OCR and speech are comfortable on CPU.
+**CPU timings, measured 2026-08-10 on a GPU-less Colab runtime** — not estimates:
+
+| Mode | CPU | For comparison |
+|---|---|---|
+| Scene (VLM) | **481 s** | 1.2 s/answer on a T4 |
+| Ask (VLM) | **315 s** | |
+| Medicine / Read (OCR) | **56 s** + 59 s one-time model load | |
+| Translation + TTS | comfortable | |
+
+The VLM modes are **minutes, not seconds**, on CPU. Plan any demo around that: medicine,
+read and currency never touch the VLM, so they stay usable on a laptop, while scene and
+ask effectively need a GPU. Closing this gap is the project's main open engineering problem
+— see RISK-1 in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
 
 ## Setup (local, Windows)
 

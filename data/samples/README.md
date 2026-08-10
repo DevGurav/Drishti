@@ -14,10 +14,10 @@ from each. Read as a single strip carrying two dates, that pair produced a false
 that survived into the decision log for a week (`DEC-030`, struck). Each strip has exactly
 one expiry: Paracip is `APR.28`, the partial is `OCT.2026`.
 
-The **strips** are downscaled to 1600px on the long side, which is exactly
-`app/engines/paddle_ocr.py::DEFAULT_MAX_SIDE` — the engine would downscale to this anyway,
-so nothing is lost and the files stay ~300 KB instead of ~3.4 MB. A side effect worth
-knowing: `max_side=1600` is therefore a **no-op** on them, and only 1280 actually resizes.
+The **strips** are downscaled to 1600px on the long side — the engine's default at the time
+they were committed. `DEFAULT_MAX_SIDE` is now **1280** (`DEC-036`), so the engine does
+resize them, and `max_side=1600` is the setting that is a no-op on these two files. Keeping
+them at 1600 is deliberate: it preserves the headroom needed to compare the two settings.
 
 The **newspaper is deliberately left at 1720px** and kept lossless. It is the one fixture
 where a downscale could plausibly cost accuracy — newsprint body text is small per glyph —
