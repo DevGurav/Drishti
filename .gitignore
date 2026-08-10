@@ -11,6 +11,10 @@ models/*
 data/vizwiz/
 data/raw/
 data/custom/images/
+# 2.4 GB / 4002 images, redownloaded from Kaggle on demand (CC0-1.0). Staging this is
+# what makes `git add .` appear to hang.
+data/currency/
+data/currency_raw/
 test-images/
 *.gguf
 *.zip
