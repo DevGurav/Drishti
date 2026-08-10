@@ -6,7 +6,8 @@ Users in Indian Languages
 **Domain:** Artificial Intelligence & Data Science (Computer Vision · Multimodal Deep Learning
 · Edge AI · Accessibility)
 
-**Team:** _<names / roll numbers>_ · **Guide:** _<guide name>_ · **Academic year:** 2026–27
+**Submitted by:** Devendra Ramesh Gurav (individual project) · **Roll No.:** _<roll number>_
+· **Guide:** _<guide name>_ · **Academic year:** 2026–27
 
 ---
 
