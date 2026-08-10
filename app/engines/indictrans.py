@@ -55,9 +55,29 @@ class IndicTrans2Translator:
                 ) from e
 
             device = self._device or ('cuda' if torch.cuda.is_available() else 'cpu')
-            self._tokenizer = AutoTokenizer.from_pretrained(self.model_id, trust_remote_code=True)
-            self._model = AutoModelForSeq2SeqLM.from_pretrained(
-                self.model_id, trust_remote_code=True).to(device)
+            try:
+                self._tokenizer = AutoTokenizer.from_pretrained(
+                    self.model_id, trust_remote_code=True)
+                self._model = AutoModelForSeq2SeqLM.from_pretrained(
+                    self.model_id, trust_remote_code=True).to(device)
+            except OSError as e:
+                # AI4Bharat gated this repo, so a first download now needs an accepted
+                # licence and a token. transformers reports it as a 22-frame traceback ending
+                # in a bare OSError, which reads like a network fault; it is an access fault
+                # and needs a human action, not a retry. Weights already in the local cache
+                # are unaffected -- this only bites on a machine that has never fetched them,
+                # which is exactly the demo laptop the day before a review.
+                if '401' not in str(e) and 'gated' not in str(e).lower():
+                    raise
+                raise OSError(
+                    f'{self.model_id} is a gated Hugging Face repo and this machine is not '
+                    'authenticated.\n'
+                    f'  1. Accept the licence at https://huggingface.co/{self.model_id}\n'
+                    '  2. Create a read token at https://huggingface.co/settings/tokens\n'
+                    '  3. Export it as HF_TOKEN (on Colab: Secrets in the sidebar, then '
+                    'enable notebook access)\n'
+                    'The download is one-time; the model runs offline afterwards.'
+                ) from e
             self._processor = IndicProcessor(inference=True)
             self._device = device
         return self._model
