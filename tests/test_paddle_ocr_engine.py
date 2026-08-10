@@ -111,5 +111,44 @@ class TestRealStripOutput(unittest.TestCase):
         self.assertIn('10.30', text)
 
 
+class TestImportOrderIsPlatformDependent(unittest.TestCase):
+    """`_load()` looks like it has a redundant torch import. It does not.
+
+    paddle and torch each bundle their own OpenMP, and the one that loses the race is
+    whichever loads second -- but which one loses differs by platform. On Linux, torch
+    first makes libpaddle segfault (`DEC-027`); on Windows, paddle first makes torch fail
+    with WinError 127 loading shm.dll (`DEC-044`). Deleting the branch fixes one platform
+    by breaking the other, and both failures are import-time crashes with no obvious link
+    to OCR, so this test states the reason in the place someone would go looking.
+    """
+
+    def setUp(self):
+        from pathlib import Path
+        self.source = (Path(__file__).resolve().parents[1] / 'app' / 'engines'
+                       / 'paddle_ocr.py').read_text(encoding='utf-8')
+
+    def test_windows_imports_torch_before_paddle(self):
+        load = self.source[self.source.index('def _load'):]
+        win = load.index("sys.platform == 'win32'")
+        torch_import = load.index('import torch')
+        paddle_import = load.index('import paddle')
+        self.assertLess(win, torch_import, 'the torch import must sit inside the win32 branch')
+        self.assertLess(torch_import, paddle_import,
+                        'on Windows torch must be imported before paddle, or torch fails '
+                        'to load its DLLs (DEC-044)')
+
+    def test_paddle_still_precedes_paddleocr_everywhere(self):
+        """The Linux constraint survives: paddle before paddleocr on every platform."""
+        load = self.source[self.source.index('def _load'):]
+        self.assertLess(load.index('import paddle'), load.index('from paddleocr'),
+                        'paddleocr pulls torch in via paddlex/modelscope, so paddle must '
+                        'already be loaded (DEC-027)')
+
+    def test_missing_torch_is_tolerated(self):
+        """An OCR-only environment has no torch, and that must not be an error."""
+        load = self.source[self.source.index('def _load'):self.source.index('from paddleocr')]
+        self.assertIn('except ImportError', load)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -30,6 +30,7 @@ none of them the mobile variants the Android target needs anyway.
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 # Measured 2026-08-10, one process, one loaded model, three photos: 1280 is 25-35% faster
@@ -109,18 +110,31 @@ class PaddleOCREngine:
 
     def _load(self):
         if self._ocr is None:
-            # Import paddle BEFORE paddleocr, and keep it first.
+            # Import order between paddle and torch is load-bearing, and the correct
+            # order is the OPPOSITE on Windows and Linux. Both link their own
+            # glog/gflags/OpenMP; whichever initializes second loses (`DEC-006`).
             #
-            # paddleocr defers loading paddle to paddlex's import_guard, by which point
-            # paddlex has already dragged torch and TensorFlow into the process. libpaddle
-            # then initializes second and segfaults in its static initializers -- observed
-            # on Colab as SIGSEGV inside paddle/base/core.py, at import time, with no image
-            # involved. Paddle, torch and TF each link their own glog/gflags/OpenMP; the
-            # loser is whichever loads last.
+            # `paddleocr` drags torch in either way -- paddlex imports `modelscope`
+            # unconditionally in inference/utils/official_models.py -- so this is not
+            # avoidable by simply not using the VLM. It fires even when nothing else in
+            # Drishti is loaded, and it is a *load-time* fault: neither `fast` nor
+            # `max_side` affects it.
             #
-            # This is the same conflict as DEC-006, but it fires inside PaddleOCR's own
-            # dependency chain, so it happens even when nothing else in Drishti is loaded.
-            # Load-time, not inference-time: neither `fast` nor `max_side` affects it.
+            # Linux (Colab): paddle must go FIRST. Loading torch first made libpaddle
+            # segfault in its static initializers -- SIGSEGV inside paddle/base/core.py,
+            # at import, with no image involved (`DEC-027`).
+            #
+            # Windows: paddle first *breaks torch instead* --
+            #   OSError: [WinError 127] ... Error loading torch\lib\shm.dll
+            # because paddle\libs\libiomp5md.dll is already resident and exports a
+            # different symbol set than torch's copy. Importing torch first makes both
+            # work (`DEC-044`).
+            if sys.platform == 'win32':
+                try:
+                    import torch  # noqa: F401  -- ordering, not use
+                except ImportError:
+                    pass          # an OCR-only environment has no torch to lose
+
             import paddle  # noqa: F401  -- ordering, not use
             from paddleocr import PaddleOCR
 
