@@ -33,5 +33,9 @@ jupyter
 # Optional, only for data/scripts/download_currency.py:
 # kaggle
 
+# Optional, only for data/scripts/build_drug_db.py. Not a runtime dependency -- the
+# generated drug list is committed, so the app never parses a PDF:
+# pypdf
+
 # Web app (app/web/) -- small, pure-python
 flask
