@@ -42,9 +42,10 @@ def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResu
             ),
         )
 
-    # Strips often show two dates (carton and blister, or two panels in one photo).
-    # Take the earliest -- the medicine cannot be trusted past it, and OCR line order
-    # is arbitrary. See parsers.earliest_expiry.
+    # A pack can show two dates (carton and blister, or two panels in one photo), and
+    # OCR line order is arbitrary, so take the earliest -- the medicine cannot be
+    # trusted past it. Precautionary: no fixture has produced two dates from one photo
+    # yet. See parsers.earliest_expiry.
     expiry_raw = earliest_expiry(extract_expiry_candidates(text))
     mrp_candidates = extract_mrp_candidates(text)
     mrp = mrp_candidates[0] if mrp_candidates else None

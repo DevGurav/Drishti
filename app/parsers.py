@@ -74,13 +74,15 @@ def is_expired(raw_expiry: str, today: date | None = None) -> bool | None:
 def earliest_expiry(candidates: list[str]) -> str | None:
     """Pick the earliest parseable expiry from several candidates.
 
-    Indian strips routinely carry more than one date — a carton date and a blister
-    date, or the photo catches two panels at once. A real capture of the Paracip strip
-    yields both 'OCT.2026' and 'APR.28'. Taking `candidates[0]` means trusting OCR's
-    line ordering, which is arbitrary, and on that strip it silently reported the date
-    18 months *later* than the true one.
+    This is a precaution, not a fix for an observed failure. No fixture has yet produced
+    two dates from one photo: 'OCT.2026' and 'APR.28' come from `strip_partial.jpg` and
+    `strip_paracip.jpg`, two *different* strips that notebook 00b happened to OCR in the
+    same cell. Each strip on its own carries exactly one expiry.
 
-    The earliest date is the only safe reading: the medicine cannot be trusted past it.
+    It stays because the multi-date capture is realistic — an Indian pack shows a carton
+    date and a blister date, and a hand-held photo can catch both panels — and because
+    `candidates[0]` would then trust OCR's line ordering, which is arbitrary. Taking the
+    earliest is the only safe reading: the medicine cannot be trusted past it.
     Unparseable strings are ignored here — `is_expired` still reports None for them, so
     'cannot verify' is preserved when nothing parses at all.
     """

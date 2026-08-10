@@ -42,9 +42,10 @@ class TestParseExpiryDate(unittest.TestCase):
 
 
 class TestEarliestExpiry(unittest.TestCase):
-    """A real Paracip capture yields both 'OCT.2026' and 'APR.28'. Taking the first
-    candidate trusted OCR line order and reported the later date, overstating safety by
-    18 months."""
+    """Guards the multi-date case: if one photo ever yields two dates, taking
+    `candidates[0]` would trust OCR line order and could report the later one,
+    overstating safety. The 'OCT.2026'/'APR.28' pair used here is realistic but
+    synthetic -- those two dates came from two different sample strips."""
 
     def test_picks_the_earlier_of_two_real_dates(self):
         self.assertEqual(earliest_expiry(['APR.28', 'OCT.2026']), 'OCT.2026')
