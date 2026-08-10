@@ -28,6 +28,8 @@ from app.engines.smolvlm import SmolVLMEngine
 from app.router import MODES, Engines, route
 from app.speech import deliver
 
+RUNTIME_AUDIO_DIR = Path(__file__).resolve().parent.parent / 'runtime' / 'audio'
+
 
 def build_engines(ocr_lang: str = 'en') -> Engines:
     """Engines are cheap to construct — every one loads its weights lazily, so an unused
@@ -76,7 +78,10 @@ def main() -> None:
     answer_en = route(args.mode, args.image, engines, question=args.question)
 
     translator = IndicTrans2Translator() if args.lang != "en" else None
-    tts = MMSTTSEngine() if args.speak else None
+    # Same place the web app writes, and gitignored. The default is the working
+    # directory, which dropped drishti_mr.wav into the repo root -- one `git add .` from
+    # being committed, and generated audio is not evidence worth versioning.
+    tts = MMSTTSEngine(out_dir=RUNTIME_AUDIO_DIR) if args.speak else None
     result = deliver(answer_en, lang=args.lang, translator=translator,
                      tts=tts, speak=args.speak)
 

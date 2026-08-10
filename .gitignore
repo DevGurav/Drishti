@@ -38,3 +38,7 @@ Thumbs.db
 
 # runtime scratch (captures are deleted after answering, audio is regenerated)
 runtime/
+# backstop: the CLI used to default MMSTTSEngine to the working directory, which
+# dropped drishti_mr.wav into the repo root. Fixed, but generated speech is never
+# worth versioning wherever it lands.
+*.wav

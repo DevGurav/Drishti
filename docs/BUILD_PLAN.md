@@ -44,7 +44,7 @@
 | VizWiz with tuned prompt | ✅ **0.533** | notebook 02, same 500 samples, no training |
 | Currency mode | ✅ **Trained** | Colab T4 2026-08-10, 12 epochs on 4002 images / 8 classes: test accuracy **0.9883**, expected error **₹5.37** unconditional; at `CONFIDENCE_THRESHOLD=0.90` it answers 85% of the time at **0.9961** accuracy and **₹0.71** (`DEC-040`). Checkpoint 6.2 MB. Misses the ≥99% bar *unconditionally* — it clears it only by declining. **Validated on notes, not on arbitrary scenes** (`DEC-042`) |
 | Scene / Ask modes | ✅ **Both work**, laptop included | Colab 2026-08-10 and **laptop 2026-08-11** (4.9 min warm, against 8 min on Colab CPU). Scene returns a full paragraph, confirming `DEC-031`. **The confabulation reproduces exactly** — "contains 30 tablets" (it holds 10) and "clear plastic… white backing" (it is opaque foil), word for word on both machines: `DEC-037` is a repeatable failure, not an anecdote |
-| Translation + TTS | ✅ Works end-to-end | Colab 2026-08-10: Marathi and Hindi text + audio from medicine mode's answer |
+| Translation + TTS | ✅ Works end-to-end, **laptop included** | Colab 2026-08-10, and laptop 2026-08-11 in 5.6 min: `हे पॅरासिटामॉल आहे. हे APR.28 पर्यंत वैध आहे. एमआरपी 10.30 रुपये आहे.` plus 5.3 s of Marathi audio. Needed VS Build Tools (`IndicTransToolkit` is source-only) and `sentencepiece` |
 | Android port | ⬜ Not started | Phase 5 |
 | NGO / user study | 🔴 **Not contacted** | long lead time — start now |
 | Latency vs <8s target | 🔴 **OCR ~56s/photo · VLM ~294s on the laptop** | Colab 2026-08-10, GPU-less, model load (59.2s) excluded: medicine 56.2s @1280 vs 76.1s @1600; Devanagari 69.4s @1280 vs 103.6s @1600; scene 481.3s, ask 314.8s. **Laptop 2026-08-11 (i5-11300H): scene 294s warm** — faster than Colab's CPU but still minutes. Both far past 8s; see RISK-1 and `DEC-038` |
@@ -96,8 +96,11 @@
 - [ ] **Send NGO / blind-school outreach emails** ← *long lead time, do immediately*
 - [ ] Get synopsis approved by guide (names + roll numbers still blank)
 
-**Exit criteria:** baseline number recorded · read + medicine + one VLM mode demoable on a
-laptop · spoken Marathi output working end-to-end for at least one mode.
+**Exit criteria — all met on the laptop, 2026-08-11:** baseline recorded (0.308 → 0.533) ·
+read, medicine and currency answering locally, scene mode too (294 s) · spoken Marathi
+end-to-end from medicine mode, text and audio.
+
+Only the two items above that depend on other people remain.
 
 ---
 
@@ -281,7 +284,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | RISK-6 | Upstream dependency churn breaks a working pipeline | 🟡 Medium | Pins + `requirements.txt` + DEC-009; re-verify before the demo |
 | RISK-7 | ~~Devanagari OCR quality unknown~~ **Largely retired** | 🟢 Low | Measured 2026-08-10: 1010 Devanagari chars of 1238 on a photographed Maharashtra Times page, headline and body both accurate. `devanagari_PP-OCRv5_mobile_rec` works on real newsprint, so the English-only fallback is no longer needed. Still open: the foil case (`पॅरासिप-500`) and the 1600 comparison, both cut short by the OOM — neither threatens the mode |
 | RISK-8 | Single-person bus factor on Colab sessions | 🟢 Low | Notebooks are committed; results downloaded to `eval/results/` |
-| RISK-9 | **Gated model repos block provisioning a fresh machine** (`DEC-029`) | 🟡 Medium | Runtime offline-ness is unaffected — weights cache locally. But a demo laptop set up from scratch needs an HF account, an accepted licence and a token. Download the weights onto the demo machine *before* review week, and keep a local copy; a gate added upstream in March 2027 would otherwise surface on stage |
+| RISK-9 | ~~**Gated model repos block provisioning a fresh machine**~~ **Retired for the demo laptop** (`DEC-029`) | 🟢 Low | Runtime offline-ness is unaffected — weights cache locally. But a demo laptop set up from scratch needs an HF account, an accepted licence and a token. **Done 2026-08-11 on this laptop:** licence accepted, `hf auth login` cached to `%USERPROFILE%\.cache\huggingface	oken`, and IndicTrans2 plus the MMS voices downloaded and cached. The offline claim is intact — they run in airplane mode now. Still applies to any *other* machine, so a replacement laptop before review week needs the same three steps, and the same is true if a gate appears upstream on a model that is currently open |
 
 ---
 

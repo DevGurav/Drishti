@@ -18,6 +18,12 @@ transformers<5
 # The Colab notebooks install it explicitly in their own pip cell, so this gap only ever
 # showed up on the laptop.
 accelerate
+
+# IndicTrans2 ships its modeling code alongside the weights (trust_remote_code), and that
+# file imports sentencepiece. transformers only discovers the requirement once it has
+# downloaded the module, so the failure lands *after* authenticating and *after* a ~950 MB
+# download -- late enough to read as a model problem rather than a missing package.
+sentencepiece
 datasets
 pillow
 numpy

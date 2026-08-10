@@ -37,6 +37,49 @@ function announce(text) {
   window.setTimeout(() => { els.live.textContent = text; }, 60);
 }
 
+/* Waiting, announced.
+
+   Answers take real time on a laptop CPU: about a minute for OCR modes and several for
+   the VLM (measured 2026-08-11 -- see RISK-1). A sighted user watches a spinner. A blind
+   user heard 'Working…' once and then nothing, with no way to tell a slow model from a
+   crash, a dropped connection, or a capture key that never registered -- and the honest
+   reaction to that silence is to press capture again, which queues a second slow request.
+
+   So: say how long it should take before the wait starts, then check in periodically.
+   Intervals widen rather than repeat on a fixed beat, because a message every few seconds
+   stops being information and becomes noise you have to listen past. */
+const EXPECTED_WAIT = {
+  currency: 'a few seconds',
+  medicine: 'about a minute',
+  read: 'about a minute',
+  scene: 'several minutes',
+  ask: 'several minutes',
+};
+
+const WAIT_CHECKPOINTS = [15, 40, 80, 140, 220, 320];
+let waitTimers = [];
+
+function startedMessage(mode) {
+  const expected = EXPECTED_WAIT[mode] || 'a moment';
+  return `Working… this usually takes ${expected}.`;
+}
+
+function startWaitUpdates() {
+  stopWaitUpdates();
+  waitTimers = WAIT_CHECKPOINTS.map((seconds) =>
+    window.setTimeout(() => {
+      /* Only the live region, not the visible answer: replacing the answer text would
+         wipe the expectation the user is waiting against. */
+      announce(`Still working. ${seconds} seconds so far.`);
+    }, seconds * 1000),
+  );
+}
+
+function stopWaitUpdates() {
+  waitTimers.forEach(window.clearTimeout);
+  waitTimers = [];
+}
+
 function setAnswer(text, { error = false, busyState = false, english = null } = {}) {
   els.answer.textContent = text;
   els.answer.classList.toggle('is-error', error);
@@ -109,7 +152,8 @@ async function capture() {
 
   busy = true;
   els.capture.disabled = true;
-  setAnswer('Working…', { busyState: true });
+  setAnswer(startedMessage(selectedMode), { busyState: true });
+  startWaitUpdates();
 
   const form = new FormData();
   form.append('image', blob, 'capture.jpg');
@@ -146,6 +190,9 @@ async function capture() {
   } catch (err) {
     setAnswer('Could not reach the app. Is the server still running?', { error: true });
   } finally {
+    /* Before re-enabling capture: a pending "still working" firing after the answer has
+       been read out would talk over it and suggest the request is still going. */
+    stopWaitUpdates();
     busy = false;
     els.capture.disabled = false;
   }
