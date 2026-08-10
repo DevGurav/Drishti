@@ -95,7 +95,7 @@ privacy claim the project rests on.
 Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-# 0. tests need nothing at all - 76 tests, no models
+# 0. tests need nothing at all - 139 tests, no models
 python -m unittest discover -s tests -t .
 
 # 1. OCR: read + medicine modes            (~100 MB downloaded on first run)
