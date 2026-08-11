@@ -1,6 +1,6 @@
 # Custom Indian Dataset
 
-See `docs/data_collection_guide.md` for the full collection protocol (target counts,
+See `docs/dataset_guide.md` for where the data comes from (public sources, licences,
 privacy rules, naming convention) before shooting anything.
 
 - `labels_template.csv` — schema to copy into `labels.csv` as you collect: one row

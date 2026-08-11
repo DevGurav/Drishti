@@ -13,7 +13,7 @@ This is our deployment distribution: blurry, tilted, thumb-in-frame images.
 ## 2. Custom Indian dataset (we collect this — M3)
 
 Full protocol (target counts per mode, privacy rules, naming convention, labeling workflow):
-**`docs/data_collection_guide.md`**. Schema template: `data/custom/labels_template.csv`.
+**`docs/dataset_guide.md`**. Schema template: `data/custom/labels_template.csv`.
 Keep faces and personal documents OUT of the dataset.
 
 ## 3. Indian currency (for MobileNet classifier)

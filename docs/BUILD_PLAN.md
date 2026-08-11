@@ -23,7 +23,7 @@
 |---|---|
 | 0 — Feasibility & setup | ✅ **Complete** |
 | 1 — Baselines & core pipeline | 🟢 **Complete** — every mode verified against real models on the laptop, 2026-08-11. NGO outreach is the one open item, and it belongs to Phase 5's user study |
-| 2 — Data collection | 🔴 Barely started (3 photos of ~700) |
+| 2 — Dataset assembly | 🟡 Base corpus done; merge, dedup and VizWiz negatives outstanding |
 | 3 — Fine-tuning | ⬜ Not started |
 | 4 — Integration | ⬜ Not started |
 | 5 — On-device + user study | ⬜ Not started |
@@ -108,26 +108,37 @@ Only the two items above that depend on other people remain.
 
 ---
 
-### Phase 2 — Data collection · 🔴 Barely started
+### Phase 2 — Dataset assembly · 🟡 Partly done
 
-**Goal:** the custom Indian dataset that makes this project original rather than an
-integration exercise. Protocol: `docs/data_collection_guide.md`.
+**Goal:** a training corpus assembled from existing licence-clean datasets. No
+self-collected photography (`DEC-047`). Protocol: `docs/dataset_guide.md`.
 
-- [ ] ~300 medicine strips (varied drugs, lighting, angles, wear)
-- [ ] ~250 currency notes (₹10–500, ~40 each, worn/folded/partial). **Over-sample ₹20/₹200
-      and ₹50/₹500** — the trained model's errors concentrate on denominations whose
-      numerals are prefixes of one another, always erring upward (`DEC-041`)
-- [ ] **~100 note-free negatives** — household surfaces, packaging, paper, fabric, floors.
-      The Kaggle `background` class is tables and hands from one session and does not
-      generalise: a medicine strip scored `50` at 0.870 (`DEC-042`). Without these, the
-      confidence threshold is the only thing preventing phantom denominations
-- [ ] ~200 labels + Devanagari signage
-- [ ] ~150 scene photos
-- [ ] `data/custom/labels.csv` maintained per-photo, all three languages represented
-- [ ] Spot-check 10% of labels against images before any training run
+Medicine and Read train nothing — they run pretrained OCR plus a database lookup — so they
+need *evaluation* data, not volume. Only currency and the VLM modes consume training data.
 
-**Exit criteria:** ≥500 labelled photos, label accuracy spot-checked.
-**Runs in parallel with Phases 1 and 3 — 20 photos/day, not one weekend.**
+- [x] **Currency base corpus** — `vishalmane109/...-2020`, CC0-1.0, 4,002 images across 8
+      classes, organized and trained on
+- [ ] **Merge the other licence-clean currency sources** — `gauravsahani` (DbCL-1.0) and
+      `pypiahmad` (CC BY 4.0, rupee classes only, attribution required).
+      `shobhit18th` is excluded: licence "unknown" fails `DEC-022`. Independent sources are
+      the camera-free route to the capture diversity `DEC-043` found missing
+- [ ] **Deduplicate across sources by content hash *and* perceptual hash** — these datasets
+      re-host each other, and a duplicate spanning train and test turns the accuracy number
+      into fiction. Higher value than the extra images
+- [ ] **~500 VizWiz images as currency negatives** — real blind-user photographs of
+      arbitrary objects, excluding any whose question or answers mention money. Strictly
+      better than the 431 tables-and-hands the `background` class has now (`DEC-042`)
+- [ ] Commit the merge script and a source manifest; the corpus must rebuild from a clean
+      checkout, since the images themselves are never committed
+- [ ] Record every source and licence in `data/README.md` with a verification date
+
+**Exit criteria:** a rebuildable, deduplicated currency corpus from ≥2 independent sources
+with a stronger `background` class, and every licence recorded.
+
+**Medicine and Read evaluation** is deliberately small and stated as such. No public Indian
+medicine-strip dataset with legible generics and expiry dates was found under a usable
+licence, and pharmacy product photography is not redistributable. The ≥95% guardrailed
+precision target therefore cannot be validated at that confidence — see `DEC-048`.
 
 ---
 
@@ -135,6 +146,9 @@ integration exercise. Protocol: `docs/data_collection_guide.md`.
 
 **Goal:** the core ML contribution. *Without this the project is an app that calls existing
 models — an integration exercise rather than a project with a result of its own.*
+
+Training data is VizWiz plus the merged public currency corpus (`DEC-047`); there is no
+custom photographic dataset.
 
 **Beat: 0.533**, the tuned-prompt result — not the 0.308 stock baseline (`DEC-017`).
 
@@ -147,11 +161,12 @@ alone could not do — every variant traded one for the other.
       versus +0.10 for a large gain in general answering ability
 - [ ] Report abstention precision/recall separately, not just aggregate accuracy — a model
       that abstains on *everything* also scores well and would be useless
-- [ ] Continue fine-tuning on the custom Indian dataset
+- [ ] Retrain the currency CNN on the merged multi-source corpus and re-check the five
+      committed note fixtures — two of which fail today
 - [ ] Re-run notebook 01 evaluation — **same N, same prompt** — for a fair comparison
 - [ ] Train the MobileNet currency classifier (≥99% target) — `notebooks/03` is written
       and the engine is wired; needs a licensed Kaggle dataset (`DEC-022`)
-- [ ] Ablation: stock vs VizWiz-tuned vs VizWiz+custom-tuned
+- [ ] Ablation: stock vs VizWiz-tuned, and single-source vs merged currency corpus
 
 **Exit criteria:** fine-tuned model beats 0.308 on the same slice, with the delta written up,
 an ablation table produced, and abstention behaviour reported separately.
@@ -272,6 +287,8 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-044 | **The paddle/torch import order is inverted on Windows** | `DEC-027` established that paddle must be imported *before* paddleocr, because paddlex drags torch in and libpaddle then segfaults. On Windows the same ordering breaks the other library instead: with `paddle\libs\libiomp5md.dll` already resident, torch fails at import with `OSError: [WinError 127] ... Error loading torch\lib\shm.dll`. Importing torch first, then paddle, then paddleocr works on Windows; on Linux it is what `DEC-027` proved fatal. `_load()` now branches on `sys.platform`, tolerating a missing torch for OCR-only environments. Two things this pins down: the conflict is **not** avoidable by declining to use the VLM, since `paddlex/inference/utils/official_models.py` imports `modelscope` unconditionally and that pulls torch regardless; and `DEC-006`'s "separate processes" constraint is now a *cross-platform* requirement rather than a Colab quirk, which raises the cost of the Phase-5 Android port. Found on the laptop, not on Colab — the demo machine is the one that matters |
 | DEC-045 | **The web app selects the OCR engine per request; `ocr_lang` was being discarded** | Found by driving the real API with the committed fixtures rather than the camera. `ocr_lang` was parsed from the form, validated against the language table, and then never used: `AnswerService` held a single English `PaddleOCREngine` built at startup. Reading the Marathi newspaper through the browser returned `Tach taaRa firast HoH HEST machals` — the Latin recogniser transliterating Devanagari. **Nothing raised**, so a blind user hears confident gibberish with no signal that the wrong model ran; the same request now returns **1010 Devanagari characters**. The front end was half the bug: it sent `ocr_lang` only for medicine mode, so Read never asked for a script at all. Engines are built lazily and cached per script rather than pre-built for every language, because two live pipelines peaked at 11.65 GB (`DEC-035`). **Method note:** this was invisible to the test suite because the fakes return whatever they are given, and invisible in manual testing because garbage output looks like a bad photo. Driving the real service with known-good fixtures is what separated an app bug from camera quality |
 | DEC-046 | **Combination strips report every ingredient, resolved by occurrence counting** | An Indian combination tablet (`IBUPROFEN 400mg PARACETAMOL 325mg`) is one product with several actives, and naming only one hides an ingredient the user may be avoiding or reacting to. The naive fix — return every database hit — would have been *worse* than the bug it replaced: `Adrenaline` is a substring of `Noradrenaline`, so one vial becomes two drugs, one of which is not in the user's hand. Inventing a medicine beats mislabelling one for sheer harm. `find_matches()` therefore reports a short name only when it occurs more often than the longer names containing it can account for — `NORADRENALINE` gives adrenaline×1 / noradrenaline×1, so Adrenaline is suppressed; `ADRENALINE … NORADRENALINE` gives ×2 / ×1, so both are reported. Names come back in printed order so the spoken answer tracks the strip. Phrasing says "a combination of A and B" rather than two sentences, which would imply two tablets. `MedicineResult.drug_names` is the list; `drug_name` survives as a property because notebook 04's checkpoint JSON reads it |
+| DEC-047 | **No self-collected dataset; build from licence-clean public sources** | Decided 2026-08-11. The plan called for ~800 photographs, and that is the one part of the project no one else can do — but it is also the part with the weakest link between effort and result. Half of it (medicine strips, labels) trained *nothing*: those modes run pretrained OCR plus a database lookup, so photographs only measure them. Scene data was worse than the alternative, since VizWiz was shot by blind photographers and a sighted person can only simulate that. What remains genuinely camera-shaped is currency, and the diversity it lacks can come from merging **independent public sources** whose contributors shot at different distances on different surfaces. Currency negatives come from VizWiz, which is thousands of photographs of arbitrary objects taken by exactly the target population. **The cost, stated plainly:** the project can no longer claim an original Indian dataset, and that was listed as what made it more than an integration exercise. What is left as its own: the routing architecture, the guardrail, the measured prompt result (0.308 → 0.533), the rupee-weighted metric, and a decision log that records what was believed wrongly and how it was caught. That is a defensible contribution; a dataset that was never going to be photographed is not |
+| DEC-048 | **Medicine mode's ≥95% precision target is not validatable, and must not be claimed** | No public dataset of Indian medicine strips with legible generic names and expiry dates exists under a licence permitting redistribution, and pharmacy product photography is not licensed for it. With `DEC-047` ruling out photography, the evaluation set is the committed fixtures. Two strips cannot support a 95% claim at any useful confidence. The number therefore does not go in the writeup as a result. What *is* reportable: the guardrail's behaviour on the NLEM database, which unit tests cover exhaustively including the nesting pairs and combinations; and a measured statement over a declared sample — "on N strips it named no drug it could not verify" — with N printed beside it. Opportunistic photographs of strips already in the house are welcome and change nothing about the claim until N is large. Recorded because an unvalidated safety number is worse than no number: it invites exactly the trust the guardrail exists to withhold |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
@@ -282,7 +299,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | ID | Risk | Severity | Mitigation |
 |---|---|---|---|
 | RISK-1 | **Latency far past the <8s target** — 2026-08-10, model load excluded: OCR **46.5–54.5s** per photo at *either* `max_side`, translate+TTS 33.8s cold / 9.7s warm, VLM 65.5s | 🔴 High | Levers by measured payoff: (1) **`max_side=1280` — banked**, 25–35% at no accuracy cost (`DEC-036`); (2) **swap the medium/server models for mobile** — `en` resolves to `PP-OCRv6_medium_det`/`_rec` and `mr` to `PP-OCRv5_server_det`, none of them the mobile variants the Android target needs anyway, so this serves Phase 5 too; (3) drop `use_doc_unwarping` per mode — `DEC-004` measured it at 13% and destroying accuracy *on foil*, but a flat newspaper may not need it, making it a per-mode rather than global choice; (4) **keep the VLM off the demo path** — scene 481s and ask 315s are what blow the budget, while medicine, read and currency never touch it, so a CPU-only review demo should be driven by the OCR modes with scene/ask shown as a recorded clip. Model load (59.2s) is one-time and must be quoted separately, never folded into the per-photo figure. If <8s still can't be met, restate the target honestly — a demo that answers in 15s is defensible, a false claim of 8s is not |
-| RISK-2 | **Dataset collection not started** (3 of ~700 photos) | 🔴 High | 20 photos/day starting now; blocks Phase 3 entirely |
+| RISK-2 | **The corpus is one source deep, and the model is weakest where that shows** | 🟡 Medium | Self-collection is out (`DEC-047`), so diversity has to come from merging independent public sources and from VizWiz negatives. Residual risk stays: no public dataset has Indian notes photographed *by blind users at arm's length*, which is the case `DEC-043` measured as failing. The five committed fixtures are the honest check, and the writeup must report them rather than only the test split |
 | RISK-3 | **No NGO contact yet** | 🔴 High | Email 5–6 today; replies take weeks, scheduling weeks more. Without this, objective 5 fails |
 | RISK-4 | Android port may not fit the timeline | 🟡 Medium | Laptop demo is the committed deliverable; Android is explicitly a stretch goal |
 | RISK-5 | Fine-tuning may not beat the stock baseline | 🟡 Medium | Even a negative result is publishable if measured honestly; ablation table makes it defensible |
@@ -314,7 +331,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | **`docs/BUILD_PLAN.md`** | **This file — phases, status, decisions, risks. The single source of truth.** |
 | `README.md` | What the system is; architecture; how to run it |
 | `docs/OVERVIEW.md` | What the project is and why: problem, objectives, literature, methodology |
-| `docs/data_collection_guide.md` | Phase-2 protocol: counts, privacy rules, labelling |
+| `docs/dataset_guide.md` | Phase-2 sources, licences, dedup and the evaluation caveats |
 | `notebooks/00_feasibility_spike_colab.ipynb` | VLM comparison + translation/TTS spike (Colab GPU) |
 | `notebooks/00b_ocr_spike.ipynb` | OCR engine selection (CPU, no GPU) |
 | `notebooks/01_vizwiz_baseline.ipynb` | The baseline number (Colab GPU) |

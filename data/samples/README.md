@@ -43,5 +43,5 @@ that ruled out changing the eval transform. Keep these committed: they are the c
 regression test for whether Phase-2 retraining actually helps.
 
 These are **fixtures, not the dataset**. The real collection lives in `data/custom/`
-(gitignored) and follows `docs/data_collection_guide.md`. Full-resolution originals stay in
+(gitignored) and follows `docs/dataset_guide.md`. Full-resolution originals stay in
 `test-images/`, also gitignored.
