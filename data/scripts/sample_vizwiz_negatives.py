@@ -15,7 +15,9 @@ Why this downloads almost nothing
 The image archives are 3.5 GB (val) and 11.3 GB (train), for a few hundred images. The
 server supports HTTP range requests, so this reads the zip's central directory and then
 fetches only the members it wants -- tens of megabytes rather than eleven gigabytes. Pass
-``--zip`` to use an already-downloaded archive instead.
+``--zip`` to use an already-downloaded archive instead. The range-request machinery
+lives in ``vizwiz_images.py``, shared with the Phase-3 fine-tuning notebook, which needs
+the train split that Hugging Face does not publish.
 
 Output goes to ``data/currency_raw/vizwiz_negatives/background/`` so it becomes an ordinary
 source for ``merge_currency.py``: deduplicated against everything else, recorded in the
@@ -28,16 +30,14 @@ manifest with its licence, and impossible to forget when the corpus is rebuilt.
 from __future__ import annotations
 
 import argparse
-import io
 import json
 import random
 import re
 import sys
-import http.client
-import urllib.parse
-import urllib.request
-import zipfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from vizwiz_images import fetch  # noqa: E402
 
 DATA = Path(__file__).resolve().parents[1]
 ANNOTATIONS = DATA / "vizwiz"
@@ -58,85 +58,6 @@ MONEY = re.compile(
     r")\b|₹|\$|€|£",
     re.IGNORECASE,
 )
-
-
-class HttpRangeFile(io.RawIOBase):
-    """A seekable read-only file backed by HTTP range requests.
-
-    `zipfile` only needs seek and read, and the archives are served with
-    `Accept-Ranges: bytes`, so the whole file never has to be transferred.
-
-    The connection is held open across reads. A first version opened a fresh one per read
-    via `urllib`, and managed about six images a minute -- TLS setup dominated, since each
-    request moves maybe 100 KB. Reuse turns the cost back into bandwidth.
-    """
-
-    def __init__(self, url: str):
-        self.url = url
-        self._pos = 0
-        parts = urllib.parse.urlsplit(url)
-        self._host = parts.netloc
-        self._path = parts.path + (f"?{parts.query}" if parts.query else "")
-        self._connection: http.client.HTTPSConnection | None = None
-
-        response = self._request("HEAD")
-        self.size = int(response.headers["Content-Length"])
-        response.read()
-        if response.headers.get("Accept-Ranges") != "bytes":
-            raise SystemExit(
-                f"{url} does not advertise range support; download it and pass --zip"
-            )
-
-    def _connect(self) -> http.client.HTTPSConnection:
-        if self._connection is None:
-            self._connection = http.client.HTTPSConnection(self._host, timeout=120)
-        return self._connection
-
-    def _request(self, method: str, headers: dict | None = None):
-        for attempt in (1, 2):
-            try:
-                connection = self._connect()
-                connection.request(method, self._path, headers=headers or {})
-                return connection.getresponse()
-            except (http.client.HTTPException, OSError):
-                # A kept-alive connection can be closed by the server between reads; drop
-                # it and retry once before giving up.
-                if self._connection is not None:
-                    self._connection.close()
-                self._connection = None
-                if attempt == 2:
-                    raise
-        raise AssertionError("unreachable")
-
-    def close(self) -> None:
-        if self._connection is not None:
-            self._connection.close()
-            self._connection = None
-        super().close()
-
-    def readable(self) -> bool:
-        return True
-
-    def seekable(self) -> bool:
-        return True
-
-    def tell(self) -> int:
-        return self._pos
-
-    def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
-        base = {io.SEEK_SET: 0, io.SEEK_CUR: self._pos, io.SEEK_END: self.size}[whence]
-        self._pos = max(0, min(self.size, base + offset))
-        return self._pos
-
-    def readinto(self, buffer) -> int:
-        if self._pos >= self.size:
-            return 0
-        end = min(self._pos + len(buffer) - 1, self.size - 1)
-        response = self._request("GET", {"Range": f"bytes={self._pos}-{end}"})
-        chunk = response.read()
-        buffer[: len(chunk)] = chunk
-        self._pos += len(chunk)
-        return len(chunk)
 
 
 def mentions_money(entry: dict) -> bool:
@@ -188,37 +109,15 @@ def main() -> int:
         print(f"  ... ({len(wanted)} total)\n(dry run -- nothing downloaded)")
         return 0
 
-    args.out.mkdir(parents=True, exist_ok=True)
-    source = args.zip if args.zip else HttpRangeFile(f"{BASE}/{args.split}.zip")
-    if args.zip:
-        print(f"reading {args.zip}")
-    else:
-        print(f"reading {BASE}/{args.split}.zip via range requests "
-              f"({source.size / 1e9:.1f} GB archive, only the selected members transferred)")
+    print(f"fetching into {args.out}")
+    tally = fetch(args.split, wanted, args.out, zip_path=args.zip)
 
-    written = missing = skipped = 0
-    with zipfile.ZipFile(io.BufferedReader(source, buffer_size=1 << 20)
-                         if not args.zip else args.zip) as archive:
-        members = {Path(n).name: n for n in archive.namelist()}
-        for name in wanted:
-            member = members.get(name)
-            if member is None:
-                missing += 1
-                continue
-            target = args.out / name
-            if target.exists():
-                skipped += 1
-                continue
-            target.write_bytes(archive.read(member))
-            written += 1
-            if written % 50 == 0:
-                print(f"  {written} written", flush=True)
+    print(f"\nwrote {tally['written']} images to {args.out}")
+    if tally["skipped"]:
+        print(f"  {tally['skipped']} already present")
+    if tally["missing"]:
+        print(f"  {tally['missing']} not found in the archive")
 
-    print(f"\nwrote {written} images to {args.out}")
-    if skipped:
-        print(f"  {skipped} already present")
-    if missing:
-        print(f"  {missing} not found in the archive")
     print("\nVizWiz is CC BY 4.0 -- attribution belongs in the writeup.")
     print("Next: python data/scripts/merge_currency.py --clean")
     return 0
