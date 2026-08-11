@@ -378,6 +378,11 @@ def main() -> int:
                         help="max Hamming distance between 64-bit perceptual hashes for "
                              "two images to count as the same photo (default 4)")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--exclude", nargs="*", default=[],
+                        help="classes to leave out entirely, e.g. --exclude 2000. The "
+                             "Rs 2000 was withdrawn from circulation in May 2023 and its "
+                             "class acts as an attractor: it turned Rs 10 and Rs 20 notes "
+                             "into Rs 1,990 errors (DEC-051)")
     parser.add_argument("--clean", action="store_true",
                         help="delete the output directory first; required when rebuilding "
                              "over an existing corpus")
@@ -398,13 +403,16 @@ def main() -> int:
               file=sys.stderr)
         return 1
 
+    excluded_classes = {str(c) for c in args.exclude}
+
     entries: list[tuple[Source, Path, str]] = []
     problems: list[str] = []
     for slug in sorted(SOURCES, key=lambda s: SOURCES[s].priority):
         source = SOURCES[slug]
         found, issues = read_source(source, args.raw)
         problems.extend(issues)
-        entries.extend((source, path, cls) for path, cls in found)
+        entries.extend((source, path, cls) for path, cls in found
+                       if cls not in excluded_classes)
         if found:
             print(f"  {slug:16} {len(found):5} images   {source.licence}")
 
@@ -424,6 +432,9 @@ def main() -> int:
         print("\nNothing to merge. Download sources into "
               f"{args.raw}/<owner>/ first.", file=sys.stderr)
         return 1
+
+    if excluded_classes:
+        print(f"\nexcluded classes: {', '.join(sorted(excluded_classes))}")
 
     print(f"\n{len(entries)} images before deduplication")
     kept, stats, conflicts, unreadable = merge(entries, args.near_threshold)
