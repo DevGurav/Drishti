@@ -22,11 +22,10 @@ notebooks/00b_ocr_spike.ipynb on real photographed medicine strips:
   ``devanagari_PP-OCRv5_mobile_rec`` model. ``lang='devanagari'`` does NOT exist in
   3.7.0 and raises ``ValueError`` on every ``ocr_version``.
 
-Latency note: ~56s/image on Colab CPU at the 1280 default, plus a one-time ~59s model
-load, is far above the project's <8s end-to-end target. That gap is unresolved and is a
-known open issue, not a solved problem. The next lever is the model tier: this loads
-``PP-OCRv6_medium_det``/``_rec`` for English and ``PP-OCRv5_server_det`` for Devanagari,
-none of them the mobile variants the Android target needs anyway.
+Latency note: the Latin path now runs the small tier and takes about 13s per photo on a
+laptop CPU, down from 41s (`DEC-058`). Still above the project's <8s end-to-end target,
+and Devanagari is worse at ~96s because no lighter detector works for it -- see
+``eval/bench_ocr.py``. The gap is narrowed, not closed.
 """
 from __future__ import annotations
 
@@ -44,6 +43,23 @@ DEFAULT_MAX_SIDE = 1280
 # 'devanagari', 'hindi', 'marathi' and 'deva' all raise ValueError.
 DEVANAGARI_LANGS = ('hi', 'mr', 'ne', 'sa')
 
+# Measured 2026-08-11 by eval/bench_ocr.py on the Paracip strip (`DEC-058`). The small
+# tier reads the drug name, expiry and MRP exactly as the default does, 3.2x faster:
+# medicine mode end to end went 41.2s -> 12.9s.
+#
+# The tier below this one is a trap and is deliberately not used. `PP-OCRv6_tiny_*` is
+# 6.3x faster and loses the expiry date -- a change that looks excellent on a stopwatch
+# and tells a blind user a medicine is safe when nothing was read. `DEC-030` is the same
+# mistake, made once already.
+DEFAULT_LATIN_DET = 'PP-OCRv6_small_det'
+DEFAULT_LATIN_REC = 'PP-OCRv6_small_rec'
+
+# Devanagari keeps PaddleOCR's own defaults -- `PP-OCRv5_server_det` plus the mobile
+# recogniser. Both lighter detectors were measured and both returned **zero** Devanagari
+# characters on a newspaper page the server detector reads at 1010. That is a total
+# failure rather than a degradation, so the server detector stays until something else
+# is shown to work. It remains a Phase-5 problem for the Android port.
+
 # Turning these off was measured as a net loss -- see module docstring. Opt-in only.
 _DOC_PREPROCESS_OFF = {
     'use_doc_orientation_classify': False,
@@ -52,13 +68,31 @@ _DOC_PREPROCESS_OFF = {
 }
 
 
-def build_kwargs(lang: str, fast: bool = False) -> dict:
+def build_kwargs(lang: str, fast: bool = False, det_model: str | None = None,
+                 rec_model: str | None = None) -> dict:
     """Constructor kwargs for PaddleOCR. Kept pure so it's testable without paddle installed.
 
     `fast=True` disables document preprocessing. Measured on a real strip photo it cost
     the drug name, expiry and MRP for a 13% speed gain, so it defaults off.
+
+    `det_model` / `rec_model` select the model tier. Left unset, PaddleOCR picks its own
+    default -- which is `PP-OCRv6_medium_*` for English and, more awkwardly for a project
+    targeting a phone, `PP-OCRv5_server_det` for Devanagari. `DEC-036` ruled out `max_side`
+    as a latency lever and pointed here instead; `eval/bench_ocr.py` measures the tiers.
     """
     kwargs: dict = {'lang': lang, 'enable_mkldnn': False}
+
+    # Latin script defaults to the small tier; Devanagari falls through to PaddleOCR's
+    # own choice, because every lighter detector tried on it read nothing at all.
+    if det_model is None and lang not in DEVANAGARI_LANGS:
+        det_model = DEFAULT_LATIN_DET
+    if rec_model is None and lang not in DEVANAGARI_LANGS:
+        rec_model = DEFAULT_LATIN_REC
+
+    if det_model:
+        kwargs['text_detection_model_name'] = det_model
+    if rec_model:
+        kwargs['text_recognition_model_name'] = rec_model
     if fast:
         kwargs.update(_DOC_PREPROCESS_OFF)
     return kwargs
@@ -102,10 +136,13 @@ def extract_lines(result) -> list[tuple[float, str]]:
 class PaddleOCREngine:
     """OCREngine backed by PaddleOCR. The model loads lazily on first read()."""
 
-    def __init__(self, lang: str = 'en', max_side: int = DEFAULT_MAX_SIDE, fast: bool = False):
+    def __init__(self, lang: str = 'en', max_side: int = DEFAULT_MAX_SIDE, fast: bool = False,
+                 det_model: str | None = None, rec_model: str | None = None):
         self.lang = lang
         self.max_side = max_side
         self.fast = fast
+        self.det_model = det_model
+        self.rec_model = rec_model
         self._ocr = None
 
     def _load(self):
@@ -138,7 +175,8 @@ class PaddleOCREngine:
             import paddle  # noqa: F401  -- ordering, not use
             from paddleocr import PaddleOCR
 
-            kwargs = build_kwargs(self.lang, self.fast)
+            kwargs = build_kwargs(self.lang, self.fast,
+                                  self.det_model, self.rec_model)
             try:
                 self._ocr = PaddleOCR(**kwargs)
             except TypeError:

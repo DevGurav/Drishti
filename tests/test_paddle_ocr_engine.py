@@ -149,6 +149,43 @@ class TestImportOrderIsPlatformDependent(unittest.TestCase):
         load = self.source[self.source.index('def _load'):self.source.index('from paddleocr')]
         self.assertIn('except ImportError', load)
 
+class TestModelTierDefaults(unittest.TestCase):
+    """Latin script runs the small tier; Devanagari must not (`DEC-058`).
+
+    Measured on the Paracip strip: small reads the drug name, expiry and MRP exactly as
+    the default did, 3.2x faster. The tier below it, `tiny`, is 6.3x faster and loses the
+    expiry -- excellent on a stopwatch, and it tells a blind user a medicine is safe when
+    nothing was read. On Devanagari every lighter detector returned zero characters where
+    the server detector reads 1010, so that path keeps PaddleOCR's own defaults.
+    """
+
+    def test_latin_uses_the_small_tier(self):
+        from app.engines.paddle_ocr import (
+            DEFAULT_LATIN_DET, DEFAULT_LATIN_REC, build_kwargs,
+        )
+        kwargs = build_kwargs('en')
+        self.assertEqual(kwargs['text_detection_model_name'], DEFAULT_LATIN_DET)
+        self.assertEqual(kwargs['text_recognition_model_name'], DEFAULT_LATIN_REC)
+
+    def test_devanagari_keeps_the_library_defaults(self):
+        from app.engines.paddle_ocr import DEVANAGARI_LANGS, build_kwargs
+        for lang in DEVANAGARI_LANGS:
+            with self.subTest(lang=lang):
+                kwargs = build_kwargs(lang)
+                self.assertNotIn('text_detection_model_name', kwargs)
+                self.assertNotIn('text_recognition_model_name', kwargs)
+
+    def test_the_tiny_tier_is_not_a_default(self):
+        """It loses the expiry date. If it ever becomes the default, that was a mistake."""
+        from app.engines.paddle_ocr import DEFAULT_LATIN_DET, DEFAULT_LATIN_REC
+        self.assertNotIn('tiny', DEFAULT_LATIN_DET)
+        self.assertNotIn('tiny', DEFAULT_LATIN_REC)
+
+    def test_an_explicit_choice_still_wins(self):
+        from app.engines.paddle_ocr import build_kwargs
+        kwargs = build_kwargs('en', det_model='PP-OCRv5_mobile_det')
+        self.assertEqual(kwargs['text_detection_model_name'], 'PP-OCRv5_mobile_det')
+
 
 if __name__ == '__main__':
     unittest.main()
