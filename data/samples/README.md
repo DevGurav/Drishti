@@ -35,12 +35,15 @@ The two notes were shot on a phone and carry EXIF orientation. `curr-10.jpg` is 
 note sideways. `app/imaging.py::load_upright` now applies the tag, and the committed
 copies are re-encoded upright so the fixture matches what a viewer shows.
 
-**The five notes are the deployment reality check, and two of them decline.** Top-1 is
-correct on all five, but ₹50 (0.882) and ₹200 (0.342) fall under the 0.90 threshold.
-Both are the loosely-framed shots; the Kaggle training images are cropped tight to the
-note. That is a data gap, not a preprocessing one — `DEC-043` records the measurement
-that ruled out changing the eval transform. Keep these committed: they are the cheapest
-regression test for whether Phase-2 retraining actually helps.
+**The five notes are the deployment reality check, and they earned their keep.** Under the
+single-source model two of them declined — ₹50 at 0.882 and ₹200 at 0.342, both loosely
+framed, against training images cropped tight to the note (`DEC-043`). After retraining on
+the merged multi-source corpus **all five answer**, with ₹200 at 0.926 and ₹50 at 0.967.
+
+That happened while the *benchmark* went down (0.9875 → 0.9810 on a harder split), which is
+why these files stay committed: five images drawn from deployment caught something 840 test
+images could not (`DEC-052`). Re-run them after every retrain, and report them beside the
+benchmark rather than underneath it.
 
 These are **fixtures, not the dataset**. The real collection lives in `data/custom/`
 (gitignored) and follows `docs/dataset_guide.md`. Full-resolution originals stay in
