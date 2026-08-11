@@ -23,9 +23,9 @@
 |---|---|
 | 0 — Feasibility & setup | ✅ **Complete** |
 | 1 — Baselines & core pipeline | 🟢 **Complete** — every mode verified against real models on the laptop, 2026-08-11. NGO outreach is the one open item, and it belongs to Phase 5's user study |
-| 2 — Dataset assembly | 🟡 Base corpus done; merge, dedup and VizWiz negatives outstanding |
-| 3 — Fine-tuning | ⬜ Not started |
-| 4 — Integration | ⬜ Not started |
+| 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
+| 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
+| 4 — Integration | 🟢 **All but one item done** — five modes, browser app on real engines, combination strips. Only the per-mode latency budget is open (RISK-1) |
 | 5 — On-device + user study | ⬜ Not started |
 | 6 — Evaluation & report | ⬜ Not started |
 
@@ -131,8 +131,8 @@ need *evaluation* data, not volume. Only currency and the VLM modes consume trai
       denomination, 500 sampled, **485 surviving deduplication**. `background` goes from
       398 to **883** and from the least varied class to the most. Fetched via HTTP range
       reads — 225 MB against an 11.3 GB archive
-- [ ] Commit the merge script and a source manifest; the corpus must rebuild from a clean
-      checkout, since the images themselves are never committed
+- [x] **Merge script and manifest committed** — `data/currency_manifest.csv`, 5,602 rows,
+      so the corpus rebuilds from a clean checkout without shipping any images
 - [ ] Record every source and licence in `data/README.md` with a verification date
 
 **Exit criteria — met 2026-08-11:** **5,602 images** from four sources, deduplicated,
@@ -322,7 +322,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | ID | Risk | Severity | Mitigation |
 |---|---|---|---|
 | RISK-1 | **Latency far past the <8s target** — 2026-08-10, model load excluded: OCR **46.5–54.5s** per photo at *either* `max_side`, translate+TTS 33.8s cold / 9.7s warm, VLM 65.5s | 🔴 High | Levers by measured payoff: (1) **`max_side=1280` — banked**, 25–35% (`DEC-036`); (2) **small-tier Latin models — banked**, medicine mode 41.2 s → 12.9 s at no accuracy cost, though Devanagari cannot follow and stays at ~96 s (`DEC-058`); (3) ~~swap the medium/server models for mobile~~ — `en` resolves to `PP-OCRv6_medium_det`/`_rec` and `mr` to `PP-OCRv5_server_det`, none of them the mobile variants the Android target needs anyway, so this serves Phase 5 too; (3) drop `use_doc_unwarping` per mode — `DEC-004` measured it at 13% and destroying accuracy *on foil*, but a flat newspaper may not need it, making it a per-mode rather than global choice; (4) **keep the VLM off the demo path** — scene 481s and ask 315s are what blow the budget, while medicine, read and currency never touch it, so a CPU-only review demo should be driven by the OCR modes with scene/ask shown as a recorded clip. Model load (59.2s) is one-time and must be quoted separately, never folded into the per-photo figure. If <8s still can't be met, restate the target honestly — a demo that answers in 15s is defensible, a false claim of 8s is not |
-| RISK-2 | **The corpus is one source deep, and the model is weakest where that shows** | 🟡 Medium | Self-collection is out (`DEC-047`), so diversity has to come from merging independent public sources and from VizWiz negatives. Residual risk stays: no public dataset has Indian notes photographed *by blind users at arm's length*, which is the case `DEC-043` measured as failing. The five committed fixtures are the honest check, and the writeup must report them rather than only the test split |
+| RISK-2 | ~~One source deep~~ **Largely retired** — four sources merged, and all five real-note fixtures now answer (`DEC-052`) | 🟢 Low | Self-collection is out (`DEC-047`), so diversity has to come from merging independent public sources and from VizWiz negatives. Residual risk stays: no public dataset has Indian notes photographed *by blind users at arm's length*, which is the case `DEC-043` measured as failing. The five committed fixtures are the honest check, and the writeup must report them rather than only the test split |
 | RISK-3 | **No NGO contact yet** | 🔴 High | Email 5–6 today; replies take weeks, scheduling weeks more. Without this, objective 5 fails |
 | RISK-4 | Android port may not fit the timeline | 🟡 Medium | Laptop demo is the committed deliverable; Android is explicitly a stretch goal |
 | RISK-5 | Fine-tuning may not beat the stock baseline | 🟡 Medium | Even a negative result is publishable if measured honestly; ablation table makes it defensible |
