@@ -127,6 +127,16 @@ SOURCES: dict[str, Source] = {
             "thai20": "", "thai50": "", "thai100": "", "thai500": "", "thai1000": "",
         },
     ),
+    "vizwiz_negatives": Source(
+        slug="vizwiz_negatives", licence="CC BY 4.0", priority=4, attribution_required=True,
+        note="VizWiz-VQA photographs used only as 'no note in frame' negatives; "
+             "produced by data/scripts/sample_vizwiz_negatives.py",
+        # Lowest priority deliberately. If a VizWiz photo somehow duplicates a currency
+        # image from another source, the currency label is the one to keep -- a real note
+        # mislabelled 'background' teaches the model to decline on money, which is the
+        # failure this class exists to prevent, pointed the wrong way.
+        class_map={"background": BACKGROUND_CLASS},
+    ),
     # shobhit18th is deliberately absent: Kaggle reports its licence as "unknown", which
     # DEC-022 treats as unusable. Adding it here would be the whole safeguard undone.
 }

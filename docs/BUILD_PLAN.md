@@ -126,15 +126,23 @@ need *evaluation* data, not volume. Only currency and the VLM modes consume trai
       duplicates dropped from 6,197. **`gauravsahani` turned out to be almost entirely a
       re-host**: 73 of its images survived, so without hashing ~200 would have been added
       as if new. The confusable classes gained real data: ₹20 446 → 653, ₹50 433 → 833
-- [ ] **~500 VizWiz images as currency negatives** — real blind-user photographs of
-      arbitrary objects, excluding any whose question or answers mention money. Strictly
-      better than the 431 tables-and-hands the `background` class has now (`DEC-042`)
+- [x] **~500 VizWiz images as currency negatives** — `data/scripts/sample_vizwiz_negatives.py`,
+      run 2026-08-11: 462 of 20,523 train entries excluded for mentioning money or a
+      denomination, 500 sampled, **485 surviving deduplication**. `background` goes from
+      398 to **883** and from the least varied class to the most. Fetched via HTTP range
+      reads — 225 MB against an 11.3 GB archive
 - [ ] Commit the merge script and a source manifest; the corpus must rebuild from a clean
       checkout, since the images themselves are never committed
 - [ ] Record every source and licence in `data/README.md` with a verification date
 
-**Exit criteria:** a rebuildable, deduplicated currency corpus from ≥2 independent sources
-with a stronger `background` class, and every licence recorded.
+**Exit criteria — met 2026-08-11:** **5,602 images** from four sources, deduplicated,
+rebuildable from `data/currency_manifest.csv`, with `background` at 883. Licences recorded:
+vishalmane109 CC0-1.0 (3,083) · pypiahmad CC BY 4.0 (1,961) · vizwiz_negatives CC BY 4.0
+(485) · gauravsahani DbCL-1.0 (73). **Attribution required for pypiahmad and
+vizwiz_negatives.**
+
+Still open: retrain on this corpus and re-derive `CONFIDENCE_THRESHOLD`, which was chosen
+on the contaminated split (`DEC-049`).
 
 **Medicine and Read evaluation** is deliberately small and stated as such. No public Indian
 medicine-strip dataset with legible generics and expiry dates was found under a usable
