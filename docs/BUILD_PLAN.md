@@ -165,7 +165,11 @@ Remaining headroom after prompting: abstention recall is 0.639 (88 of 244 still 
 precision has fallen to 0.726. Fine-tuning should aim to raise **both**, which prompting
 alone could not do — every variant traded one for the other.
 
-- [ ] LoRA fine-tune the base VLM on VizWiz train split (free Colab/Kaggle T4)
+- [x] **Notebook written** — `notebooks/05_lora_finetune.ipynb`. Holds the prompt, the 500
+      evaluation samples, the metric and the normalisation fixed at notebook 01's values so
+      the result is comparable to 0.533; the suffix is *read from* `app/engines/smolvlm.py`
+      rather than retyped, so it cannot drift from what the app ships
+- [ ] Run it on a T4 and record the ablation
 - [ ] **Weight abstention examples** — teaching "unanswerable" is worth up to +0.34 overall,
       versus +0.10 for a large gain in general answering ability
 - [ ] Report abstention precision/recall separately, not just aggregate accuracy — a model
@@ -351,6 +355,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | `notebooks/00b_ocr_spike.ipynb` | OCR engine selection (CPU, no GPU) |
 | `notebooks/01_vizwiz_baseline.ipynb` | The baseline number (Colab GPU) |
 | `notebooks/02_abstention_prompts.ipynb` | Prompt sweep to recalibrate abstention (Colab GPU) |
+| `notebooks/05_lora_finetune.ipynb` | Phase 3: LoRA fine-tune on VizWiz, measured against 0.533 |
 | `eval/results/` | Downloaded run artifacts — the evidence trail |
 
 **Maintenance rule:** update the status dashboard and decision log in the same commit as the
