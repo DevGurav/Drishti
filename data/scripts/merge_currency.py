@@ -143,6 +143,30 @@ SOURCES: dict[str, Source] = {
 
 VALID_CLASSES = {str(d) for d in KNOWN_DENOMINATIONS} | {BACKGROUND_CLASS}
 
+# Conflicts resolved by looking at the images, keyed by SHA-256 so a resolution cannot
+# drift onto a different file. `vishalmane109` files seven images under two labels each;
+# in every case the denomination folder is right and the second copy is wrong.
+#
+# There is no rule that decides these safely, which is why they are listed rather than
+# inferred. "Trust the denomination over background" would be wrong the moment a genuine
+# background image is misfiled under a denomination -- that teaches phantom money, the
+# failure money mode exists to prevent, just pointed the other way.
+#
+# The five 50/background pairs are the ones that matter most: they are Rs 50 SPECIMEN
+# notes filed as background, which teaches the model to decline on real money.
+RESOLVED_CONFLICTS: dict[str, str] = {
+    # Rs 200 bundles (a watermarked stock photograph -- see DEC-053), also filed under 20
+    "6febf5cd8ec8d0867f4e7f29022f0c93d521bff13b7487d3379009304d22127f": "200",
+    # An unmistakable Rs 2000 note, also filed under 20
+    "fe9d8bcfc06a081ac5cb36aa9b7db3c7f5a2aa449e3e49cbddf0832db3ea3117": "2000",
+    # Rs 50 RBI SPECIMEN notes, all five also filed under background
+    "560ba2cf58ecef74f5775660cc9ded9254f9182be6f17d589a8d70e48f7bd03e": "50",
+    "b2d121ff597af6d130fbe2c4da1ba88e5db68445b3ba39f5f223cf9f3e5f6509": "50",
+    "5f222476145901665a6ce72247e245b7f4502bb3a4571b73b45cb03e7fac6f69": "50",
+    "c9c64d0ebf776737a72cccd4885a637a0eafebcc699911fdb39514205375021f": "50",
+    "9465d06bb9ec1bd80430c057e1f900acfb9a8443a3e3f9be0b86a5d071868ff6": "50",
+}
+
 
 # --------------------------------------------------------------------------- hashing
 
@@ -257,8 +281,17 @@ def merge(entries: list[tuple[Source, Path, str]], near_threshold: int):
     conflicts: list[str] = []
     unreadable: list[Path] = []
 
+    resolved = 0
+
     for source, path, cls in entries:
         digest = sha256(path)
+
+        # A recorded resolution overrides the folder a file happens to sit in. Applied
+        # before deduplication so the wrong copy never becomes the one that survives.
+        correct = RESOLVED_CONFLICTS.get(digest)
+        if correct is not None and correct != cls:
+            resolved += 1
+            continue
 
         if digest in by_sha:
             prior_source, prior_path, prior_cls = by_sha[digest]
@@ -292,6 +325,7 @@ def merge(entries: list[tuple[Source, Path, str]], near_threshold: int):
         kept.append((source, path, cls, digest, perceptual))
         stats[f"kept:{source.slug}"] += 1
 
+    stats["resolved_conflicts"] = resolved
     return kept, stats, conflicts, unreadable
 
 
@@ -400,13 +434,18 @@ def main() -> int:
     if unreadable:
         print(f"  unreadable files skipped : {len(unreadable)}")
 
+    if stats["resolved_conflicts"]:
+        print(f"  mislabelled copies dropped : {stats['resolved_conflicts']} "
+              f"(RESOLVED_CONFLICTS)")
+
     if conflicts:
-        print(f"\n*** {len(conflicts)} LABEL CONFLICT(S): identical images, different "
-              f"denominations ***")
+        print(f"\n*** {len(conflicts)} UNRESOLVED LABEL CONFLICT(S): identical images, "
+              f"different denominations ***")
         for line in conflicts[:10]:
             print(f"  {line}")
         print("  One of the sources is wrong. Training on either label teaches a")
         print("  contradiction, and the wrong one is spoken aloud as money.")
+        print("  Look at the images, then record the correct class in RESOLVED_CONFLICTS.")
 
     print(f"\n{len(kept)} images kept")
     by_class = Counter(cls for _, _, cls, _, _ in kept)
