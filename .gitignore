@@ -42,3 +42,6 @@ runtime/
 # dropped drishti_mr.wav into the repo root. Fixed, but generated speech is never
 # worth versioning wherever it lands.
 *.wav
+
+
+*.zip

@@ -51,8 +51,10 @@ jupyter
 # per photo; currency and the parsers are fast.
 # ---------------------------------------------------------------------------
 
-# Optional, only for data/scripts/download_currency.py:
-# kaggle
+# Rebuilding the currency corpus. Not optional since DEC-047: every training image now
+# comes from a public dataset fetched with this, so a clean checkout cannot reproduce the
+# corpus without it.
+kaggle
 
 # Optional, only for data/scripts/build_drug_db.py. Not a runtime dependency -- the
 # generated drug list is committed, so the app never parses a PDF:

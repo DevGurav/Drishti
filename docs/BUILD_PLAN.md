@@ -118,13 +118,14 @@ need *evaluation* data, not volume. Only currency and the VLM modes consume trai
 
 - [x] **Currency base corpus** — `vishalmane109/...-2020`, CC0-1.0, 4,002 images across 8
       classes, organized and trained on
-- [ ] **Merge the other licence-clean currency sources** — `gauravsahani` (DbCL-1.0) and
-      `pypiahmad` (CC BY 4.0, rupee classes only, attribution required).
-      `shobhit18th` is excluded: licence "unknown" fails `DEC-022`. Independent sources are
-      the camera-free route to the capture diversity `DEC-043` found missing
-- [ ] **Deduplicate across sources by content hash *and* perceptual hash** — these datasets
-      re-host each other, and a duplicate spanning train and test turns the accuracy number
-      into fiction. Higher value than the extra images
+- [x] **Merge the other licence-clean currency sources** — `data/scripts/merge_currency.py`,
+      run 2026-08-11: **5,117 images** from vishalmane109 (60%), pypiahmad (38%) and
+      gauravsahani (1%), up from 3,083 single-source. `shobhit18th` excluded, licence
+      "unknown" fails `DEC-022`. pypiahmad requires attribution in the writeup
+- [x] **Deduplicate by content hash *and* perceptual hash** — 591 exact and 489 near
+      duplicates dropped from 6,197. **`gauravsahani` turned out to be almost entirely a
+      re-host**: 73 of its images survived, so without hashing ~200 would have been added
+      as if new. The confusable classes gained real data: ₹20 446 → 653, ₹50 433 → 833
 - [ ] **~500 VizWiz images as currency negatives** — real blind-user photographs of
       arbitrary objects, excluding any whose question or answers mention money. Strictly
       better than the 431 tables-and-hands the `background` class has now (`DEC-042`)

@@ -92,12 +92,40 @@ SOURCES: dict[str, Source] = {
     ),
     "gauravsahani": Source(
         slug="gauravsahani", licence="DbCL-1.0", priority=2,
-        note="indian-currency-notes-classifier",
+        note="indian-currency-notes-classifier; folders spell the denomination in words",
+        # Digit-scraping these would be a catastrophe rather than a near miss:
+        # '1Hundrednote' -> 1, '2Hundrednote' -> 2, '2Thousandnote' -> 2. Three
+        # denominations destroyed, and 'Fiftynote' has no digits at all.
+        class_map={
+            "tennote": "10",
+            "twentynote": "20",
+            "fiftynote": "50",
+            "1hundrednote": "100",
+            "2hundrednote": "200",
+            "5hundrednote": "500",
+            "2thousandnote": "2000",
+        },
     ),
     "pypiahmad": Source(
         slug="pypiahmad", licence="CC BY 4.0", priority=3, attribution_required=True,
-        note="indian-rupees-and-thai-baht-banknotes; RUPEE CLASSES ONLY -- the Thai baht "
-             "folders must be mapped to None or the merge is refused",
+        note="indian-rupees-and-thai-baht-banknotes; rupee classes only",
+        # THAI20, THAI50, THAI500 would land directly on rupee classes under any digit
+        # rule -- a 20-baht note taught as a Rs 20 note. Mapped to None, which excludes
+        # them explicitly rather than relying on them being skipped by accident.
+        #
+        # NEW/OLD are the pre- and post-2016 designs of the same denomination. Both map to
+        # the denomination: the user wants to know what it is worth, and carrying both
+        # designs is exactly the intra-class variety a single-source corpus lacks.
+        class_map={
+            "india10new": "10", "india10old": "10",
+            "india20": "20",
+            "india50new": "50", "india50old": "50",
+            "india100new": "100", "india100old": "100",
+            "india200": "200",
+            "india500": "500",
+            "india2000": "2000",
+            "thai20": "", "thai50": "", "thai100": "", "thai500": "", "thai1000": "",
+        },
     ),
     # shobhit18th is deliberately absent: Kaggle reports its licence as "unknown", which
     # DEC-022 treats as unusable. Adding it here would be the whole safeguard undone.
@@ -257,7 +285,31 @@ def merge(entries: list[tuple[Source, Path, str]], near_threshold: int):
     return kept, stats, conflicts, unreadable
 
 
-def write_corpus(kept, out: Path, manifest: Path) -> None:
+def write_corpus(kept, out: Path, manifest: Path, clean: bool) -> None:
+    """Replace the output directory rather than adding to it.
+
+    `organize_currency.py` names files `{split}_{original}` and this script names them
+    `{source}_{split}_{original}`, so writing over an earlier corpus does not overwrite it
+    -- it *doubles* it. The duplicates would then be invisible: every filename distinct,
+    every image present twice, and a training run that looks fine while the split leaks
+    into itself. Refuse instead, and delete only on request.
+    """
+    if out.exists() and any(out.iterdir()):
+        if not clean:
+            raise SystemExit(
+                f"error: {out} is not empty.\n"
+                "       Merging into an existing corpus adds to it rather than replacing "
+                "it, because\n"
+                "       the filenames differ, so every image would end up duplicated and "
+                "invisible.\n"
+                "       Re-run with --clean to rebuild it from scratch."
+            )
+        shutil.rmtree(out)
+
+    _write(kept, out, manifest)
+
+
+def _write(kept, out: Path, manifest: Path) -> None:
     for cls in {c for _, _, c, _, _ in kept}:
         (out / cls).mkdir(parents=True, exist_ok=True)
 
@@ -282,6 +334,9 @@ def main() -> int:
                         help="max Hamming distance between 64-bit perceptual hashes for "
                              "two images to count as the same photo (default 4)")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--clean", action="store_true",
+                        help="delete the output directory first; required when rebuilding "
+                             "over an existing corpus")
     args = parser.parse_args()
 
     if not args.raw.is_dir():
@@ -357,7 +412,7 @@ def main() -> int:
         print("\n(dry run -- nothing written)")
         return 0
 
-    write_corpus(kept, args.out, args.manifest)
+    write_corpus(kept, args.out, args.manifest, args.clean)
     print(f"\nwrote {args.out}\nmanifest {args.manifest}")
     return 0
 

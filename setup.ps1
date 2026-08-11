@@ -41,7 +41,7 @@ Write-Host "Verifying imports..."
 $check = @'
 import importlib.util, sys   # importlib alone does not expose .util
 required = ['torch', 'torchvision', 'PIL', 'numpy', 'flask', 'transformers', 'accelerate',
-            'sentencepiece']
+            'sentencepiece', 'kaggle']
 missing = [m for m in required if importlib.util.find_spec(m) is None]
 if missing:
     print('MISSING: ' + ', '.join(missing))
