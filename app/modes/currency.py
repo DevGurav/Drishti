@@ -1,6 +1,6 @@
-"""Currency mode: classify the rupee note. Backed by the MobileNet CNN to be
-trained on an Indian-currency dataset (data/scripts/download_currency.py, not
-yet built) once notebook 00's candidate evaluation picks the model shape.
+"""Currency mode: classify the rupee note. Backed by the 7-class MobileNet trained on
+the assembled Indian-currency dataset, wired in as app/engines/currency_cnn.py — see
+DEC-040 to DEC-042 in docs/BUILD_PLAN.md.
 """
 from __future__ import annotations
 

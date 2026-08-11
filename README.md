@@ -105,7 +105,7 @@ load is one-time, and there is no reason to spend it in front of an audience.
 Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-# 0. tests need nothing at all - 175 tests, no models
+# 0. tests need nothing at all - 179 tests, no models
 python -m unittest discover -s tests -t .
 
 # 1. OCR: read + medicine modes            (~100 MB downloaded on first run)
@@ -125,7 +125,14 @@ python -m app.cli --mode ask --image x.jpg --question "what colour is this?"
 name and expiry in **Latin script** even on Marathi packaging, so `--ocr-lang en --lang mr`
 is the usual combination.
 
-Currency mode still raises `NotImplementedError` — it needs the MobileNet training run.
+Currency mode works. The 7-class MobileNet is trained and wired in
+(`app/engines/currency_cnn.py`, a 6.2 MB checkpoint) — **0.9827** accuracy on the 2026-08-11
+retrain, and at the chosen `CONFIDENCE_THRESHOLD = 0.90` it answers 89.9% of the time at
+**0.9941**, an expected error of **₹0.68** per identification. Below that threshold it says it is
+unsure rather than guessing a denomination, and a photo with no note in it comes back as
+`background` instead of an amount. Verified on the laptop the same day: 4 of the 5 real handheld
+fixtures answer, and 2 of 3 non-note photos correctly return `background`. ₹2000 is deliberately
+not a class — see `DEC-051` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
 
 **CPU timings, measured 2026-08-10 on a GPU-less Colab runtime** — not estimates:
 
