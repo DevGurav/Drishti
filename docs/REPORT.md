@@ -34,9 +34,25 @@ is the axis the whole system is designed around.
 
 `TODO:` one paragraph on scale — how many blind users in India, why Marathi specifically.
 
-## 2. Objectives
+## 2. Objectives, and how they turned out
 
-`TODO:` restate from `docs/OVERVIEW.md`, and mark which are met.
+Stated at the start of the project, scored honestly at the end. **Two of five met, two
+partly, one not attempted.**
+
+| # | objective | outcome |
+|---|---|---|
+| 1 | Fine-tune a **quantized (4-bit)** small VLM beating the stock VizWiz baseline | **Partly.** 0.308 → 0.575 beats stock decisively, but is *indistinguishable from a prompt change* (`DEC-067`), and the adapter does not ship (`DEC-068`). **No quantization was implemented.** |
+| 2 | Specialist pipelines: Indic OCR + expiry parsing, and a ₹-note CNN at **≥99%** | **Partly.** Both pipelines work end to end. Currency reached **0.9827**, short of the 99% bar — and the bar itself proved to be the wrong target (`DEC-022`). |
+| 3 | Safety guardrail: report a drug name only on a verified database match | **Met.** `app/drug_db.py`, declines otherwise, precision reported over a declared sample (`DEC-048`). |
+| 4 | Offline speech in Marathi/Hindi/English, **under 8s** end to end | **Partly.** The full offline translate + TTS path works in all three languages. The 8s budget is met by **one mode of six** (`DEC-066`). |
+| 5 | Validate with visually-impaired users; Android as a stretch goal | **Not attempted.** Android was dropped deliberately with its blocker measured (`DEC-064`); the user study is outstanding. |
+
+**The honest summary is that the targets were mostly missed and the reasons are the
+result.** The 99% accuracy bar was replaced by rupee-weighted cost because accuracy does
+not describe what a wrong answer costs. The 8s budget was missed, and measuring *why*
+showed the bottleneck was translation rather than the OCR everyone assumed. The VLM
+fine-tune worked and still should not ship. A report that claimed five green ticks would
+be less informative than this table.
 
 ## 3. Background
 
@@ -54,7 +70,34 @@ can answer it.** Currency is a closed-set problem with seven classes, so it runs
 MobileNetV3-Small — smaller, faster and more accurate than asking a vision-language model.
 OCR runs PaddleOCR. Only the open-ended modes reach the VLM.
 
-`TODO:` architecture diagram — camera → router → engine → translation → speech.
+```text
+                    ┌──────────────┐
+   photo ─────────► │    router    │  app/router.py — picks by mode, not by content
+                    └──────┬───────┘
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+  ┌───────────┐     ┌────────────┐     ┌────────────┐
+  │ PaddleOCR │     │ MobileNet  │     │  SmolVLM   │
+  │ read      │     │ currency   │     │ scene, ask │
+  │ medicine  │     │            │     │            │
+  └─────┬─────┘     └──────┬─────┘     └──────┬─────┘
+        │ text             │ class+conf       │ text
+        │                  │                  │
+        │            ┌─────▼──────┐           │
+        └───────────►│  refuse?   │◄──────────┘   drug DB · threshold 0.90 ·
+                     └─────┬──────┘               "unanswerable"
+                           │ English answer
+                     ┌─────▼──────┐
+                     │ IndicTrans2│   en → mr/hi        (16–23s on long text)
+                     └─────┬──────┘
+                     ┌─────▼──────┐
+                     │  MMS-TTS   │   offline speech    (3–6s)
+                     └─────┬──────┘
+                           ▼  spoken answer, no network at any point
+```
+
+Every box runs locally. The refusal stage is drawn as its own step because it is the
+project's actual subject: three different mechanisms feed it, and §7 measures each.
 
 ### 4.2 Components
 
@@ -99,8 +142,17 @@ Three findings worth reporting in their own right:
    tagged CC0 was found to contain watermarked stock photography (`DEC-053`). **No dataset
    image appears in this report.**
 
-`TODO:` say plainly that ₹ note serial numbers are traceable, that fixtures are blurred,
-and that no faces, ID documents or prescriptions were used.
+### 5.1 Privacy, stated rather than assumed
+
+The corpus contains **no faces, no identity documents and no prescriptions carrying a
+patient name**. Banknote **serial numbers are traceable to an individual transaction**, so
+the five self-photographed fixtures are blurred at the serial and no note image appears in
+this report.
+
+That last rule has a second reason. A Kaggle dataset tagged CC0 was found to contain
+Shutterstock-watermarked stock photography (`DEC-053`), which establishes that **a platform
+licence tag records the uploader's claim, not a provenance audit**. Reproducing any dataset
+image would propagate a licence this project cannot verify.
 
 ## 6. Method
 
@@ -244,9 +296,17 @@ benchmark and the product disagree.*
 - 68 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
 - Per-sample predictions: `eval/results/*.csv`
 - Corpus rebuild: `data/currency_manifest.csv` + `data/scripts/merge_currency.py`
-- `TODO:` test count at submission
+- **186 automated tests**, including a compile check over every notebook cell (`DEC-065`)
 
 ## Appendix B — Attribution
 
-`pypiahmad` and VizWiz-VQA are CC BY 4.0 and **require attribution**. `TODO:` full
-citations.
+Two sources are CC BY 4.0 and **require attribution**:
+
+- **VizWiz-VQA** — Gurari et al., *VizWiz Grand Challenge: Answering Visual Questions from
+  Blind People*, CVPR 2018. Used for the evaluation benchmark, the fine-tuning split, and
+  as "no note in frame" negatives for the currency classifier.
+- **`pypiahmad/indian-rupees-and-thai-baht-banknotes`** (Kaggle) — 1,961 images.
+
+`vishalmane109` is CC0-1.0 and `gauravsahani` is DbCL-1.0; neither requires attribution,
+and both are named anyway because `data/currency_manifest.csv` reproduces the corpus only
+if the sources are identifiable.
