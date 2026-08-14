@@ -2,10 +2,10 @@
 
 **Devendra Ramesh Gurav** · [github.com/DevGurav/Drishti](https://github.com/DevGurav/Drishti)
 
-> **Status: draft.** Two sections remain (`TODO`): the opening paragraph on scale, which
-> needs a citation, and the conclusion, which is written last. Everything else is complete.
-> Every number is measured and traceable to `docs/BUILD_PLAN.md` or a file in
-> `eval/results/` — if a figure is missing it is absent, not invented.
+> **Status: complete but for two author items**, both marked `TODO`: the opening paragraph
+> on scale, which needs a citation, and a re-check of the competing products' current
+> feature sets. Every number here is measured and traceable to `docs/BUILD_PLAN.md` or a
+> file in `eval/results/` — if a figure is missing it is absent, not invented.
 
 ---
 
@@ -423,10 +423,44 @@ Devanagari detector does not fit a phone.
 
 ## 11. Conclusion
 
-`TODO:` write last. The honest summary is likely: *a fully offline five-mode assistant that
-works end to end in Marathi on a laptop CPU, evaluated with metrics chosen to reflect what
-a wrong answer costs a user who cannot check it — and a repeated demonstration that the
-benchmark and the product disagree.*
+Drishti is a five-mode vision assistant that runs **entirely offline on a laptop CPU** and
+answers in Marathi, Hindi or English. Reading text, identifying a medicine and its expiry,
+naming a banknote, describing a scene and answering a question about a photograph all work
+end to end, with no network at any point. That much is demonstrable and was the committed
+deliverable.
+
+Most of the numeric targets set at the start were missed. Currency reached 0.9827 against a
+99% bar; one mode of six meets the 8-second budget; no quantization was implemented; the
+user study was not run. **The reasons those targets were missed are the substance of this
+project**, because in every case the target turned out to describe something other than what
+a blind user experiences:
+
+- **99% accuracy was the wrong bar.** Replaced by rupee-weighted error, which revealed that
+  ₹2000 was an *attractor* rather than a difficult class — removing it improved accuracy and
+  cut expected cost from ₹9.43 to ₹2.48, and eliminated the ₹2,000 error entirely.
+- **The 8-second miss was informative.** Measuring per mode showed translation, not OCR, is
+  the larger cost on the English text path — the opposite of what the risk register had
+  assumed since Phase 1.
+- **Fine-tuning worked and should not ship.** The LoRA adapter scores highest on VizWiz and
+  refuses half of all answerable questions. A one-line prompt change captures what a
+  hundred-minute training run does, and the paired interval says the difference is
+  indistinguishable from zero.
+
+The finding that recurs, and the one this report puts forward as its main claim, is that
+**benchmark scores and deployed behaviour diverged five separate times** — and that the
+things which caught it were cheap: a handful of hand-photographed fixtures, a cost metric
+kept alongside the accuracy metric, versioned per-sample predictions, and a prediction
+written down before the run that then failed on all four counts.
+
+None of the components here are novel. The contribution is a working offline system for a
+user who is poorly served by the existing ones, and an evaluation honest enough to
+recommend against its own best-scoring model.
+
+**What remains** is the user study, which is scoped and outstanding rather than abandoned,
+and the Android port, which was dropped deliberately with its blocker measured: Devanagari
+OCR needs a server-class detector because every lighter one read zero characters. The
+project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 68 decisions, each
+with the measurement that settled it, including the ones that were wrong.
 
 ---
 

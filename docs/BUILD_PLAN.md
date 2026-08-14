@@ -27,7 +27,7 @@
 | 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
 | 4 — Integration | 🟢 **All but one item done** — five modes, browser app on real engines, combination strips. Only the per-mode latency budget is open (RISK-1) |
 | 5 — User study | ⬜ Not started — **Android descoped** (`DEC-064`); gated on NGO contact (`RISK-3`) |
-| 6 — Evaluation & report | 🟡 **Draft complete** — `docs/REPORT.md`: problem, objectives scorecard, background, design, datasets, method, all results, discussion, limitations and attribution are written. Outstanding: the scale paragraph (needs a citation) and the conclusion (written last) |
+| 6 — Evaluation & report | 🟢 **Complete but for two author items** — `docs/REPORT.md` is written end to end including the conclusion; `docs/DEMO.md` is the runbook. Outstanding: the scale paragraph (needs a citation) and a re-check of competing products' current features |
 
 **Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
 demoable end to end ≈ **Oct 2026** · project complete ≈ **Mar–Apr 2027**.
