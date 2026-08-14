@@ -122,23 +122,29 @@ def main() -> int:
         row.infer_s = warm
         row.answer = str(answer)[:70].replace('\n', ' ')
 
+        # The speech leg must be timed on the text the user actually hears, which is the
+        # *translated* answer. Timing it on the English answer with a Marathi voice is
+        # not merely inaccurate, it does not run: MMS-TTS tokenises against a Devanagari
+        # vocabulary, English input reduces to no tokens, and VITS then calls narrow()
+        # with a negative length. That is a harness error and was briefly mistaken for
+        # scene and ask shipping without audio.
+        spoken = row.answer
         if args.lang != 'en':
             translator = IndicTrans2Translator()
-            _, _ = timed(lambda: deliver(row.answer, lang=args.lang,
-                                         translator=translator, tts=None, speak=False))
-            _, row.translate_s = timed(
+            warm = deliver(row.answer, lang=args.lang, translator=translator,
+                           tts=None, speak=False)
+            result, row.translate_s = timed(
                 lambda: deliver(row.answer, lang=args.lang, translator=translator,
                                 tts=None, speak=False))
+            spoken = getattr(result, 'text_out', None) or getattr(warm, 'text_out', '') \
+                or row.answer
 
         tts = MMSTTSEngine(out_dir=ROOT / 'runtime' / 'audio')
         try:
-            _, _ = timed(lambda: deliver(row.answer, lang=args.lang, translator=None,
-                                         tts=tts, speak=True))
-            _, row.tts_s = timed(
-                lambda: deliver(row.answer, lang=args.lang, translator=None,
-                                tts=tts, speak=True))
+            _, _ = timed(lambda: tts.speak(spoken, lang=args.lang))
+            _, row.tts_s = timed(lambda: tts.speak(spoken, lang=args.lang))
         except Exception as exc:                       # noqa: BLE001
-            row.notes.append(f'tts unavailable: {type(exc).__name__}')
+            row.notes.append(f'tts failed: {type(exc).__name__}: {exc}')
 
         rows.append(row)
         verdict = 'PASS' if row.per_photo_s < TARGET_S else 'over'
