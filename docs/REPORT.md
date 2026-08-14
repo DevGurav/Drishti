@@ -2,9 +2,10 @@
 
 **Devendra Ramesh Gurav** · [github.com/DevGurav/Drishti](https://github.com/DevGurav/Drishti)
 
-> **Status: scaffold.** Sections marked `TODO` need writing; every number already present
-> is measured and traceable to `docs/BUILD_PLAN.md` or a file in `eval/results/`. Nothing
-> here is a placeholder figure — if a number is missing it is absent, not invented.
+> **Status: draft.** Two sections remain (`TODO`): the opening paragraph on scale, which
+> needs a citation, and the conclusion, which is written last. Everything else is complete.
+> Every number is measured and traceable to `docs/BUILD_PLAN.md` or a file in
+> `eval/results/` — if a figure is missing it is absent, not invented.
 
 ---
 
@@ -56,10 +57,42 @@ be less informative than this table.
 
 ## 3. Background
 
-`TODO:` brief and honest. What already exists (Seeing AI, Lookout, Envision), what they
-require (network, subscription, English-first), and what is genuinely different here
-(offline, Indic-first, refusal as a first-class output). Do not oversell novelty — the
-contribution is a measured system and its evaluation, not a new architecture.
+Assistive vision tools for blind users are a solved problem in the sense that good ones
+exist. **Microsoft Seeing AI**, **Google Lookout** and **Envision AI** all read text,
+identify currency and describe scenes, and **Be My Eyes** connects users to sighted
+volunteers and, more recently, to a cloud model. Several are free. None of them is
+improved on here, and this report does not claim to.
+
+What they share is a set of assumptions that do not hold for the user this project targets:
+
+- **They lean on the network.** Text recognition is often local; scene description and
+  free-form questions are typically served by a cloud model. That fails on a patchy
+  connection and sends a photograph of a medicine strip to a server.
+- **Their Indic coverage is thin.** Interfaces and speech output are English-first, and
+  Marathi is rarely a first-class option — for a user in Maharashtra the answer may be
+  correct and still unusable.
+- **Currency recognition is region-specific**, and Indian denominations changed
+  substantially after 2016; ₹2000 was withdrawn in 2023.
+
+> `TODO:` verify the current feature set of each product before submission — these
+> assistants ship changes frequently and a claim about what runs on-device dates quickly.
+
+**What is different here is not architecture.** Every component is an off-the-shelf open
+model, and that is deliberate: the interesting question is not whether a 2B VLM can
+describe a photograph, but what a system built from such parts should *do when it is not
+sure*. The contributions this report claims are therefore:
+
+1. A **fully offline** five-mode pipeline including Indic translation and speech, measured
+   end to end on ordinary laptop hardware rather than on a GPU.
+2. Metrics chosen to describe **what a wrong answer costs a user who cannot check it** —
+   rupee-weighted error, and abstention precision and recall reported separately.
+3. A repeated, documented finding that **benchmark scores and deployed behaviour diverge**,
+   with five independent instances and one that changed what ships (§8).
+
+Academic work on abstention and selective prediction is the closer relative to this project
+than the consumer apps are. **VizWiz** (Gurari et al., 2018) is the benchmark that makes it
+measurable, because it is photographs actually taken by blind people, and roughly half of
+its validation set is unanswerable by construction.
 
 ## 4. System design
 
@@ -156,8 +189,77 @@ image would propagate a licence this project cannot verify.
 
 ## 6. Method
 
-`TODO:` per mode — preprocessing, model, thresholds, and where each constant came from.
-Every threshold in this project was measured rather than assumed; say so with the sweep.
+**No constant in this system is a guess.** Every threshold below was set by a sweep, and
+where one started as a scaffolding value the decision log records both the guess and the
+measurement that replaced it. That is the methodological claim of this section.
+
+### 6.1 Shared preprocessing
+
+All three engines load images through `app/imaging.py::load_upright`, which applies EXIF
+orientation. Phone photographs record rotation as metadata rather than rotating the pixels,
+so an engine reading the raw file sees a sideways image — and a blind user has no way to
+know their photograph was rotated.
+
+### 6.2 Read and medicine — PaddleOCR
+
+| constant | value | how it was set |
+|---|---|---|
+| `max_side` | 1280 | swept against 1600 and 1024; 1600 cost 35% more time for no fields gained (`DEC-036`) |
+| detector, Latin | `PP-OCRv6_small_det` | benchmarked over five tiers scoring **fields recovered alongside seconds**, not seconds alone (`DEC-058`) |
+| detector, Devanagari | `PP-OCRv5_server_det` | every lighter tier returned **zero** Devanagari characters where this reads 1010 |
+| `enable_mkldnn` | `False` | mandatory — the oneDNN CPU path crashes on this version pair |
+| doc preprocessing | on | disabling it lost the drug name, expiry and MRP for a 13% speed gain |
+
+The tier benchmark is the part worth reporting. `PP-OCRv6_tiny` is **6.3× faster** and
+**loses the expiry date** — excellent on a stopwatch, and it would tell a blind user an
+expired medicine is safe. Scoring required fields alongside latency is what caught it.
+
+**Medicine mode** then parses expiry and MRP from the OCR text (`app/parsers.py`) and looks
+the drug name up in a verified database (`app/drug_db.py`). Matching counts occurrences
+rather than testing substrings, so `NORADRENALINE` does not resolve to `Adrenaline`
+(`DEC-046`). **No database match means no drug name is spoken** — the mode declines.
+
+### 6.3 Currency — MobileNetV3-Small
+
+Transfer-learned from ImageNet, 224px, 12 epochs, AdamW with cosine annealing and label
+smoothing 0.05. **Augmentation is chosen to match how a blind user photographs a note** —
+random resized crop to 0.55 (partially framed), rotation ±25° (handheld tilt), heavy colour
+jitter (indoor bulbs), perspective distortion (folded notes), and random erasing (a thumb
+over the note). Both flips are included, since a note handed over upside-down is the same
+note.
+
+`CONFIDENCE_THRESHOLD = 0.90` was a scaffolding guess of 0.85 until notebook 03 swept it
+(`DEC-040`). Selection minimises **rupee error** subject to answering ≥80% of the time; an
+earlier rule picked the lowest viable threshold and recommended 0.50, optimising for
+answering often, which contradicts the premise that rupee cost is what matters. The sweep
+has since re-derived 0.90 independently on three different corpora.
+
+Class names, image size and normalisation travel **inside** the checkpoint (`DEC-023`), so
+a corpus with different folders cannot silently relabel every prediction.
+
+### 6.4 Scene and ask — SmolVLM
+
+The prompt is the method. `ABSTENTION_SUFFIX` in `app/engines/smolvlm.py` states the stakes
+plainly — that the person asking is blind and cannot check the answer, that a confident
+wrong answer is worse than none, and that the model should reply exactly `unanswerable`
+otherwise. **This single change moved VizWiz accuracy 0.308 → 0.533** (`DEC-016`), which is
+why it, not the stock model, is the bar fine-tuning had to clear (`DEC-017`).
+
+The notebooks read that suffix **from the source file rather than retyping it**, so a
+measured number always describes the prompt the app actually ships.
+
+The model intermittently emits `Answer: unanswerable`; unhandled, the app reads that string
+aloud instead of offering retake guidance, so it is stripped (`DEC-018`).
+
+### 6.5 Delivery — translation and speech
+
+IndicTrans2 for en → mr/hi, then MMS-TTS. Speech is chunked at sentence boundaries under
+400 characters, because MMS degrades on long inputs and scene descriptions run long.
+
+Note for anyone reproducing the latency figures: **the speech leg must be timed on the
+translated text**. MMS-TTS tokenises against a Devanagari vocabulary, so English input
+reduces to no tokens and the model fails outright — a harness error that briefly looked
+like a missing feature.
 
 ## 7. Evaluation
 
@@ -243,9 +345,9 @@ why they are quoted as ranges.
 
 ## 8. Discussion — the benchmark is not the product
 
-This is the thread running through the project, and it should be the centre of this
-section rather than an aside. Four independent times, **the benchmark and the deployed
-behaviour moved in opposite directions**:
+This is the thread running through the project. **Five independent times, the benchmark and
+the deployed behaviour moved in opposite directions** — and the pattern is consistent
+enough to be the report's main claim rather than an aside:
 
 1. Merging datasets made the **benchmark score go down** while real-note fixtures went
    from 3/5 to 5/5 (`DEC-052`).
@@ -258,8 +360,45 @@ behaviour moved in opposite directions**:
 5. The LoRA scoring **highest on VizWiz** is the one that refuses **half** of all
    answerable questions, so the prompt ships instead (`DEC-068`).
 
-The practical conclusion: **five self-photographed fixtures caught what a 751-image test
-set could not.** `TODO:` develop this into the report's main argument.
+### 8.1 Why this keeps happening
+
+These are not five unrelated accidents. Each has the same shape: **the metric is a proxy,
+and optimising a proxy hard enough eventually pushes against the thing it stands for.**
+
+- **The test set is drawn from the same distribution as the training set.** A currency
+  corpus of tightly-cropped catalogue photographs measures how well the model reads
+  tightly-cropped catalogue photographs. Real notes are held at arm's length in bad light.
+- **The metric omits the cost structure.** VizWiz pays full credit for a correct
+  `unanswerable`, so declining is a cheap way to score. Accuracy treats a ₹10→₹20 error and
+  a ₹100→₹500 error identically. Both metrics are reasonable; neither describes the user.
+- **Latency measured on one component hides where the time goes.** Six months of the risk
+  register said "OCR is slow". Measured end to end, translation is the larger half.
+
+### 8.2 What actually caught them
+
+Not better benchmarks. Four cheap habits, and they generalise beyond this project:
+
+1. **A handful of real fixtures, photographed by hand.** Five banknote photographs and three
+   non-note images caught what a 751-image test split could not — twice. They cost an
+   afternoon and are the single highest-value artifact in the repository.
+2. **A cost metric alongside the accuracy metric.** Rupee-weighted error is what revealed
+   that ₹2000 was an attractor rather than a merely difficult class, and that dataset
+   leakage understated cost by 54% while barely moving accuracy.
+3. **Per-sample predictions, versioned.** Every claim traces to a CSV, which is what made
+   paired confidence intervals possible after the fact — and paired intervals are what
+   demoted "fine-tuning beats prompting" to "indistinguishable".
+4. **Predictions written down before the run.** `DEC-061` was registered in advance and
+   **failed on all four counts**, which falsified a diagnosis that had already been written
+   into the decision log as though it were established. Nothing else would have caught it;
+   a hypothesis formed after seeing the result would have fitted the result.
+
+### 8.3 The uncomfortable version
+
+The strongest result in this project is a **negative** one, and it took two GPU runs to
+establish: a one-line prompt change captures essentially everything a 100-minute fine-tune
+does, and the fine-tune that scores highest is the one that should not ship. Had the
+project reported only the headline metric — 0.308 → 0.575, an 87% relative improvement —
+every number would have been true and the conclusion would have been wrong.
 
 ## 9. Limitations
 
