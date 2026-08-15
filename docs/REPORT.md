@@ -506,14 +506,14 @@ pretend otherwise (§9). Naming it is the same discipline the rest of the projec
 `DEC-048` rule that an unvalidated claim is worse than an absent one, applied here to the
 claim that would have been the most tempting to make.
 
-The project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 70 decisions,
+The project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 71 decisions,
 each with the measurement that settled it, including the ones that were wrong.
 
 ---
 
 ## Appendix A — Reproducibility
 
-- 70 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
+- 71 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
 - Per-sample predictions: `eval/results/*.csv`
 - Corpus rebuild: `data/currency_manifest.csv` + `data/scripts/merge_currency.py`
 - **186 automated tests**, including a compile check over every notebook cell (`DEC-065`)

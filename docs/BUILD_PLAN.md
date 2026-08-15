@@ -33,7 +33,7 @@
 | 1 — Baselines & core pipeline | ✅ **Complete** — every mode verified against real models on the laptop, 2026-08-11. The one item left open here was NGO outreach, now dropped (`DEC-070`) |
 | 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
 | 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
-| 4 — Integration | 🟢 **All but one item done** — five modes, browser app on real engines, combination strips. Only the per-mode latency budget is open (RISK-1) |
+| 4 — Integration | ✅ **Complete** — five modes, browser app on real engines, combination strips. The per-mode latency budget is closed as won't-do (`DEC-071`): measured and reported per tier rather than enforced, because enforcing it would disable five modes of six |
 | 5 — Self-conducted task testing | ⬜ Not started — **Android descoped** (`DEC-064`) and the **user study dropped** (`DEC-070`). What remains is airplane-mode verification and a scripted self-test. It cannot show that a blind user can operate the app, and does not claim to |
 | 6 — Evaluation & report | 🟢 **Report complete** — `docs/REPORT.md` written end to end, both author items closed 2026-08-15: the scale paragraph now carries citations, and the competitor claims were re-verified against first-party docs (`DEC-069`). Outstanding: the demo rehearsal |
 
@@ -211,7 +211,7 @@ beats 0.308 decisively but is **statistically indistinguishable from the prompt 
 
 ---
 
-### Phase 4 — Integration · 🟢 Complete but for the latency budget (RISK-1)
+### Phase 4 — Integration · ✅ Complete
 
 **Goal:** one coherent app rather than five scripts.
 
@@ -228,7 +228,9 @@ Brought forward while model installs were pending — the interface needs no wei
 - [x] **Run the browser app against real engines** — 2026-08-11, laptop: read, medicine and
       currency all answer through `AnswerService` with real weights. Exposed `DEC-045`
       (discarded `ocr_lang`), which fakes could not have caught
-- [ ] Latency budget enforced per mode (see RISK-1)
+- [x] ~~Latency budget enforced per mode~~ — **closed as won't-do, 2026-08-15** (`DEC-071`).
+      Measured per mode instead and reported per tier; enforcing an 8s budget in code would
+      make five modes of six refuse to run
 - [x] **Separate scene description from VQA** — `VLMEngine` gained `describe()`, so the
       abstention suffix stays on `answer()` where the 0.533 was measured and off
       description, which asked for sentences and got `Paracip-500` (`DEC-031`). One
@@ -257,14 +259,18 @@ The Android port is dropped (`DEC-064`) and the study with blind participants is
 - [ ] **Airplane-mode verification** — network off at the OS level, then every mode run end
       to end. The offline claim is currently enforced by a test over the rendered page, which
       cannot see a model phoning home
-- [ ] **Task-based self-test, scripted before running.** Write the task list and the
-      pass/fail rule *first*, so the outcome is not graded after the fact by the person who
-      built it. Minimum: a strip whose expiry has passed · a strip the database cannot match
-      (must decline) · each circulating denomination · a note in poor light (must decline
-      rather than guess) · a non-note object in currency mode · a Marathi page · an
-      unanswerable photograph in ask mode
+- [x] **Write the task list and its pass conditions, before testing** — `docs/SELF_TEST.md`,
+      2026-08-15. 22 tasks across the five modes plus offline delivery, each with its pass
+      condition fixed *now*, while nothing has been run. It states in its own header what it
+      cannot establish, so a green sheet cannot later be written up as user validation
+- [ ] **Run it**, filling in results by hand and without editing a pass condition mid-run
 - [ ] Record every failure with the photograph that caused it, so a fix has a fixture
-- [ ] Re-run the five committed note fixtures on the demo machine, cold
+- [x] **Re-run the committed fixtures on the demo machine, cold** — done 2026-08-15 via
+      `python -m eval.check_fixtures`, which now exists so this instruction has a command
+      rather than a good intention. **4 of 5 notes answer, 3 of 3 non-notes refused, worst
+      false positive `strip_paracip` → ₹100 at 0.840 leaving 0.060 of headroom** — an
+      independent reproduction of `DEC-062`. It also caught that `data/samples/README.md`
+      had drifted two model generations stale
 
 **Exit criteria:** every mode exercised against a pre-written task list in airplane mode,
 with failures recorded as fixtures rather than as recollections.
@@ -295,8 +301,10 @@ That claim needs blind participants and is now out of scope (`DEC-070`).
       (expiry + MRP spoken in Marathi) → ₹500 note → Marathi newspaper read aloud →
       *then* the recorded scene-mode clip, introduced as needing a GPU
 - [ ] Pre-load every model on the demo machine and leave the server warm — the 59s model
-      load is one-time and should not happen in front of anyone (`RISK-9` covers the
-      gated repos)
+      load is one-time and should not happen in front of anyone (`RISK-9` covers the gated
+      repos). **Now one command: `python -m app.warmup`**, which runs each stage in its own
+      process (`DEC-006`) and reports which one failed. Verified 2026-08-15: all four
+      non-VLM stages pass, 175.5s total from cold. Still needs running *on the day*
 - [ ] Rehearse the two questions anyone watching will ask: "why is it slow?" (RISK-1, with the
       measured table) and "does it ever make things up?" (`DEC-037`, with scene mode's own
       30-tablets paragraph and the guardrail that stops it reaching the user)
@@ -378,6 +386,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-068 | **The prompt ships, not the adapter — the best VizWiz score is the worse product** | Run 2 is the best model this project has produced *on the benchmark*: overall 0.575, unanswerable subset 0.783, abstention recall 0.750, all bests. It is also the one that **refuses 129 of 256 answerable questions — half of everything a user could actually be told** — against 59 for the prompt-only path. Abstention precision is 0.587, so **more than four in ten refusals are needless**. VizWiz scores a correct `unanswerable` as a full point, which makes declining a cheap way to win; a blind user gets silence and no way to know the answer was available. `app/engines/smolvlm.py` therefore keeps the stakes prompt, and the adapters stay in `models/` as measured artifacts rather than shipped weights. **This is the fifth time in this project that the benchmark and the product moved in opposite directions** (`DEC-049`, `DEC-052`, `DEC-058`, `DEC-062`), and the first time the gap was large enough to change what ships |
 | DEC-069 | **The competitor re-check weakened two of the three claims the project was scoped against, and both corrections are kept** | §3 of the report rested on three assumptions about Seeing AI, Lookout, Envision and Be My Eyes, written from memory during project selection. Verified against first-party documentation on **2026-08-15**, two do not survive. **"Their Indic coverage is thin" is false for reading:** Lookout reads text in 33 languages *including Marathi*, Hindi, Gujarati, Kannada, Tamil, Telugu and Bengali. **"They lean on the network" is being closed as this was written:** Envision shipped on-device scene description and visual question answering on Gemma 4 / Arm SME2 in **June 2026**, two months ago, as a preview. Also corrected: Lookout's currency mode already covers **Indian Rupees**, so currency mode fills no coverage gap. The temptation was to leave the original framing, since it is the framing that motivates the project — and it would have been the single easiest claim for any reader to falsify in thirty seconds, in a report whose whole argument is that unverified claims are the problem. **What survives is narrower and checkable:** none of these products documents the entire chain — Indic OCR, an Indic *spoken* answer, and a designed refusal — offline on ordinary hardware, and none publishes what a wrong answer costs. **Method note:** every external claim now carries the date it was verified, because this section decays faster than any measured number in the report — the Envision announcement post-dates the project's own scoping |
 | DEC-070 | **The user study is dropped, not deferred; self-testing replaces it and is not a substitute for it** | Decided 2026-08-15: no NGO outreach, no blind participants, self-conducted task testing instead. The reason is time, and it is a legitimate one — `RISK-3` had already recorded weeks of lead time for a reply plus weeks more for scheduling, against a project whose other work is finished. **The cost is specific and must not be blurred.** This project's entire design rests on one premise — *the user cannot check the answer* — and that is precisely the condition a sighted author testing their own app cannot reproduce. I know what the strip says before I photograph it, I can see when OCR returns nothing, and I will unconsciously frame the shot well. A blind user gets none of that, and the failures that matter most (a confident wrong answer, an answer that never arrives, a refusal with no way to know why) are the ones self-testing is worst at surfacing. **So the claim does not survive the change of method:** objective 5 is recorded as *not met*, not as *met differently*, and `docs/REPORT.md` §9 says plainly that nothing in this project demonstrates a blind user can operate it. This is the `DEC-048` rule applied to a second claim — an unvalidated number invites exactly the trust it has not earned, and "validated with users" would be a far more damaging one to overstate than medicine precision. **What self-testing genuinely buys**, and why it is still worth doing: it exercises modes that have never run against adversarial inputs — an expired strip, an unmatched drug name, a note in poor light — and every failure it finds becomes a committed fixture. The task list is written *before* the testing, because a test graded afterwards by its author grades itself |
+| DEC-071 | **The per-mode latency budget is not enforced in code; it is measured and reported per tier** | The Phase-4 item said "latency budget enforced per mode", written when the budget was assumed reachable. `DEC-066` measured it: currency 1–2s, medicine 19–30s, read 29–45s, read-mr 76–83s, scene ~245s, ask ~224s. **Enforcing an 8s budget now would make five modes of six refuse to run** — it would convert a documented limitation into a broken app, and the modes it would disable include the Marathi newspaper read that is the whole point of the demo. Rejected alternatives: *a per-mode timeout* (the work is already done when the clock expires, so it throws away a correct answer the user waited for); *a warning after 8s* (the answer is spoken, so a warning is either noise or ignored — and `DEC-063` established that a warning inside a long-running operation is not a control, it is a thing that scrolls past). What ships instead is the `DEC-038` framing: OCR modes demoed live, VLM modes reported with their measured cost stated aloud. **The budget stays in the success criteria as a target that was missed**, not deleted and not quietly redefined to something the system meets — the same rule `DEC-070` applies to the user study and `DEC-048` to medicine precision. `RISK-1` therefore stays open and red rather than being closed by fiat |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
@@ -426,6 +435,11 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | `notebooks/01_vizwiz_baseline.ipynb` | The baseline number (Colab GPU) |
 | `notebooks/02_abstention_prompts.ipynb` | Prompt sweep to recalibrate abstention (Colab GPU) |
 | `notebooks/05_lora_finetune.ipynb` | Phase 3: LoRA fine-tune on VizWiz, measured against 0.533 |
+| `docs/DEMO.md` | Demo runbook — the order to show things in, and the fallback for each failure |
+| `docs/SELF_TEST.md` | Phase-5 task sheet: 22 tasks with pass conditions fixed before the run |
+| `eval/check_fixtures.py` | Runs the committed fixtures through currency mode — the "re-run after every retrain" instruction, as a command |
+| `app/warmup.py` | Pre-demo preflight: every model loaded once, each stage in its own process |
+| `eval/bench_modes.py` | Per-mode latency, model load excluded (`DEC-066`) |
 | `eval/results/` | Downloaded run artifacts — the evidence trail |
 
 **Maintenance rule:** update the status dashboard and decision log in the same commit as the
