@@ -2,10 +2,10 @@
 
 **Devendra Ramesh Gurav** · [github.com/DevGurav/Drishti](https://github.com/DevGurav/Drishti)
 
-> **Status: complete but for two author items**, both marked `TODO`: the opening paragraph
-> on scale, which needs a citation, and a re-check of the competing products' current
-> feature sets. Every number here is measured and traceable to `docs/BUILD_PLAN.md` or a
-> file in `eval/results/` — if a figure is missing it is absent, not invented.
+> **Status: complete.** Every number here is measured and traceable to `docs/BUILD_PLAN.md`
+> or a file in `eval/results/` — if a figure is missing it is absent, not invented.
+> External claims about competing products carry the date they were verified (§3,
+> **2026-08-15**); they date quickly and should be re-checked before any public version.
 
 ---
 
@@ -33,7 +33,19 @@ sighted user reading a wrong OCR result notices. A blind user does not. This mak
 confident wrong answer strictly worse than a refusal, and that asymmetry — not accuracy —
 is the axis the whole system is designed around.
 
-`TODO:` one paragraph on scale — how many blind users in India, why Marathi specifically.
+**The scale.** India's most recent nationally representative eye survey puts country-wide
+blindness prevalence at **0.36%** and visual impairment at **5.47%**, which the authors
+extrapolate to roughly **4.8 million blind and 74 million visually impaired people** as of
+2017 (Vashist et al., 2022). For that population "ask a sighted person" is not an
+occasional inconvenience; it is the daily mechanism for reading a medicine strip or
+checking a banknote.
+
+**Marathi is not an arbitrary choice of first language.** The 2011 Census records about
+**83 million** first-language Marathi speakers — the fourth largest in India — and roughly
+99 million including second-language speakers. It is also written in Devanagari, so `read`
+mode reaches Marathi and Hindi through a single OCR recogniser rather than two. The
+consumer assistants surveyed in §3 do read Marathi text; what none of them does is *answer*
+in it (§3), which is the half that matters to a user who cannot read the screen.
 
 ## 2. Objectives, and how they turned out
 
@@ -63,19 +75,36 @@ identify currency and describe scenes, and **Be My Eyes** connects users to sigh
 volunteers and, more recently, to a cloud model. Several are free. None of them is
 improved on here, and this report does not claim to.
 
-What they share is a set of assumptions that do not hold for the user this project targets:
+Every claim in this section was re-verified against first-party documentation on
+**2026-08-15**. These products ship frequently, and the re-check **weakened two of the three
+assumptions this project was originally scoped against** — recorded here rather than quietly
+left in the stronger form.
 
-- **They lean on the network.** Text recognition is often local; scene description and
-  free-form questions are typically served by a cloud model. That fails on a patchy
-  connection and sends a photograph of a medicine strip to a server.
-- **Their Indic coverage is thin.** Interfaces and speech output are English-first, and
-  Marathi is rarely a first-class option — for a user in Maharashtra the answer may be
-  correct and still unusable.
-- **Currency recognition is region-specific**, and Indian denominations changed
-  substantially after 2016; ₹2000 was withdrawn in 2023.
+- **They lean on the network — but decreasingly.** Text recognition is often local, while
+  scene description and free-form questions are typically served by a cloud model, which
+  fails on a patchy connection and sends a photograph of a medicine strip to a server.
+  **This is actively changing:** in **June 2026** Envision shipped on-device scene
+  description and visual question answering built on Gemma 4, running on Arm SME2-capable
+  phones, released as a preview. Google documents only Lookout's Food labels mode as
+  working offline. The offline gap is real but narrowing, and on phone-class hardware a
+  competitor has now closed part of it.
+- **Indic support is real for *reading* and absent for *answering*.** Lookout reads text in
+  33 languages including Marathi, Hindi, Gujarati, Kannada, Tamil, Telugu and Bengali — so
+  "these tools cannot read Devanagari" would be false. But its detailed image descriptions
+  are English, and Seeing AI's published list at its Android launch was 18 languages, none
+  of them Indic. The gap is not recognising Indic script; it is **replying in an Indic
+  language**, which is what the translate-and-speak path exists for.
+- **Currency recognition is region-specific, and Indian notes are already covered.**
+  Lookout's currency mode supports US dollars, Euros and **Indian Rupees**; Seeing AI has a
+  currency channel. This project's currency mode therefore fills **no coverage gap**. What
+  it adds is a rupee-weighted cost metric and a measured refusal threshold (§7.2) — a
+  different claim from working where they do not.
 
-> `TODO:` verify the current feature set of each product before submission — these
-> assistants ship changes frequently and a claim about what runs on-device dates quickly.
+**What survives the re-check is narrower than the original framing.** None of these products
+documents the whole chain — Indic OCR, an Indic *spoken* answer, and a designed refusal —
+running offline on ordinary hardware, and none publishes what a wrong answer costs its user.
+That is a defensible position. "Existing tools do not work for Indian users" would not have
+been, and was the claim before this section was checked.
 
 **What is different here is not architecture.** Every component is an off-the-shelf open
 model, and that is deliberate: the interesting question is not whether a 2B VLM can
@@ -459,14 +488,14 @@ recommend against its own best-scoring model.
 **What remains** is the user study, which is scoped and outstanding rather than abandoned,
 and the Android port, which was dropped deliberately with its blocker measured: Devanagari
 OCR needs a server-class detector because every lighter one read zero characters. The
-project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 68 decisions, each
+project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 69 decisions, each
 with the measurement that settled it, including the ones that were wrong.
 
 ---
 
 ## Appendix A — Reproducibility
 
-- 68 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
+- 69 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
 - Per-sample predictions: `eval/results/*.csv`
 - Corpus rebuild: `data/currency_manifest.csv` + `data/scripts/merge_currency.py`
 - **186 automated tests**, including a compile check over every notebook cell (`DEC-065`)
@@ -483,3 +512,27 @@ Two sources are CC BY 4.0 and **require attribution**:
 `vishalmane109` is CC0-1.0 and `gauravsahani` is DbCL-1.0; neither requires attribution,
 and both are named anyway because `data/currency_manifest.csv` reproduces the corpus only
 if the sources are identifiable.
+
+## Appendix C — External sources
+
+Cited for the scale figures in §1 and the competitor claims in §3. **Everything in §3 was
+verified on 2026-08-15** against first-party documentation; consumer assistants change
+often, and each claim should be re-checked rather than quoted from here later.
+
+- Vashist P, Senjam SS, Gupta V, et al. (2022). *Blindness and visual impairment and their
+  causes in India: Results of a nationally representative survey.* **PLoS ONE** 17(7):
+  e0271736. <https://doi.org/10.1371/journal.pone.0271736> — source of the 0.36% / 5.47%
+  prevalence figures and the 4.8 million / 74 million extrapolation for 2017.
+- **Census of India 2011**, language tables — 83 million first-language Marathi speakers,
+  ~99 million including second-language speakers.
+- Gurari D, et al. (2018). *VizWiz Grand Challenge: Answering Visual Questions from Blind
+  People.* **CVPR 2018.** <https://vizwiz.org/tasks-and-datasets/vqa/>
+- **Microsoft Seeing AI** — feature channels and the 18-language list, from the Android
+  launch announcement, Microsoft Accessibility Blog.
+- **Google Lookout** — seven modes, currency limited to USD/EUR/INR, 33 text-reading
+  languages including Marathi, and Food labels as the only documented offline mode:
+  Android Accessibility Help,
+  <https://support.google.com/accessibility/android/answer/9031274>
+- **Envision** — on-device scene description and VQA with Gemma 4 on Arm SME2 hardware,
+  announced **June 2026** and shipped as a preview:
+  <https://www.letsenvision.com/blog/envision-arm-and-google-are-bringing-powerful-visual-ai-on-device>
