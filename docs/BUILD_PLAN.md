@@ -5,11 +5,15 @@
 > approach. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-11 — currency mode trained and verified on the laptop
-> (`DEC-040`–`DEC-042`). Previously 2026-08-10: full end-to-end run, every mode verified
-> against real models (`DEC-035`–`DEC-037`).
+> **Last updated:** 2026-08-15 — the report's two open author items closed, `data/README.md`
+> written with verified licences, and the stale Phase 3/4/6 headings reconciled with what is
+> actually finished (`DEC-069`). Previously 2026-08-14: report written end to end.
 >
-> **Phase:** 1 of 6 · **Personal project by Devendra Ramesh Gurav**
+> **Phase:** 6 of 6 · **Personal project by Devendra Ramesh Gurav**
+>
+> **What is actually left:** the demo rehearsal, the latency budget (`RISK-1`, and the
+> honest answer there is to report per-mode rather than fix it), and the user study, which
+> is gated on NGO contact and deferred by choice (`RISK-3`).
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
 > Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
@@ -27,7 +31,7 @@
 | 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
 | 4 — Integration | 🟢 **All but one item done** — five modes, browser app on real engines, combination strips. Only the per-mode latency budget is open (RISK-1) |
 | 5 — User study | ⬜ Not started — **Android descoped** (`DEC-064`); gated on NGO contact (`RISK-3`) |
-| 6 — Evaluation & report | 🟢 **Complete but for two author items** — `docs/REPORT.md` is written end to end including the conclusion; `docs/DEMO.md` is the runbook. Outstanding: the scale paragraph (needs a citation) and a re-check of competing products' current features |
+| 6 — Evaluation & report | 🟢 **Report complete** — `docs/REPORT.md` written end to end, both author items closed 2026-08-15: the scale paragraph now carries citations, and the competitor claims were re-verified against first-party docs (`DEC-069`). Outstanding: the demo rehearsal |
 
 **Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
 demoable end to end ≈ **Oct 2026** · project complete ≈ **Mar–Apr 2027**.
@@ -108,7 +112,7 @@ Only the two items above that depend on other people remain.
 
 ---
 
-### Phase 2 — Dataset assembly · 🟡 Partly done
+### Phase 2 — Dataset assembly · ✅ Complete
 
 **Goal:** a training corpus assembled from existing licence-clean datasets. No
 self-collected photography (`DEC-047`). Protocol: `docs/dataset_guide.md`.
@@ -133,7 +137,11 @@ need *evaluation* data, not volume. Only currency and the VLM modes consume trai
       reads — 225 MB against an 11.3 GB archive
 - [x] **Merge script and manifest committed** — `data/currency_manifest.csv`, 5,602 rows,
       so the corpus rebuilds from a clean checkout without shipping any images
-- [ ] Record every source and licence in `data/README.md` with a verification date
+- [x] **Record every source and licence in `data/README.md` with a verification date** —
+      done 2026-08-15: four sources with licences and per-source counts reproduced from the
+      committed manifest, the two requiring attribution marked, the excluded `shobhit18th`
+      recorded with its reason, and the Shutterstock-watermark warning (`DEC-053`) stated as
+      a rule that no dataset image may be reproduced
 
 **Exit criteria — met 2026-08-11:** **5,602 images** from four sources, deduplicated,
 rebuildable from `data/currency_manifest.csv`, with `background` at 883. Licences recorded:
@@ -151,7 +159,7 @@ precision target therefore cannot be validated at that confidence — see `DEC-0
 
 ---
 
-### Phase 3 — Fine-tuning · ⬜ Not started
+### Phase 3 — Fine-tuning · ✅ Complete — **the result is negative, and it ships that way**
 
 **Goal:** the core ML contribution. *Without this the project is an app that calls existing
 models — an integration exercise rather than a project with a result of its own.*
@@ -169,24 +177,35 @@ alone could not do — every variant traded one for the other.
       evaluation samples, the metric and the normalisation fixed at notebook 01's values so
       the result is comparable to 0.533; the suffix is *read from* `app/engines/smolvlm.py`
       rather than retyped, so it cannot drift from what the app ships
-- [ ] Run it on a T4 and record the ablation
-- [ ] **Weight abstention examples** — teaching "unanswerable" is worth up to +0.34 overall,
-      versus +0.10 for a large gain in general answering ability
-- [ ] Report abstention precision/recall separately, not just aggregate accuracy — a model
-      that abstains on *everything* also scores well and would be useless
-- [ ] Retrain the currency CNN on the merged multi-source corpus and re-check the five
-      committed note fixtures — two of which fail today
-- [ ] Re-run notebook 01 evaluation — **same N, same prompt** — for a fair comparison
-- [ ] Train the MobileNet currency classifier (≥99% target) — `notebooks/03` is written
-      and the engine is wired; needs a licensed Kaggle dataset (`DEC-022`)
-- [ ] Ablation: stock vs VizWiz-tuned, and single-source vs merged currency corpus
+- [x] **Run it on a T4 and record the ablation** — two runs, 100 minutes each. Run 1
+      (`ABSTAIN_RATIO=0.45`) scored **0.521**, run 2 (0.28) scored **0.575**, against the
+      prompt-only **0.533**. Four-row ablation table produced (`DEC-060`, `DEC-067`)
+- [x] **Weight abstention examples** — done via `ABSTAIN_RATIO`, and the knob mattered:
+      run 2 beat run 1 by `+0.054`, CI `[+0.013, +0.095]`. But **not for the predicted
+      reason** — `DEC-061`'s written prediction missed on all four counts, and the better
+      hypothesis is mode collapse onto the lowest-entropy string (`DEC-067`)
+- [x] Report abstention precision/recall separately — and it is what decided the outcome:
+      run 2's recall 0.750 came with precision **0.587**, refusing **129 of 256 answerable
+      questions**
+- [x] **Retrain the currency CNN on the merged multi-source corpus** — 5,010 images across
+      7 classes, 0.0% leakage. All five note fixtures answer (`DEC-052`, `DEC-062`)
+- [x] Re-run notebook 01 evaluation — same 500 samples, same prompt, same normalisation
+- [x] **Train the MobileNet currency classifier** — accuracy **0.9827**, expected error
+      **₹2.48**; at threshold 0.90 it answers 89.9% at ₹0.68. **The ≥99% bar was not met
+      and was the wrong target** — rupee cost is the metric (`DEC-022`, `DEC-059`)
+- [x] Ablation: stock vs prompt vs two LoRA configurations, and single-source vs merged
+      currency corpus
 
-**Exit criteria:** fine-tuned model beats 0.308 on the same slice, with the delta written up,
-an ablation table produced, and abstention behaviour reported separately.
+**Exit criteria — met, with the honest outcome being a negative result.** The fine-tune
+beats 0.308 decisively but is **statistically indistinguishable from the prompt change**
+(paired bootstrap CI straddles zero). Run 2 is the best model on the benchmark and the
+*worse product*: it refuses half of everything a user could be told, so
+`app/engines/smolvlm.py` keeps the stakes prompt and **the adapter does not ship**
+(`DEC-068`). The adapters stay in `models/` as measured artifacts.
 
 ---
 
-### Phase 4 — Integration · 🟡 Started early
+### Phase 4 — Integration · 🟢 Complete but for the latency budget (RISK-1)
 
 **Goal:** one coherent app rather than five scripts.
 
@@ -232,12 +251,23 @@ Brought forward while model installs were pending — the interface needs no wei
 
 ---
 
-### Phase 6 — Evaluation & report · ⬜ Not started
+### Phase 6 — Evaluation & report · 🟢 **Report complete; the rehearsal is what is left**
 
-- [ ] Final metrics: VizWiz accuracy vs baseline, per-mode precision/recall, latency
-- [ ] Success bar: medicine ≥95% guardrailed precision · currency ≥99% · <8s for the OCR
-      modes, with the VLM modes reported separately and honestly (`DEC-038`)
-- [ ] Write up the results; the decision log below is the methodology section, already written
+- [x] Final metrics: VizWiz accuracy vs baseline, per-mode precision/recall, latency — all
+      in `docs/REPORT.md` §7, each traceable to a file in `eval/results/`
+- [x] Success bar scored honestly in §2 — **two of five objectives met, two partly, one not
+      attempted**. Medicine ≥95% is declared *unvalidatable* rather than claimed
+      (`DEC-048`); currency reached 0.9827 against a 99% bar that was itself the wrong
+      target; the <8s budget is met by one mode of six (`DEC-066`)
+- [x] **Write up the results** — `docs/REPORT.md`, 11 sections plus three appendices.
+      §8 is the discussion the project actually earned: the benchmark and the product
+      moved in opposite directions five times
+- [x] **Scale paragraph written with citations** — 4.8M blind / 74M visually impaired in
+      India (Vashist et al., 2022); 83M first-language Marathi speakers (Census 2011)
+- [x] **Competing products re-verified, 2026-08-15** — and the re-check **weakened two of
+      the three original claims**: Lookout reads Marathi text and identifies ₹ notes, and
+      Envision shipped on-device scene description on Gemma 4 in June 2026. The surviving
+      claim is narrower and stated as such (`REPORT.md` §3, Appendix C)
 - [ ] **Demo rehearsal, in this order** (`DEC-038`): airplane mode on → medicine strip
       (expiry + MRP spoken in Marathi) → ₹500 note → Marathi newspaper read aloud →
       *then* the recorded scene-mode clip, introduced as needing a GPU
@@ -323,6 +353,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-066 | **Per-mode latency measured; one mode of six meets the target, and the bottleneck is not where the risk assumed** | `eval/bench_modes.py`, laptop CPU, Marathi delivery, model load excluded (it is paid once a session, not once a photo): **currency 1–2s ✅**, medicine 19–30s, read 29–45s, read-mr 76–83s, scene ~245s, ask ~224s. Three findings. **(1) Delivery dominates the English text modes.** For `read`, translation is 16–23s and speech 5–6s — **29s of a 45s total, 65%** — against 12–16s of OCR. `RISK-1` has been framed as "OCR is slow" since Phase 1; for the English path the translator is the larger half and no OCR tier change touches it. `ask` translates in 0.6s because its answer is one word, so the cost tracks output length, not mode. **(2) The VLM modes are 28–31× over**, which is not an optimisation problem. **(3) The laptop throttles under sustained load**: across four runs in one evening, per-photo cost rose monotonically — currency +120%, medicine +58%, read +55%. Absolute figures therefore carry roughly ±50% depending on how long the machine has been working, so they are quoted as ranges, and **the demo should be run on a cool machine**. `DEC-058`'s 12.9s for medicine is confirmed (11.6–13.2s inference); an isolated 22.1s reading earlier the same evening was contention between two concurrent benchmarks, not a regression |
 | DEC-067 | **`DEC-061`'s prediction was wrong on all four counts — over-abstention is not prior-copying** | Run 2 held everything fixed and moved `ABSTAIN_RATIO` 0.45 → 0.28, VizWiz-train's natural rate. Predicted, in writing, beforehand: abstention 40–46%, precision 0.68–0.78, recall 0.55–0.62, overall within noise of 0.53. **Measured: 62%, 0.587, 0.750, 0.575 — every interval missed.** Lowering the share of `unanswerable` targets made the model abstain *more* (56% → 62%), which is the opposite of what prior-copying predicts, so `DEC-060`'s diagnosis is falsified rather than refined. **A better hypothesis, and it fits the direction of the error**: `unanswerable` is a single fixed string while the answerable targets are hundreds of distinct short answers, so it is the lowest-entropy output available and cross-entropy drifts toward it regardless of its share. Run 2 gave the model *more* answerable examples and therefore a *more* diverse tail to fit, making the one reliably-predictable target relatively more attractive. That is mode collapse onto the easiest string, not prior imitation. **On the headline:** 0.575 vs 0.533 is `+0.043` with a paired CI of **[-0.005, +0.090]** — the notebook's `>` comparison called this a win and it is not one; the interval includes zero. Against run 1 the gain **is** significant (`+0.054`, `[+0.013, +0.095]`), so the knob mattered, just not for the predicted reason. §6 now prints the interval instead of a bare comparison |
 | DEC-068 | **The prompt ships, not the adapter — the best VizWiz score is the worse product** | Run 2 is the best model this project has produced *on the benchmark*: overall 0.575, unanswerable subset 0.783, abstention recall 0.750, all bests. It is also the one that **refuses 129 of 256 answerable questions — half of everything a user could actually be told** — against 59 for the prompt-only path. Abstention precision is 0.587, so **more than four in ten refusals are needless**. VizWiz scores a correct `unanswerable` as a full point, which makes declining a cheap way to win; a blind user gets silence and no way to know the answer was available. `app/engines/smolvlm.py` therefore keeps the stakes prompt, and the adapters stay in `models/` as measured artifacts rather than shipped weights. **This is the fifth time in this project that the benchmark and the product moved in opposite directions** (`DEC-049`, `DEC-052`, `DEC-058`, `DEC-062`), and the first time the gap was large enough to change what ships |
+| DEC-069 | **The competitor re-check weakened two of the three claims the project was scoped against, and both corrections are kept** | §3 of the report rested on three assumptions about Seeing AI, Lookout, Envision and Be My Eyes, written from memory during project selection. Verified against first-party documentation on **2026-08-15**, two do not survive. **"Their Indic coverage is thin" is false for reading:** Lookout reads text in 33 languages *including Marathi*, Hindi, Gujarati, Kannada, Tamil, Telugu and Bengali. **"They lean on the network" is being closed as this was written:** Envision shipped on-device scene description and visual question answering on Gemma 4 / Arm SME2 in **June 2026**, two months ago, as a preview. Also corrected: Lookout's currency mode already covers **Indian Rupees**, so currency mode fills no coverage gap. The temptation was to leave the original framing, since it is the framing that motivates the project — and it would have been the single easiest claim for any reader to falsify in thirty seconds, in a report whose whole argument is that unverified claims are the problem. **What survives is narrower and checkable:** none of these products documents the entire chain — Indic OCR, an Indic *spoken* answer, and a designed refusal — offline on ordinary hardware, and none publishes what a wrong answer costs. **Method note:** every external claim now carries the date it was verified, because this section decays faster than any measured number in the report — the Envision announcement post-dates the project's own scoping |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
