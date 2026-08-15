@@ -62,3 +62,16 @@ kaggle
 
 # Web app (app/web/) -- small, pure-python
 flask
+
+# ---------------------------------------------------------------------------
+# Development. Not needed to run the app, needed to trust it.
+#
+# pytest was missing from this file until 2026-08-15, and missing from the venv
+# with it, so `python -m pytest` failed with "No module named pytest" on the
+# demo laptop -- the one machine where the suite matters. The report cited 186
+# passing tests that could not be run on the machine that would be demonstrated.
+# Same failure shape as the torchvision and accelerate gaps this file already
+# records: setup completes, nothing complains, and the hole appears at the worst
+# moment. Ceiling-pinned per DEC-009; a pytest major bump changes collection
+# behaviour and the notebook compile-check (DEC-065) depends on it.
+pytest<10
