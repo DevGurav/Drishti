@@ -47,8 +47,13 @@ existing assistive AI requires internet, English literacy, and cloud upload of p
    over a declared sample rather than as an unvalidated percentage (`DEC-048`).
 4. Deliver answers as speech in Marathi/Hindi/English through an offline translation
    (IndicTrans2) and TTS pipeline; end-to-end spoken answer under 8 seconds on a laptop CPU.
-5. Validate with visually-impaired users through an NGO/blind-school partnership (task-success
-   study) and port the system to an Android device as a stretch goal.
+5. ~~Validate with visually-impaired users through an NGO/blind-school partnership
+   (task-success study) and port the system to an Android device as a stretch goal.~~
+   **Both dropped, and the objective is scored *not met* rather than redefined** — the
+   Android port with its blocker measured (`DEC-064`), the user study for time (`DEC-070`).
+   Self-conducted task testing replaces the study and does not stand in for it: a sighted
+   author cannot reproduce the one condition the whole design assumes, that the user cannot
+   check the answer. See `docs/REPORT.md` §9.
 
 ## Literature survey (indicative)
 
@@ -71,10 +76,13 @@ existing assistive AI requires internet, English literacy, and cloud upload of p
 3. **Fine-tuning:** LoRA fine-tune the chosen VLM on VizWiz (free Colab/Kaggle GPUs);
    train the currency CNN on the merged corpus; assemble the routing layer and guardrail.
 4. **Speech pipeline (M4):** IndicTrans2 dist-200M (en→mr/hi) + MMS-TTS, all offline.
-5. **Deployment (M5–6):** 4-bit GGUF quantization; laptop demo app; Android port via
-   llama.cpp/MediaPipe LLM Inference (stretch); NGO user testing.
+5. **Deployment (M5–6):** laptop demo app. ~~4-bit GGUF quantization; Android port via
+   llama.cpp/MediaPipe LLM Inference (stretch); NGO user testing~~ — all three dropped
+   (`DEC-064`, `DEC-068`, `DEC-070`).
 6. **Evaluation (M7–8):** VizWiz accuracy vs baseline; per-mode precision/recall; latency;
-   user task-success study; a written record of what worked and what did not.
+   a scripted self-test in airplane mode; a written record of what worked and what did not.
+   ~~User task-success study~~ — dropped (`DEC-070`), and recorded as a limitation rather
+   than replaced.
 
 ## System requirements
 
@@ -84,10 +92,16 @@ existing assistive AI requires internet, English literacy, and cloud upload of p
 
 ## Expected outcomes
 
-A working offline assistant (laptop demo + Android stretch goal), measurable improvement over
-the stock-model baseline on VizWiz, guardrail behaviour reported over a stated sample rather than as an
-unvalidated ≥95%, ≥99% currency accuracy on a held-out public split, and a small user study with visually-impaired participants — plus an honest writeup
-of the measurements, including the ones that did not go the way they were expected to.
+A working offline assistant (laptop demo), measurable improvement over the stock-model
+baseline on VizWiz, guardrail behaviour reported over a stated sample rather than as an
+unvalidated ≥95%, and currency accuracy on a held-out public split reported as rupee-weighted
+cost rather than as a bare ≥99% — plus an honest writeup of the measurements, including the
+ones that did not go the way they were expected to.
+
+**Not delivered, and stated here rather than at the end:** the Android port (`DEC-064`) and
+the user study with visually-impaired participants (`DEC-070`). The second means the project
+never establishes that its intended user can operate it — its largest gap, and the one no
+measurement elsewhere compensates for.
 
 ## Targets
 
@@ -98,4 +112,4 @@ slipping. The ordered work — six phases, live status, decision log and risk re
 | Target | By | What "done" means |
 |---|---|---|
 | Demoable end to end | ~Oct 2026 | Read, medicine and currency answering on a laptop, offline, spoken in Marathi |
-| Project complete | ~Mar–Apr 2027 | Fine-tuned model beating the baseline, a user study, and the results written up |
+| Project complete | ~Mar–Apr 2027 | Fine-tuning measured and written up (it tied with prompting and does not ship — `DEC-068`), a scripted self-test passed in airplane mode, and the results written up. **No user study** (`DEC-070`) |

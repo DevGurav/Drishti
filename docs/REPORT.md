@@ -58,7 +58,7 @@ partly, one not attempted.**
 | 2 | Specialist pipelines: Indic OCR + expiry parsing, and a ₹-note CNN at **≥99%** | **Partly.** Both pipelines work end to end. Currency reached **0.9827**, short of the 99% bar — and the bar itself proved to be the wrong target (`DEC-022`). |
 | 3 | Safety guardrail: report a drug name only on a verified database match | **Met.** `app/drug_db.py`, declines otherwise, precision reported over a declared sample (`DEC-048`). |
 | 4 | Offline speech in Marathi/Hindi/English, **under 8s** end to end | **Partly.** The full offline translate + TTS path works in all three languages. The 8s budget is met by **one mode of six** (`DEC-066`). |
-| 5 | Validate with visually-impaired users; Android as a stretch goal | **Not attempted.** Android was dropped deliberately with its blocker measured (`DEC-064`); the user study is outstanding. |
+| 5 | Validate with visually-impaired users; Android as a stretch goal | **Not met, and now out of scope.** Android was dropped with its blocker measured (`DEC-064`); the user study was dropped for time (`DEC-070`) and replaced by self-conducted task testing, which tests the software rather than the user experience. **Scored not met rather than redefined** — see §9. |
 
 **The honest summary is that the targets were mostly missed and the reasons are the
 result.** The 99% accuracy bar was replaced by rupee-weighted cost because accuracy does
@@ -442,6 +442,16 @@ State these plainly rather than burying them:
 - **The drug database is a guardrail, not a pharmacopoeia.**
 - **Evaluated on public datasets and five fixtures**, not on photographs taken by blind
   users in their homes.
+- **No blind user has ever used this system, and nothing here shows that one could.** The
+  study that would have established it was dropped for time (`DEC-070`); what replaces it is
+  the author testing his own build. That is a weaker instrument than it sounds, and weakest
+  exactly where this project is most exposed: **the entire design rests on the premise that
+  the user cannot check the answer**, which is the one condition a sighted author cannot
+  reproduce. He knows what the strip says before photographing it, sees immediately when OCR
+  returns nothing, and frames the shot well without meaning to. The failure modes that
+  matter most — a confident wrong answer, a refusal with no way to know why, an answer that
+  never arrives — are the ones self-testing is worst at finding. **This is the project's
+  largest single gap**, and no amount of the measurement in §7 substitutes for it.
 
 ## 10. Future work
 
@@ -460,7 +470,7 @@ deliverable.
 
 Most of the numeric targets set at the start were missed. Currency reached 0.9827 against a
 99% bar; one mode of six meets the 8-second budget; no quantization was implemented; the
-user study was not run. **The reasons those targets were missed are the substance of this
+user study was dropped. **The reasons those targets were missed are the substance of this
 project**, because in every case the target turned out to describe something other than what
 a blind user experiences:
 
@@ -485,17 +495,25 @@ None of the components here are novel. The contribution is a working offline sys
 user who is poorly served by the existing ones, and an evaluation honest enough to
 recommend against its own best-scoring model.
 
-**What remains** is the user study, which is scoped and outstanding rather than abandoned,
-and the Android port, which was dropped deliberately with its blocker measured: Devanagari
-OCR needs a server-class detector because every lighter one read zero characters. The
-project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 69 decisions, each
-with the measurement that settled it, including the ones that were wrong.
+**Two things were dropped rather than finished, and both are recorded as such.** The Android
+port went first, with its blocker measured: Devanagari OCR needs a server-class detector
+because every lighter one read zero characters (`DEC-064`). The user study went second, for
+time (`DEC-070`). That second one leaves the project's largest gap, and it is a gap in
+exactly the place the design is most exposed — **a system built entirely around the premise
+that the user cannot check the answer has never been put in front of a user who cannot check
+the answer.** Self-testing by a sighted author does not close that, and this report does not
+pretend otherwise (§9). Naming it is the same discipline the rest of the project ran on: the
+`DEC-048` rule that an unvalidated claim is worse than an absent one, applied here to the
+claim that would have been the most tempting to make.
+
+The project's most-used artifact is not the code but `docs/BUILD_PLAN.md` — 70 decisions,
+each with the measurement that settled it, including the ones that were wrong.
 
 ---
 
 ## Appendix A — Reproducibility
 
-- 69 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
+- 70 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
 - Per-sample predictions: `eval/results/*.csv`
 - Corpus rebuild: `data/currency_manifest.csv` + `data/scripts/merge_currency.py`
 - **186 automated tests**, including a compile check over every notebook cell (`DEC-065`)

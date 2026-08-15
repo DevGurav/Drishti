@@ -5,15 +5,19 @@
 > approach. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-15 — the report's two open author items closed, `data/README.md`
-> written with verified licences, and the stale Phase 3/4/6 headings reconciled with what is
-> actually finished (`DEC-069`). Previously 2026-08-14: report written end to end.
+> **Last updated:** 2026-08-15 — the report's two open author items closed,
+> `data/README.md` written with verified licences, the stale Phase 3/4/6 headings reconciled
+> (`DEC-069`), and the **user study dropped in favour of self-testing** (`DEC-070`).
 >
 > **Phase:** 6 of 6 · **Personal project by Devendra Ramesh Gurav**
 >
-> **What is actually left:** the demo rehearsal, the latency budget (`RISK-1`, and the
-> honest answer there is to report per-mode rather than fix it), and the user study, which
-> is gated on NGO contact and deferred by choice (`RISK-3`).
+> **What is actually left:** the demo rehearsal, a scripted self-test in airplane mode
+> (Phase 5), and the latency budget (`RISK-1`) — where the honest answer is to report per
+> mode rather than to fix it. **No item is blocked on anyone else.**
+>
+> **What the project will not claim:** that a blind user can operate it. The study that
+> would have shown this is dropped (`DEC-070`), so objective 5 is scored *not met* rather
+> than redefined into something self-testing can satisfy.
 >
 > **Baseline:** stock SmolVLM-Instruct scored **0.308** on 500 VizWiz-val samples.
 > Prompt engineering alone lifted it to **0.533** (+0.225, no training). Phase 3
@@ -26,11 +30,11 @@
 | Phase | State |
 |---|---|
 | 0 — Feasibility & setup | ✅ **Complete** |
-| 1 — Baselines & core pipeline | 🟢 **Complete** — every mode verified against real models on the laptop, 2026-08-11. NGO outreach is the one open item, and it belongs to Phase 5's user study |
+| 1 — Baselines & core pipeline | ✅ **Complete** — every mode verified against real models on the laptop, 2026-08-11. The one item left open here was NGO outreach, now dropped (`DEC-070`) |
 | 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
 | 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
 | 4 — Integration | 🟢 **All but one item done** — five modes, browser app on real engines, combination strips. Only the per-mode latency budget is open (RISK-1) |
-| 5 — User study | ⬜ Not started — **Android descoped** (`DEC-064`); gated on NGO contact (`RISK-3`) |
+| 5 — Self-conducted task testing | ⬜ Not started — **Android descoped** (`DEC-064`) and the **user study dropped** (`DEC-070`). What remains is airplane-mode verification and a scripted self-test. It cannot show that a blind user can operate the app, and does not claim to |
 | 6 — Evaluation & report | 🟢 **Report complete** — `docs/REPORT.md` written end to end, both author items closed 2026-08-15: the scale paragraph now carries citations, and the competitor claims were re-verified against first-party docs (`DEC-069`). Outstanding: the demo rehearsal |
 
 **Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
@@ -54,7 +58,7 @@ know which month Phase 3 lands in is not.
 | Scene / Ask modes | ✅ **Both work**, laptop included | Colab 2026-08-10 and **laptop 2026-08-11** (4.9 min warm, against 8 min on Colab CPU). Scene returns a full paragraph, confirming `DEC-031`. **The confabulation reproduces exactly** — "contains 30 tablets" (it holds 10) and "clear plastic… white backing" (it is opaque foil), word for word on both machines: `DEC-037` is a repeatable failure, not an anecdote |
 | Translation + TTS | ✅ Works end-to-end, **laptop included** | Colab 2026-08-10, and laptop 2026-08-11 in 5.6 min: `हे पॅरासिटामॉल आहे. हे APR.28 पर्यंत वैध आहे. एमआरपी 10.30 रुपये आहे.` plus 5.3 s of Marathi audio. Needed VS Build Tools (`IndicTransToolkit` is source-only) and `sentencepiece` |
 | Android port | ⬜ Not started | Phase 5 |
-| NGO / user study | 🔴 **Not contacted** | long lead time — start now |
+| ~~NGO / user study~~ | ⚪ **Dropped** | Decided 2026-08-15 (`DEC-070`) — no participants, self-conducted task testing instead. Objective 5 is recorded as **not met** |
 | Latency vs <8s target | 🔴 **OCR ~56s/photo · VLM ~294s on the laptop** | Colab 2026-08-10, GPU-less, model load (59.2s) excluded: medicine 56.2s @1280 vs 76.1s @1600; Devanagari 69.4s @1280 vs 103.6s @1600; scene 481.3s, ask 314.8s. **Laptop 2026-08-11 (i5-11300H): scene 294s warm** — faster than Colab's CPU but still minutes. Both far past 8s; see RISK-1 and `DEC-038` |
 
 ---
@@ -101,14 +105,16 @@ know which month Phase 3 lands in is not.
       medicines of India's National List of Essential Medicines 2022, extracted from the
       CDSCO publication by `data/scripts/build_drug_db.py` (`DEC-032`). Building it
       exposed a latent matcher bug — see `DEC-033`
-- [ ] **Send NGO / blind-school outreach emails** ← *long lead time; replies take weeks and
-      scheduling takes weeks more, so this gates Phase 5 rather than Phase 1*
+- [x] ~~**Send NGO / blind-school outreach emails**~~ — **dropped 2026-08-15** (`DEC-070`).
+      Not sent, and no longer planned: the lead time was weeks for a reply plus weeks for
+      scheduling, against a project otherwise finished. Consequence carried into §5 and the
+      report's limitations, not written off
 
 **Exit criteria — all met on the laptop, 2026-08-11:** baseline recorded (0.308 → 0.533) ·
 read, medicine and currency answering locally, scene mode too (294 s) · spoken Marathi
 end-to-end from medicine mode, text and audio.
 
-Only the two items above that depend on other people remain.
+**Phase 1 is closed.** With outreach dropped, nothing in this project waits on anyone else.
 
 ---
 
@@ -235,19 +241,36 @@ Brought forward while model installs were pending — the interface needs no wei
 
 ---
 
-### Phase 5 — On-device + user study · ⬜ Not started
+### Phase 5 — Self-conducted task testing · ⬜ Not started
 
-**Goal:** prove the "offline on a ₹10k phone" claim, and that blind users can actually use it.
+**Goal:** exercise every mode against realistic tasks on the demo laptop, and record what
+breaks. **This is not a user study and must never be written up as one** (`DEC-070`).
 
-- [ ] 4-bit quantization (GGUF) of the fine-tuned VLM
-- [ ] Android port via llama.cpp / MediaPipe LLM Inference
-- [ ] Resolve the PyTorch/PaddlePaddle process-isolation constraint (see DEC-006)
-- [ ] Airplane-mode verification — no network calls anywhere
-- [ ] User study with 5–10 visually-impaired participants; task-success rate
-- [ ] Iterate on findings
+The Android port is dropped (`DEC-064`) and the study with blind participants is dropped
+(`DEC-070`), so what remains of this phase is testing the author can do alone.
 
-**Exit criteria:** APK running offline on a real phone · user-study data collected.
-**Fallback if the port slips:** laptop demo is the deliverable, Android becomes future work.
+- [x] ~~4-bit quantization (GGUF) of the fine-tuned VLM~~ — no adapter ships (`DEC-068`)
+- [x] ~~Android port via llama.cpp / MediaPipe~~ — dropped with its blocker measured (`DEC-064`)
+- [x] ~~Resolve the PyTorch/PaddlePaddle process-isolation constraint~~ — solved on both
+      platforms instead (`DEC-027`, `DEC-044`); it stops being a port problem once the port is
+      dropped
+- [ ] **Airplane-mode verification** — network off at the OS level, then every mode run end
+      to end. The offline claim is currently enforced by a test over the rendered page, which
+      cannot see a model phoning home
+- [ ] **Task-based self-test, scripted before running.** Write the task list and the
+      pass/fail rule *first*, so the outcome is not graded after the fact by the person who
+      built it. Minimum: a strip whose expiry has passed · a strip the database cannot match
+      (must decline) · each circulating denomination · a note in poor light (must decline
+      rather than guess) · a non-note object in currency mode · a Marathi page · an
+      unanswerable photograph in ask mode
+- [ ] Record every failure with the photograph that caused it, so a fix has a fixture
+- [ ] Re-run the five committed note fixtures on the demo machine, cold
+
+**Exit criteria:** every mode exercised against a pre-written task list in airplane mode,
+with failures recorded as fixtures rather than as recollections.
+
+**What this phase can no longer deliver:** evidence that a blind user can operate the app.
+That claim needs blind participants and is now out of scope (`DEC-070`).
 
 ---
 
@@ -354,6 +377,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | DEC-067 | **`DEC-061`'s prediction was wrong on all four counts — over-abstention is not prior-copying** | Run 2 held everything fixed and moved `ABSTAIN_RATIO` 0.45 → 0.28, VizWiz-train's natural rate. Predicted, in writing, beforehand: abstention 40–46%, precision 0.68–0.78, recall 0.55–0.62, overall within noise of 0.53. **Measured: 62%, 0.587, 0.750, 0.575 — every interval missed.** Lowering the share of `unanswerable` targets made the model abstain *more* (56% → 62%), which is the opposite of what prior-copying predicts, so `DEC-060`'s diagnosis is falsified rather than refined. **A better hypothesis, and it fits the direction of the error**: `unanswerable` is a single fixed string while the answerable targets are hundreds of distinct short answers, so it is the lowest-entropy output available and cross-entropy drifts toward it regardless of its share. Run 2 gave the model *more* answerable examples and therefore a *more* diverse tail to fit, making the one reliably-predictable target relatively more attractive. That is mode collapse onto the easiest string, not prior imitation. **On the headline:** 0.575 vs 0.533 is `+0.043` with a paired CI of **[-0.005, +0.090]** — the notebook's `>` comparison called this a win and it is not one; the interval includes zero. Against run 1 the gain **is** significant (`+0.054`, `[+0.013, +0.095]`), so the knob mattered, just not for the predicted reason. §6 now prints the interval instead of a bare comparison |
 | DEC-068 | **The prompt ships, not the adapter — the best VizWiz score is the worse product** | Run 2 is the best model this project has produced *on the benchmark*: overall 0.575, unanswerable subset 0.783, abstention recall 0.750, all bests. It is also the one that **refuses 129 of 256 answerable questions — half of everything a user could actually be told** — against 59 for the prompt-only path. Abstention precision is 0.587, so **more than four in ten refusals are needless**. VizWiz scores a correct `unanswerable` as a full point, which makes declining a cheap way to win; a blind user gets silence and no way to know the answer was available. `app/engines/smolvlm.py` therefore keeps the stakes prompt, and the adapters stay in `models/` as measured artifacts rather than shipped weights. **This is the fifth time in this project that the benchmark and the product moved in opposite directions** (`DEC-049`, `DEC-052`, `DEC-058`, `DEC-062`), and the first time the gap was large enough to change what ships |
 | DEC-069 | **The competitor re-check weakened two of the three claims the project was scoped against, and both corrections are kept** | §3 of the report rested on three assumptions about Seeing AI, Lookout, Envision and Be My Eyes, written from memory during project selection. Verified against first-party documentation on **2026-08-15**, two do not survive. **"Their Indic coverage is thin" is false for reading:** Lookout reads text in 33 languages *including Marathi*, Hindi, Gujarati, Kannada, Tamil, Telugu and Bengali. **"They lean on the network" is being closed as this was written:** Envision shipped on-device scene description and visual question answering on Gemma 4 / Arm SME2 in **June 2026**, two months ago, as a preview. Also corrected: Lookout's currency mode already covers **Indian Rupees**, so currency mode fills no coverage gap. The temptation was to leave the original framing, since it is the framing that motivates the project — and it would have been the single easiest claim for any reader to falsify in thirty seconds, in a report whose whole argument is that unverified claims are the problem. **What survives is narrower and checkable:** none of these products documents the entire chain — Indic OCR, an Indic *spoken* answer, and a designed refusal — offline on ordinary hardware, and none publishes what a wrong answer costs. **Method note:** every external claim now carries the date it was verified, because this section decays faster than any measured number in the report — the Envision announcement post-dates the project's own scoping |
+| DEC-070 | **The user study is dropped, not deferred; self-testing replaces it and is not a substitute for it** | Decided 2026-08-15: no NGO outreach, no blind participants, self-conducted task testing instead. The reason is time, and it is a legitimate one — `RISK-3` had already recorded weeks of lead time for a reply plus weeks more for scheduling, against a project whose other work is finished. **The cost is specific and must not be blurred.** This project's entire design rests on one premise — *the user cannot check the answer* — and that is precisely the condition a sighted author testing their own app cannot reproduce. I know what the strip says before I photograph it, I can see when OCR returns nothing, and I will unconsciously frame the shot well. A blind user gets none of that, and the failures that matter most (a confident wrong answer, an answer that never arrives, a refusal with no way to know why) are the ones self-testing is worst at surfacing. **So the claim does not survive the change of method:** objective 5 is recorded as *not met*, not as *met differently*, and `docs/REPORT.md` §9 says plainly that nothing in this project demonstrates a blind user can operate it. This is the `DEC-048` rule applied to a second claim — an unvalidated number invites exactly the trust it has not earned, and "validated with users" would be a far more damaging one to overstate than medicine precision. **What self-testing genuinely buys**, and why it is still worth doing: it exercises modes that have never run against adversarial inputs — an expired strip, an unmatched drug name, a note in poor light — and every failure it finds becomes a committed fixture. The task list is written *before* the testing, because a test graded afterwards by its author grades itself |
 | DEC-023 | Class names live in the checkpoint, never in code | A checkpoint trained on differently-ordered folders would silently relabel every prediction. Hardcoding the order makes "₹500 reported as ₹10" a one-line mistake, which is the exact failure Money mode exists to prevent |
 | DEC-024 | The currency confidence threshold is measured, not assumed | `CONFIDENCE_THRESHOLD = 0.85` was a guess made while scaffolding. Notebook 03 §5 sweeps it and refuses to recommend any value that cannot reach ≥99% accuracy while still answering ≥80% of the time — better to declare the mode unready than to ship a confident wrong denomination |
 
@@ -365,7 +389,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 |---|---|---|---|
 | RISK-1 | **Latency: 1 of 6 modes meets the <8s target** — currency 1–2s ✅; medicine 19–30s; read 29–45s; read-mr 76–83s; scene ~245s; ask ~224s (`DEC-066`) | 🔴 High | No longer a guess: measured per mode by `eval/bench_modes.py`. Two structural facts change the plan. **Delivery, not vision, dominates the English text modes** — for `read`, translate + speak is 29s of 45s, so OCR tier work cannot fix it. **Scene and ask are 28–31× over**, which is a deployment answer rather than an optimisation. Currency is the demo-safe mode |
 | RISK-2 | ~~One source deep~~ **Largely retired** — four sources merged, and all five real-note fixtures now answer (`DEC-052`) | 🟢 Low | Self-collection is out (`DEC-047`), so diversity has to come from merging independent public sources and from VizWiz negatives. Residual risk stays: no public dataset has Indian notes photographed *by blind users at arm's length*, which is the case `DEC-043` measured as failing. The five committed fixtures are the honest check, and the writeup must report them rather than only the test split |
-| RISK-3 | **No NGO contact yet** | 🟡 **Deferred by choice, 2026-08-11** | Not a slip — outreach is paused until time allows. Consequence, stated so it is not a surprise later: Phase 5's user study cannot start until replies arrive, and reply plus scheduling has weeks of lead time. Everything else in the project can finish without it |
+| RISK-3 | ~~**No NGO contact yet**~~ | ⚪ **Closed — outreach dropped, 2026-08-15** | Decided (`DEC-070`): no NGO contact, no user study, self-conducted task testing instead. The risk is closed because the work it guarded is out of scope, **not because it was mitigated**. What it was protecting against still applies and moves to the limitations section: nothing in this project demonstrates that a blind user can operate the app |
 | RISK-4 | ~~Android port may not fit the timeline~~ | ⚪ **Closed — dropped on purpose** | Decided 2026-08-11 (`DEC-064`). Not a slip: the port is descoped and documented, and the laptop demo was always the committed deliverable |
 | RISK-5 | ~~Fine-tuning may not beat the stock baseline~~ | ⚪ **Closed — it did not, and that is the result** | LoRA scored 0.521 against the prompt-only 0.533, a paired bootstrap CI of [-0.058, +0.036] (`DEC-060`). The mitigation was always "a negative result measured honestly is defensible", and the four-row ablation now exists to defend it. Run 2 at the natural abstention rate refines the claim; it cannot reopen the risk |
 | RISK-6 | Upstream dependency churn breaks a working pipeline | 🟡 Medium | Pins + `requirements.txt` + DEC-009; re-verify before the demo |
@@ -385,7 +409,7 @@ Records *why*, so decisions aren't relitigated and the report has evidence.
 | End-to-end spoken answer, **OCR modes** (medicine, read, currency) | <8s on laptop CPU — the live-demo path (`DEC-038`). Currently 56s; the gap is RISK-1 |
 | End-to-end spoken answer, **VLM modes** (scene, ask) | <8s **with a GPU**. On CPU it is 315–481s, measured, and no realistic optimisation closes that — reported honestly rather than targeted |
 | Offline operation | Zero network calls — verified in airplane mode |
-| User study | 5–10 visually-impaired participants, task-success rate recorded |
+| ~~User study~~ | **Dropped** (`DEC-070`). Replaced by a self-conducted task test against a pre-written list — which measures whether the *software* works, not whether a blind user can operate it. The original criterion is recorded as unmet, not redefined |
 
 ---
 
