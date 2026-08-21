@@ -149,6 +149,50 @@ class TestImportOrderIsPlatformDependent(unittest.TestCase):
         load = self.source[self.source.index('def _load'):self.source.index('from paddleocr')]
         self.assertIn('except ImportError', load)
 
+class TestMaxSidePerScript(unittest.TestCase):
+    """The two scripts want opposite downscale limits and one value cannot serve both
+    (`DEC-073`). Measured 2026-08-22: a foil strip shot at 4080x3072 recovers 7 of 10
+    printed fields at 1280 and all 10 at 2048; newspaper-marathi.png reads 1010
+    Devanagari characters at 1280 and only 938 at 2048. Raising a single global default
+    would have fixed small Latin print by losing 72 Devanagari characters.
+    """
+
+    def test_latin_gets_the_larger_limit(self):
+        from app.engines.paddle_ocr import LATIN_MAX_SIDE, max_side_for
+        self.assertEqual(max_side_for('en'), LATIN_MAX_SIDE)
+        self.assertGreaterEqual(LATIN_MAX_SIDE, 2048)
+
+    def test_devanagari_keeps_the_smaller_one(self):
+        from app.engines.paddle_ocr import (
+            DEVANAGARI_LANGS, DEVANAGARI_MAX_SIDE, max_side_for,
+        )
+        for lang in DEVANAGARI_LANGS:
+            with self.subTest(lang=lang):
+                self.assertEqual(max_side_for(lang), DEVANAGARI_MAX_SIDE)
+        self.assertEqual(DEVANAGARI_MAX_SIDE, 1280)
+
+    def test_the_two_are_not_the_same_value(self):
+        """If these ever converge, one script's measurement was thrown away."""
+        from app.engines.paddle_ocr import DEVANAGARI_MAX_SIDE, LATIN_MAX_SIDE
+        self.assertNotEqual(LATIN_MAX_SIDE, DEVANAGARI_MAX_SIDE)
+
+    def test_native_resolution_is_not_a_default(self):
+        """At 4080 the detector is outside its trained scale and output degrades into
+        non-words -- the same symptom as text that is too small, so 'just stop
+        downscaling' looks like a fix and is not."""
+        from app.engines.paddle_ocr import DEVANAGARI_MAX_SIDE, LATIN_MAX_SIDE
+        for value in (LATIN_MAX_SIDE, DEVANAGARI_MAX_SIDE):
+            self.assertLessEqual(value, 2560)
+
+    def test_engine_resolves_by_lang_but_an_explicit_value_wins(self):
+        from app.engines.paddle_ocr import (
+            LATIN_MAX_SIDE, DEVANAGARI_MAX_SIDE, PaddleOCREngine,
+        )
+        self.assertEqual(PaddleOCREngine(lang='en').max_side, LATIN_MAX_SIDE)
+        self.assertEqual(PaddleOCREngine(lang='mr').max_side, DEVANAGARI_MAX_SIDE)
+        self.assertEqual(PaddleOCREngine(lang='en', max_side=999).max_side, 999)
+
+
 class TestModelTierDefaults(unittest.TestCase):
     """Latin script runs the small tier; Devanagari must not (`DEC-058`).
 

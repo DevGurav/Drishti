@@ -39,6 +39,31 @@ from pathlib import Path
 # DEC-036; two earlier readings of this knob were wrong in opposite directions.
 DEFAULT_MAX_SIDE = 1280
 
+# ...but that was measured on large print, and it is wrong for small Latin text. A phone
+# shoots 4080x3072; 1280 crushes it 3.2x linearly, a 10x loss of pixel area, and body text
+# falls below what the recogniser can resolve -- it then returns confident non-words rather
+# than nothing. Measured 2026-08-22 on a foil strip photographed at 4080x3072 (`DEC-073`):
+#
+#   max_side   fine print recovered   seconds
+#     1280        7/10 fields           6.2      <- the fine print is simply absent
+#     1600        7/10                  6.2
+#     2048       10/10                 10.1      <- chosen for Latin
+#     2560       10/10                 16.4
+#     4080        7/10                 46.4      <- collapses into garbage
+#
+# Bigger is *not* monotonically better: at native resolution the detector is outside the
+# scale it was trained for and output degrades into non-words, which is the same symptom
+# as too-small text and a trap for anyone "fixing" this by removing the downscale.
+LATIN_MAX_SIDE = 2048
+
+# Devanagari wants the opposite, and the same run measured it: newspaper-marathi.png reads
+# 1010 Devanagari characters at 1280 *and* 1600, but only **938 at 2048 and 2560**. That
+# fixture is 1296x1720, so 2048 stops downscaling it at all -- and native is worse here for
+# the same reason 4080 is worse for Latin. 1280 is also 1.4x faster than 1600 at identical
+# quality, so it stays. Raising one global value would have bought small Latin print at the
+# cost of 72 Devanagari characters.
+DEVANAGARI_MAX_SIDE = 1280
+
 # Devanagari script codes that PaddleOCR 3.7.0 actually accepts (verified in notebook 00b).
 # 'devanagari', 'hindi', 'marathi' and 'deva' all raise ValueError.
 DEVANAGARI_LANGS = ('hi', 'mr', 'ne', 'sa')
@@ -66,6 +91,16 @@ _DOC_PREPROCESS_OFF = {
     'use_doc_unwarping': False,
     'use_textline_orientation': False,
 }
+
+
+def max_side_for(lang: str) -> int:
+    """The downscale limit for a script. Pure, so the choice is testable without paddle.
+
+    Latin gets 2048 because small print in a 12MP phone photo does not survive 1280;
+    Devanagari keeps 1280 because it reads *worse* above it. See `DEC-073` for both
+    measurements -- neither value is transferable to the other script.
+    """
+    return DEVANAGARI_MAX_SIDE if lang in DEVANAGARI_LANGS else LATIN_MAX_SIDE
 
 
 def build_kwargs(lang: str, fast: bool = False, det_model: str | None = None,
@@ -136,10 +171,13 @@ def extract_lines(result) -> list[tuple[float, str]]:
 class PaddleOCREngine:
     """OCREngine backed by PaddleOCR. The model loads lazily on first read()."""
 
-    def __init__(self, lang: str = 'en', max_side: int = DEFAULT_MAX_SIDE, fast: bool = False,
+    def __init__(self, lang: str = 'en', max_side: int | None = None, fast: bool = False,
                  det_model: str | None = None, rec_model: str | None = None):
         self.lang = lang
-        self.max_side = max_side
+        # Resolved per script, not shared: the two want opposite values and a single
+        # default cannot serve both (`DEC-073`). Explicit `max_side` still wins, so
+        # eval/bench_ocr.py can sweep it.
+        self.max_side = max_side if max_side is not None else max_side_for(lang)
         self.fast = fast
         self.det_model = det_model
         self.rec_model = rec_model

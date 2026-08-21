@@ -12,7 +12,14 @@ from app.drug_db import DrugDatabase
 from app.engines.mms_tts import dropped_characters
 from app.modes.currency import run as currency_run
 from app.modes.medicine import run as medicine_run
-from app.speakable import expiry_words, has_digits, money_words, number_words
+from app.speech import localize
+from app.speakable import (
+    expiry_words,
+    has_digits,
+    money_words,
+    number_words,
+    spell_numbers_in_text,
+)
 
 CIRCULATING = ['10', '20', '50', '100', '200', '500']
 
@@ -137,6 +144,67 @@ class TestNoDigitReachesTheVoice(unittest.TestCase):
                               FakeOCR('PARACETAMOL EXP: JAN2020'), db)
         self.assertIn('expired', result.message_en.lower())
         self.assertFalse(has_digits(result.message_en), result.message_en)
+
+
+class TestSpellNumbersInText(unittest.TestCase):
+    """For read/scene/ask, which relay text rather than build it. Every voice drops
+    digits it lacks -- English has no 7, 8 or 9, so this is not a Devanagari-only fix."""
+
+    def test_year_and_price(self):
+        self.assertEqual(
+            spell_numbers_in_text('EXP 2028, MRP 87.90'),
+            'EXP two thousand twenty eight, MRP eighty seven point nine zero')
+
+    def test_the_english_cases_that_vanished(self):
+        self.assertEqual(spell_numbers_in_text('789 rupees'),
+                         'seven hundred eighty nine rupees')
+        self.assertEqual(spell_numbers_in_text('chapter 7'), 'chapter seven')
+
+    def test_fraction_is_read_digit_by_digit(self):
+        """'point ninety' would be a different quantity from 'point nine zero'."""
+        self.assertIn('point nine zero', spell_numbers_in_text('87.90'))
+        self.assertIn('point zero five', spell_numbers_in_text('1.05'))
+
+    def test_long_runs_are_read_out_as_digits(self):
+        """A ten-digit run is a phone number, not a quantity."""
+        self.assertEqual(spell_numbers_in_text('9876543210'),
+                         'nine eight seven six five four three two one zero')
+
+    def test_ordinals(self):
+        self.assertEqual(spell_numbers_in_text('3rd floor'), 'third floor')
+        self.assertEqual(spell_numbers_in_text('21st'), 'twenty first')
+        self.assertEqual(spell_numbers_in_text('12th'), 'twelfth')
+        self.assertEqual(spell_numbers_in_text('40th'), 'fortieth')
+
+    def test_text_without_digits_is_untouched(self):
+        marathi = 'ठाणे : अरुंद रस्ते'
+        self.assertEqual(spell_numbers_in_text(marathi), marathi)
+
+    def test_nothing_survives_that_a_voice_would_drop(self):
+        page = 'Published 2026. Call 022 12345678. Page 7 of 89. Rs 1,250.75'
+        self.assertFalse(has_digits(spell_numbers_in_text(page)),
+                         spell_numbers_in_text(page))
+
+
+class TestLocalizeSpellsNumbers(unittest.TestCase):
+    """The wiring: read/scene/ask get this for free because it lives in delivery."""
+
+    def test_english_path_is_covered_too(self):
+        """No translator involved, and English still cannot say 7, 8 or 9."""
+        self.assertEqual(localize('chapter 7', 'en', None), 'chapter seven')
+
+    def test_runs_before_translation_not_after(self):
+        """IndicTrans2 passes digits through unchanged, so spelling afterwards would be
+        too late -- the translator must receive words."""
+        seen = []
+
+        class SpyTranslator:
+            def translate(self, text, lang):
+                seen.append(text)
+                return 'translated'
+
+        localize('EXP 2028', 'mr', SpyTranslator())
+        self.assertEqual(seen, ['EXP two thousand twenty eight'])
 
 
 class CharVocabTokenizer:

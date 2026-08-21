@@ -1,7 +1,5 @@
 mode,load_s,infer_s,translate_s,tts_s,per_photo_s,first_photo_s,target_s,answer,notes
-currency,5.49,0.05,1.07,1.06,2.18,7.67,8.0,This is a 500 rupee note.,
-medicine,5.55,15.96,10.22,3.68,29.86,35.40,8.0,This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees.,
-read,1.81,15.88,23.09,5.91,44.89,46.70,8.0,Paracetamol Tablets IP 15000mg nol Tablets IP 500mg m  o ited cea  eoa,
-read-mr,1.71,69.06,8.81,4.62,82.48,84.20,8.0,खक तिजोरीमुळे भिवंडी भकास महेश गायकवाड राजकीय कुरघोडचांमुळे mahesh gai,
-scene,36.83,235.16,5.65,4.38,245.19,282.03,8.0,In this image we can see a paper with some text and numbers on it.,
-ask,37.22,222.61,0.57,0.51,223.69,260.91,8.0,Money,
+currency,5.95,0.04,0.80,0.79,1.64,7.58,8.0,This is a five hundred rupee note.,
+medicine,1.92,17.26,4.45,2.49,24.20,26.13,8.0,This is Paracetamol. It is valid until April two thousand twenty eight,
+read,1.32,13.97,17.71,4.19,35.88,37.20,8.0,Paracetamol Tables IP nol Tables IP 500mg PARACIP-500 T-500 CIP-500 -5,
+read-mr,8.45,54.90,6.35,4.25,65.51,73.95,8.0,खक तिजोरीमुळे भिवंडी भकास महेश गायकवाड राजकीय कुरघोडचांमुळे mahesh gai,

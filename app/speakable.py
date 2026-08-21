@@ -20,6 +20,8 @@ proves nothing about the audio unless the two are the same string.
 """
 from __future__ import annotations
 
+import re
+
 from app.parsers import parse_expiry_date
 
 _ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -101,6 +103,64 @@ def expiry_words(raw: str) -> str | None:
     if parsed is None:
         return None
     return f'{_MONTH_NAMES[parsed.month - 1]} {number_words(parsed.year)}'
+
+
+# Above this many digits a run is far more likely to be an identifier -- a pincode, a
+# phone number, a batch code -- than a quantity, and "one five zero zero zero" is both
+# safer and closer to how a person reads one out. Below it, the cardinal is right:
+# a year, a page number, a price.
+MAX_CARDINAL_DIGITS = 4
+
+_ORDINAL_WORDS = {'one': 'first', 'two': 'second', 'three': 'third', 'five': 'fifth',
+                  'eight': 'eighth', 'nine': 'ninth', 'twelve': 'twelfth'}
+
+_NUMBER_RUN = re.compile(r'(\d+)(?:\.(\d+))?(st|nd|rd|th)?', re.IGNORECASE)
+
+
+def _digit_by_digit(digits: str) -> str:
+    return ' '.join(_ONES[int(d)] for d in digits)
+
+
+def _ordinal(n: int) -> str:
+    head, _, last = number_words(n).rpartition(' ')
+    if last in _ORDINAL_WORDS:
+        last = _ORDINAL_WORDS[last]
+    elif last.endswith('y'):
+        last = f'{last[:-1]}ieth'
+    else:
+        last = f'{last}th'
+    return f'{head} {last}'.strip()
+
+
+def spell_numbers_in_text(text: str) -> str:
+    """Replace every digit run in free text with words.
+
+    For the modes that *relay* text rather than construct it -- read, scene, ask -- the
+    answer is whatever OCR or the VLM produced, so there is no single number to spell.
+    Every voice this project ships drops digits it lacks (`DEC-072`): Marathi has no
+    `3/5/8`, Hindi no `5/6/7/9`, and **English none of `7/8/9`**, which turns "789 rupees"
+    into "rupees" and "EXP 2028" into "exp 202".
+
+    >>> spell_numbers_in_text('EXP 2028, MRP 87.90')
+    'EXP two thousand twenty eight, MRP eighty seven point nine zero'
+    """
+    def replace(match: re.Match) -> str:
+        whole, frac, ordinal_suffix = match.group(1), match.group(2), match.group(3)
+
+        if ordinal_suffix and not frac:
+            if len(whole) <= MAX_CARDINAL_DIGITS:
+                return _ordinal(int(whole))
+            return f'{_digit_by_digit(whole)} {ordinal_suffix}'
+
+        spoken = (number_words(int(whole)) if len(whole) <= MAX_CARDINAL_DIGITS
+                  else _digit_by_digit(whole))
+        if frac:
+            # Read the fractional part digit by digit: "point nine zero", not "point
+            # ninety", which would be a different quantity.
+            spoken = f'{spoken} point {_digit_by_digit(frac)}'
+        return spoken
+
+    return _NUMBER_RUN.sub(replace, text)
 
 
 def has_digits(text: str) -> bool:
