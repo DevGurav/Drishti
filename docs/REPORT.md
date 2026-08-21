@@ -57,7 +57,7 @@ partly, one not attempted.**
 | 1 | Fine-tune a **quantized (4-bit)** small VLM beating the stock VizWiz baseline | **Partly.** 0.308 → 0.575 beats stock decisively, but is *indistinguishable from a prompt change* (`DEC-067`), and the adapter does not ship (`DEC-068`). **No quantization was implemented.** |
 | 2 | Specialist pipelines: Indic OCR + expiry parsing, and a ₹-note CNN at **≥99%** | **Partly.** Both pipelines work end to end. Currency reached **0.9827**, short of the 99% bar — and the bar itself proved to be the wrong target (`DEC-022`). |
 | 3 | Safety guardrail: report a drug name only on a verified database match | **Met.** `app/drug_db.py`, declines otherwise, precision reported over a declared sample (`DEC-048`). |
-| 4 | Offline speech in Marathi/Hindi/English, **under 8s** end to end | **Partly.** The full offline translate + TTS path works in all three languages. The 8s budget is met by **one mode of six** (`DEC-066`). |
+| 4 | Offline speech in Marathi/Hindi/English, **under 8s** end to end | **Partly.** The full offline translate + TTS path works in all three languages. The 8s budget is met by **one mode of six** (`DEC-066`). This row read the same before 2026-08-22, when it was **wrong**: the speech was carrying the wrong numbers in every language (`DEC-072`) and read mode was rewriting its own Marathi (`DEC-074`). Both are fixed and verified end to end; the row is annotated rather than quietly corrected, because how long it stood is §8.4's point. |
 | 5 | Validate with visually-impaired users; Android as a stretch goal | **Not met, and now out of scope.** Android was dropped with its blocker measured (`DEC-064`); the user study was dropped for time (`DEC-070`) and replaced by self-conducted task testing, which tests the software rather than the user experience. **Scored not met rather than redefined** — see §9. |
 
 **The honest summary is that the targets were mostly missed and the reasons are the
@@ -233,7 +233,8 @@ know their photograph was rotated.
 
 | constant | value | how it was set |
 |---|---|---|
-| `max_side` | 1280 | swept against 1600 and 1024; 1600 cost 35% more time for no fields gained (`DEC-036`) |
+| `max_side`, Latin | **2048** | 1280 recovers 7 of 10 printed fields from a 4080×3072 phone photo; 2048 recovers 10 of 10 for +4s. Native resolution recovers 7 and degrades into non-words (`DEC-073`) |
+| `max_side`, Devanagari | **1280** | the opposite result on the same day: 1010 characters at 1280 *and* 1600, but 938 at 2048. One shared value would have traded one mode's failure for another's (`DEC-073`) |
 | detector, Latin | `PP-OCRv6_small_det` | benchmarked over five tiers scoring **fields recovered alongside seconds**, not seconds alone (`DEC-058`) |
 | detector, Devanagari | `PP-OCRv5_server_det` | every lighter tier returned **zero** Devanagari characters where this reads 1010 |
 | `enable_mkldnn` | `False` | mandatory — the oneDNN CPU path crashes on this version pair |
@@ -372,6 +373,14 @@ cost rose monotonically — currency +120%, medicine +58%, read +55%. Absolute f
 therefore carry roughly ±50% depending on how long the machine has been working, which is
 why they are quoted as ranges.
 
+**Re-measured 2026-08-22, after the resolution fix** (`DEC-073`), on the same benchmark and
+machine: currency **1.6s**, medicine **24.2s**, read **35.9s**, read-mr **65.5s**. Every
+mode fell inside the ranges above *despite Latin OCR now running at 2048 rather than 1280* —
+a 2.6× increase in pixels processed. **Recovering the small print cost no measurable time**,
+which is worth stating because the 1280 default had been justified partly on latency
+grounds. read-mr should improve further still: `DEC-074` removes a 6.4s translation step
+from that path, and that step was actively corrupting the text.
+
 ## 8. Discussion — the benchmark is not the product
 
 This is the thread running through the project. **Five independent times, the benchmark and
@@ -429,6 +438,59 @@ does, and the fine-tune that scores highest is the one that should not ship. Had
 project reported only the headline metric — 0.308 → 0.575, an 87% relative improvement —
 every number would have been true and the conclusion would have been wrong.
 
+### 8.4 A second pattern: the failures were in the stage nobody measured
+
+Everything above was written before Phase 5 began. On the **first day of self-testing**,
+using the app rather than evaluating it turned up three defects, and none of them was
+visible to any metric in this report:
+
+1. **Every spoken number was wrong** (`DEC-072`). MMS-TTS voices carry a character
+   vocabulary and silently discard what they cannot encode. Marathi has no `3`, `5` or `8`;
+   Hindi no `5`, `6`, `7` or `9`; **English none of `7`, `8` or `9`**. So ₹500 was announced
+   as "00", an expiry of `APR.28` as "2", and an MRP of ₹10.30 as **₹100** — a tenfold price
+   error, spoken confidently, to someone who cannot check it.
+2. **Read mode returned non-words on book text** (`DEC-073`). `max_side=1280` reduces a
+   4080×3072 phone photo by 3.2× per side — a **10× loss of pixel area** — putting body text
+   below what the recogniser resolves.
+3. **Read mode was translating Marathi into Marathi** (`DEC-074`). Correctly-OCR'd
+   Devanagari was passed to IndicTrans2, an English-to-Indic model, which rewrote `भिवंडी`
+   (a city) as `विव्हंदी` (not a word), `निधीचा` ("of funds") as `नीतीचा` ("of policy"), and
+   then looped on `अधिक माहितीचे`.
+
+**The shape is the same in all three, and it is not the shape of §8.** These are not proxies
+drifting from the goal. Each component was *certified by a measurement that stopped one
+stage short of the user*:
+
+| What was measured | What was not | Result |
+|---|---|---|
+| 1010 Devanagari characters **recognised** (`DEC-036`) | what delivery did with them afterwards | the page was rewritten before it was spoken |
+| correct Marathi text, and 5.3s of audio **produced** | whether the audio said the text | ₹500 announced as "00" for twelve days |
+| "no accuracy cost at 1280" (`DEC-036`) | that the test image was 1296×1720 and barely downscaled | the default was validated on an input that did not stress it |
+
+Each measurement was real, correctly performed, and honestly reported. Each stopped at the
+boundary of the component being built rather than at the person being served. **The third
+row is the sharpest: a downscale limit was approved using a fixture it shrank by 25%, then
+applied to photographs it shrank by 69%.**
+
+Stated as a rule, and it is the more useful half of this report's argument: **a component
+is only validated on inputs that stress it, and a pipeline is only validated end to end.**
+Section 8's five cases argue that metrics can point away from the product. These three argue
+something narrower and more actionable — that a metric which never reaches the product
+cannot point anywhere at all.
+
+**What caught them was using the app.** Not a better benchmark, not more test coverage —
+somebody listening to the audio and noticing the number was wrong. That is the same lesson
+as §8.2's hand-photographed fixtures, arriving from the opposite direction: the fixtures
+caught what the test split missed because they came from deployment, and these three were
+caught because someone finally ran the thing end to end and paid attention to the output.
+
+**Recorded honestly, this section is also an admission.** This report was complete, its
+results tables filled and its conclusion written, while the product was announcing the wrong
+denomination to its user. That gap between "the write-up is finished" and "the system works"
+is the most useful thing in the document, and it would have been invisible had testing been
+skipped for time — which, given the user study was already dropped for exactly that reason
+(§9, `DEC-070`), is not a hypothetical.
+
 ## 9. Limitations
 
 State these plainly rather than burying them:
@@ -439,7 +501,24 @@ State these plainly rather than burying them:
 - **`background` does not fully generalise.** 2 of 3 non-note images are now handled, but
   a medicine strip still reads as a banknote at 0.840 against a 0.90 bar — **0.06 of
   headroom** (`DEC-062`).
-- **The drug database is a guardrail, not a pharmacopoeia.**
+- **The drug database is a guardrail, not a pharmacopoeia.** It also matches generic names
+  only, so a packet showing just a brand or an abbreviation is declined even when the
+  medicine is in the list — a false negative, which is the safe direction, but a real one.
+- **Numbers inside Devanagari text are still partly lost when spoken.** `DEC-072` is fixed
+  for every answer the app *constructs*, because those are built as words before delivery.
+  Read mode *relays* a page, and on the Devanagari path there is nowhere safe to put a
+  number: the voices lack Latin digits, Devanagari digits **and** Latin letters, so English
+  number words cannot be used either. Only a Marathi/Hindi number speller closes this, and
+  it is not written. The engine now warns when a voice discards characters, which makes the
+  loss visible rather than silent — a detector, not a fix.
+- **Marathi mispronounces transliterated drug names.** That voice lacks `ॅ` and `ॉ`, so
+  `पॅरासिटामॉल` is spoken `परासिटामल`. Recognisable, not a wrong answer, and absent in
+  Hindi — the residual belongs to one voice rather than to the pipeline.
+- **Framing is load-bearing and the user cannot judge it.** `DEC-073` recovered small print
+  by processing more pixels, but a whole page photographed from far back still has too few
+  pixels per character at any setting. This is `DEC-043`'s finding for currency appearing
+  again for text, and it is the failure a blind photographer is most likely to cause and
+  least able to detect.
 - **Evaluated on public datasets and five fixtures**, not on photographs taken by blind
   users in their homes.
 - **No blind user has ever used this system, and nothing here shows that one could.** The
@@ -485,11 +564,28 @@ a blind user experiences:
   hundred-minute training run does, and the paired interval says the difference is
   indistinguishable from zero.
 
+- **The report was finished before the system worked.** On the first day of Phase-5
+  self-testing, using the app turned up three defects no metric here could see: every spoken
+  number was wrong in all three languages (`DEC-072`), small print was destroyed by a
+  downscale limit validated on an image it barely touched (`DEC-073`), and read mode was
+  handing its own correct Marathi to an English-to-Indic translator, which rewrote a city's
+  name into a non-word and then looped (`DEC-074`).
+
 The finding that recurs, and the one this report puts forward as its main claim, is that
 **benchmark scores and deployed behaviour diverged five separate times** — and that the
 things which caught it were cheap: a handful of hand-photographed fixtures, a cost metric
 kept alongside the accuracy metric, versioned per-sample predictions, and a prediction
 written down before the run that then failed on all four counts.
+
+**A second pattern arrived late and is sharper** (§8.4). The three Phase-5 defects share a
+shape the five above do not: each component had been certified by a measurement that stopped
+one stage short of the user. Read mode was signed off on *1010 characters recognised*, an
+OCR-stage number taken before delivery existed. Speech was signed off on correct text plus
+the existence of audio, which never established that the audio said the text. The downscale
+limit was signed off on an image it shrank by 25%, then applied to photographs it shrank by
+69%. Every one of those measurements was real and honestly reported, and none of them
+reached the person being served. **A component is only validated on inputs that stress it,
+and a pipeline is only validated end to end.**
 
 None of the components here are novel. The contribution is a working offline system for a
 user who is poorly served by the existing ones, and an evaluation honest enough to
@@ -516,7 +612,9 @@ each with the measurement that settled it, including the ones that were wrong.
 - 71 decisions and 9 risks with measurements: `docs/BUILD_PLAN.md`
 - Per-sample predictions: `eval/results/*.csv`
 - Corpus rebuild: `data/currency_manifest.csv` + `data/scripts/merge_currency.py`
-- **186 automated tests**, including a compile check over every notebook cell (`DEC-065`)
+- **237 automated tests**, including a compile check over every notebook cell (`DEC-065`),
+  a model-free invariant that no digit reaches a voice (`DEC-072`), and a guard that text
+  already in the target script is never translated (`DEC-074`)
 
 ## Appendix B — Attribution
 
