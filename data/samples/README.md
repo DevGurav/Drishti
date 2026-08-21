@@ -20,15 +20,22 @@ that survived into the decision log for a week (`DEC-030`, struck). Each strip h
 one expiry: Paracip is `APR.28`, the partial is `OCT.2026`.
 
 The **strips** are downscaled to 1600px on the long side — the engine's default at the time
-they were committed. `DEFAULT_MAX_SIDE` is now **1280** (`DEC-036`), so the engine does
-resize them, and `max_side=1600` is the setting that is a no-op on these two files. Keeping
-them at 1600 is deliberate: it preserves the headroom needed to compare the two settings.
+they were committed. **`max_side` is now resolved per script** (`DEC-073`): Latin runs at
+**2048**, so these two files are no longer resized at all on the path that reads them;
+Devanagari stays at **1280**.
 
-The **newspaper is deliberately left at 1720px** and kept lossless. It is the one fixture
-where a downscale could plausibly cost accuracy — newsprint body text is small per glyph —
-so it is genuinely resized by both 1280 and 1600, which is what makes the `max_side`
-comparison in notebook 04 §5 mean anything. Re-encoding it to a 1600px JPEG would destroy
-exactly the signal it exists to measure, at a cost of 2.4 MB.
+The **newspaper is deliberately left at 1720px** and kept lossless, and that detail turned
+out to matter more than it looks. Re-encoding it smaller would destroy the signal it exists
+to measure, at a cost of 2.4 MB.
+
+**A caution this file is now the evidence for.** `DEC-036` approved `max_side=1280` as
+costing no accuracy, measured on this newspaper — but at 1720px on its long side, 1280
+shrinks it by only 25%. A 4080×3072 phone photograph is shrunk by 69%, and small print does
+not survive that: a foil strip at full phone resolution yielded 7 of 10 printed fields at
+1280 against 10 of 10 at 2048 (`DEC-073`). **These fixtures are gentler than deployment**,
+and a setting validated only on them has not been stressed. The same warning applies to the
+notes: they were shot deliberately loose (`DEC-043`), and they are still the easy end of what
+a blind photographer produces.
 
 The two notes were shot on a phone and carry EXIF orientation. `curr-10.jpg` is stored
 3072×4080 with a rotation tag, and the engines used to ignore it — every model saw that

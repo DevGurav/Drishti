@@ -34,6 +34,16 @@ green sheet here be written up as validation.** It is a software test.
 Then **turn aeroplane mode on and leave it on for the whole session.** If any task below
 succeeds only with the network up, that is the single most important finding on this page.
 
+> **Judge every task by what you HEAR, not by what is printed.** Added 2026-08-22 after
+> `DEC-072`, `DEC-074`: for twelve days the printed text was correct while the audio said
+> something else — ₹500 announced as "00", an MRP of ₹10.30 as ₹100, and a Marathi page
+> rewritten into different Marathi before being read out. Every automated check in this
+> repository passed throughout, because they all read the text. **Use headphones, play the
+> answer, and compare it to the object in your hand** — not to the line on screen.
+>
+> This changes no pass condition. It says which artifact to apply them to, which the sheet
+> failed to state, and that omission is the reason three bugs survived to be found by ear.
+
 Date run: `__________`  ·  Machine cool at start? `☐`  ·  Aeroplane mode on? `☐`
 
 ---

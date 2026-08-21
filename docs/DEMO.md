@@ -11,7 +11,7 @@ most likely to be the ones someone asks for.
 ```powershell
 # 1. Clean-install verification (RISK-6: upstream churn breaks a working pipeline)
 .\setup.ps1
-.\.venv\Scripts\python.exe -m unittest discover -s tests -q     # expect 186 tests, OK
+.\.venv\Scripts\python.exe -m unittest discover -s tests -q     # expect 237 tests, OK
 
 # 2. Warm every model cache, so nothing downloads on the day
 .\.venv\Scripts\python.exe -m app.cli --mode currency --image data\samples\curr-500.jpg
@@ -67,7 +67,7 @@ runs: the drug name is spoken **only** on a verified database match, and a faste
 was rejected because it lost the expiry date — 6.3× quicker, and it would tell a blind user
 an expired medicine is safe (`DEC-058`).
 
-### 3. Read, Marathi — the hardest thing here (~76–83s)
+### 3. Read, Marathi — the hardest thing here (~65s)
 
 ```powershell
 .\.venv\Scripts\python.exe -m app.cli --mode read --image data\samples\newspaper-marathi.png --ocr-lang mr --lang mr --speak
