@@ -59,7 +59,7 @@ class TestRouter(unittest.TestCase):
 
     def test_currency_routes_to_classifier(self):
         result = route("currency", Path("x.jpg"), Engines(classifier=FakeClassifier()))
-        self.assertIn("500", result)
+        self.assertIn("five hundred", result)
 
     def test_medicine_routes_through_guardrail(self):
         engines = Engines(ocr=FakeOCR(), drug_db=DrugDatabase(["Paracetamol"]))

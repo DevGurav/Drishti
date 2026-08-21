@@ -252,7 +252,7 @@ class TestAnswerService(unittest.TestCase):
         r = _service(self.tmp, classifier=FakeCurrency()).handle(
             AnswerRequest(mode='currency', image_bytes=JPEG))
         self.assertTrue(r.ok)
-        self.assertIn('500', r.text_en)
+        self.assertIn('five hundred', r.text_en)
 
     def test_response_serializes_for_json(self):
         r = _service(self.tmp, ocr=FakeOCR()).handle(

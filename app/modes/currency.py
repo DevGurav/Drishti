@@ -7,6 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.interfaces import Classifier
+from app.speakable import number_words
 
 # Measured, not assumed (DEC-040). Notebook 03's sweep on 600 held-out test images,
 # 2026-08-10:
@@ -43,4 +44,10 @@ def run(image_path: Path, classifier: Classifier) -> str:
         return NO_NOTE_MESSAGE
     if confidence < CONFIDENCE_THRESHOLD:
         return UNSURE_MESSAGE
-    return f"This is a {label} rupee note."
+
+    # The denomination is spelled out, never left as digits. The Marathi voice has no
+    # '5' in its vocabulary, so "500" was being spoken as "00" -- the whole answer, wrong,
+    # with correct text printed beside it (DEC-072).
+    name = str(label).strip()
+    spoken = number_words(int(name)) if name.isdigit() else name
+    return f"This is a {spoken} rupee note."

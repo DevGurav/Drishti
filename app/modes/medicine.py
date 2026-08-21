@@ -17,6 +17,7 @@ from app.parsers import (
     extract_mrp_candidates,
     is_expired,
 )
+from app.speakable import expiry_words, money_words
 
 
 @dataclass
@@ -70,15 +71,27 @@ def run(image_path: Path, ocr: OCREngine, drug_db: DrugDatabase) -> MedicineResu
     mrp = mrp_candidates[0] if mrp_candidates else None
     expired = is_expired(expiry_raw) if expiry_raw else None
 
+    # Dates and prices are spoken as words, never as digits. The Devanagari voices have
+    # no '3', '5' or '8' and no Latin letters, so "APR.28" reached the user as "2" and an
+    # MRP of 10.30 as 100 -- both silently, beside correct-looking text (DEC-072).
+    expiry_spoken = expiry_words(expiry_raw) if expiry_raw else None
+
     parts = [name_phrase(drug_names)]
     if expired is True:
-        parts.append(f"Warning: it expired on {expiry_raw}. Do not use it.")
-    elif expired is False:
-        parts.append(f"It is valid until {expiry_raw}.")
+        # The warning does not depend on being able to spell the date. Losing "expired"
+        # because the month would not render is the one failure this mode cannot have.
+        when = f" in {expiry_spoken}" if expiry_spoken else ""
+        parts.append(f"Warning: this medicine expired{when}. Do not use it.")
+    elif expired is False and expiry_spoken:
+        parts.append(f"It is valid until {expiry_spoken}.")
     else:
         parts.append("I could not read a clear expiry date -- please check manually.")
-    if mrp:
-        parts.append(f"MRP is {mrp} rupees.")
+
+    # An unspellable price is omitted, not read out as digits: silence about the MRP is
+    # recoverable, a confidently wrong price is not.
+    mrp_spoken = money_words(mrp) if mrp else None
+    if mrp_spoken:
+        parts.append(f"MRP is {mrp_spoken}.")
 
     return MedicineResult(
         ok=True,

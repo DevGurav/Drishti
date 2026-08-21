@@ -8,7 +8,10 @@ expected (a user may ask in Marathi and read an English label).
 """
 from __future__ import annotations
 
+import sys
+import unicodedata
 import wave
+from collections import Counter
 from pathlib import Path
 
 from app.languages import get as get_language
@@ -43,6 +46,34 @@ def split_for_tts(text: str, max_chars: int = MAX_CHARS) -> list[str]:
     return chunks
 
 
+def dropped_characters(text: str, tokenizer) -> list[str]:
+    """Characters this voice silently discards, found by round-tripping the tokenizer.
+
+    A VITS tokenizer filters its input down to its own character vocabulary and raises
+    nothing, so a number that will not be spoken looks exactly like one that will. The
+    Marathi voice has no '3', '5' or '8' and no Latin letters at all: it turned "500"
+    into "00" and an expiry of "APR.28" into "2" (DEC-072).
+
+    This is a **detector, not a control** -- it reports after the fact, and read mode
+    legitimately passes through arbitrary OCR text. The actual fix is upstream, in
+    `app/speakable.py`, where answers are built as words before they ever get here.
+    """
+    heard = tokenizer.decode(tokenizer(text).input_ids)
+    lost = Counter(text.lower()) - Counter(heard.lower())
+    return sorted({ch for ch in lost if _carries_meaning(ch)})
+
+
+def _carries_meaning(ch: str) -> bool:
+    """Whether losing this character changes what the listener hears as content.
+
+    Every voice drops the sentence-final full stop, so counting punctuation would make
+    this warn on all output -- and a warning that always fires is not a signal, it is
+    noise that gets tuned out (the DEC-063 lesson). Letters, digits and the Devanagari
+    vowel marks are kept: those change the word.
+    """
+    return ch.isalnum() or unicodedata.category(ch).startswith('M')
+
+
 class MMSTTSEngine:
     """Offline speech synthesis. Models load lazily and are cached per language."""
 
@@ -73,6 +104,14 @@ class MMSTTSEngine:
 
         waveforms = []
         for chunk in chunks:
+            lost = dropped_characters(chunk, tokenizer)
+            if lost:
+                print(
+                    f"warning: the {lang} voice has no {''.join(lost)!r} in its "
+                    f'vocabulary -- those characters are missing from the audio, so '
+                    f'what is spoken differs from what was printed',
+                    file=sys.stderr,
+                )
             inputs = tokenizer(chunk, return_tensors='pt')
             with torch.no_grad():
                 waveforms.append(model(**inputs).waveform.squeeze().cpu().numpy())

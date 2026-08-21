@@ -38,13 +38,15 @@ class TestDenomination(unittest.TestCase):
 
 class TestMoneyMode(unittest.TestCase):
     def test_confident_prediction_is_reported(self):
+        """Spelled out, not '500' -- the Marathi voice has no '5' and spoke it as
+        '00' (DEC-072). tests/test_speakable.py holds the full invariant."""
         out = run_currency(Path('n.jpg'), FakeClassifier('500', 0.99))
-        self.assertIn('500', out)
+        self.assertIn('five hundred', out)
 
     def test_low_confidence_refuses_rather_than_guessing(self):
         """A wrong denomination costs the user money; a refusal costs a retaken photo."""
         out = run_currency(Path('n.jpg'), FakeClassifier('500', 0.42))
-        self.assertNotIn('500', out)
+        self.assertNotIn('five hundred', out)
         self.assertIn('not confident', out.lower())
 
     def test_refusal_tells_the_user_what_to_do(self):
@@ -53,11 +55,11 @@ class TestMoneyMode(unittest.TestCase):
 
     def test_threshold_boundary_is_inclusive(self):
         out = run_currency(Path('n.jpg'), FakeClassifier('200', CONFIDENCE_THRESHOLD))
-        self.assertIn('200', out)
+        self.assertIn('two hundred', out)
 
     def test_just_below_threshold_refuses(self):
         out = run_currency(Path('n.jpg'), FakeClassifier('200', CONFIDENCE_THRESHOLD - 0.01))
-        self.assertNotIn('200', out)
+        self.assertNotIn('two hundred', out)
 
     def test_threshold_is_high_enough_to_be_meaningful(self):
         """Guards against someone lowering the bar to make the demo look good."""

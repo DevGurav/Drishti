@@ -105,7 +105,7 @@ load is one-time, and there is no reason to spend it in front of an audience.
 Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-# 0. tests need nothing at all - 186 tests, no models
+# 0. tests need nothing at all - 211 tests, no models
 python -m unittest discover -s tests -t .
 
 # 1. OCR: read + medicine modes            (~100 MB downloaded on first run)
