@@ -5,15 +5,22 @@
 > approach. Neither carries a timeline — if a date or milestone appears anywhere else,
 > it is stale and should be deleted in favour of this file.
 >
-> **Last updated:** 2026-08-15 — the report's two open author items closed,
-> `data/README.md` written with verified licences, the stale Phase 3/4/6 headings reconciled
-> (`DEC-069`), and the **user study dropped in favour of self-testing** (`DEC-070`).
+> **Last updated:** 2026-08-21 — dashboard reconciled with the phase sections: the Phase 3
+> row still read *in progress* after `DEC-068` closed it, the latency budget was still listed
+> as remaining work after `DEC-071` closed it as won't-do, and the test count was stale in
+> two files (175/179 → **186**).
+>
+> Before that, 2026-08-15 — the report's two open author items closed, `data/README.md`
+> written with verified licences, the stale Phase 3/4/6 headings reconciled (`DEC-069`), and
+> the **user study dropped in favour of self-testing** (`DEC-070`).
 >
 > **Phase:** 6 of 6 · **Personal project by Devendra Ramesh Gurav**
 >
-> **What is actually left:** the demo rehearsal, a scripted self-test in airplane mode
-> (Phase 5), and the latency budget (`RISK-1`) — where the honest answer is to report per
-> mode rather than to fix it. **No item is blocked on anyone else.**
+> **What is actually left:** airplane-mode verification and the scripted self-test
+> (Phase 5), then the demo rehearsal (Phase 6). Six checkboxes, and **no item is blocked on
+> anyone else.** The latency budget is *not* on this list — `DEC-071` closed it as won't-do,
+> measured and reported per tier. `RISK-1` stays open and red as a documented limitation
+> rather than as outstanding work.
 >
 > **What the project will not claim:** that a blind user can operate it. The study that
 > would have shown this is dropped (`DEC-070`), so objective 5 is scored *not met* rather
@@ -32,7 +39,7 @@
 | 0 — Feasibility & setup | ✅ **Complete** |
 | 1 — Baselines & core pipeline | ✅ **Complete** — every mode verified against real models on the laptop, 2026-08-11. The one item left open here was NGO outreach, now dropped (`DEC-070`) |
 | 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
-| 3 — Fine-tuning | 🟡 **In progress** — currency retrained; `notebooks/05` written and running for the VLM LoRA against the 0.533 bar |
+| 3 — Fine-tuning | ✅ **Complete — the result is negative, and it ships that way** — currency retrained (0.9827, ₹0.68 at threshold); the VLM LoRA ran twice against the 0.533 bar and is **statistically indistinguishable** from it, so the stakes prompt ships and the adapter does not (`DEC-068`) |
 | 4 — Integration | ✅ **Complete** — five modes, browser app on real engines, combination strips. The per-mode latency budget is closed as won't-do (`DEC-071`): measured and reported per tier rather than enforced, because enforcing it would disable five modes of six |
 | 5 — Self-conducted task testing | ⬜ Not started — **Android descoped** (`DEC-064`) and the **user study dropped** (`DEC-070`). What remains is airplane-mode verification and a scripted self-test. It cannot show that a blind user can operate the app, and does not claim to |
 | 6 — Evaluation & report | 🟢 **Report complete** — `docs/REPORT.md` written end to end, both author items closed 2026-08-15: the scale paragraph now carries citations, and the competitor claims were re-verified against first-party docs (`DEC-069`). Outstanding: the demo rehearsal |
@@ -47,7 +54,7 @@ know which month Phase 3 lands in is not.
 
 | Component | State | Evidence |
 |---|---|---|
-| App skeleton (router, 5 modes, guardrail) | ✅ Done | 175 tests passing |
+| App skeleton (router, 5 modes, guardrail) | ✅ Done | 186 tests passing |
 | OCR engine (PaddleOCR) | ✅ Wired | `app/engines/paddle_ocr.py`. Verified on the **laptop** 2026-08-11: medicine and read modes both run locally, after fixing an inverted paddle/torch import order on Windows (`DEC-044`) |
 | Medicine mode end-to-end | ✅ Works | Colab 2026-08-10 on `strip_paracip.jpg`: real OCR → `"This is Paracetamol. It is valid until APR.28. MRP is 10.30 rupees."` — drug name, expiry and MRP all correct against the strip |
 | Read mode (English) | ✅ Works | via same engine |
