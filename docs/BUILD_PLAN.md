@@ -54,7 +54,7 @@
 | 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
 | 3 — Fine-tuning | ✅ **Complete — the result is negative, and it ships that way** — currency retrained (0.9827, ₹0.68 at threshold); the VLM LoRA ran twice against the 0.533 bar and is **statistically indistinguishable** from it, so the stakes prompt ships and the adapter does not (`DEC-068`) |
 | 4 — Integration | ✅ **Complete** — five modes, browser app on real engines, combination strips. The per-mode latency budget is closed as won't-do (`DEC-071`): measured and reported per tier rather than enforced, because enforcing it would disable five modes of six |
-| 5 — Self-conducted task testing | 🟢 **Closed 2026-08-24** — **Android descoped** (`DEC-064`), **user study dropped** (`DEC-070`). Three sessions: 08-22 by hand (found `DEC-072`/`073`/`074`), 08-24 against 16 photographs via `eval/run_self_test.py` (found `DEC-076`), and **08-24 in aeroplane mode through the browser app — the offline claim now has a measurement rather than an inference**. 14 of 22 rows exercised; **8 had no photograph and nobody has listened to the audio**. It cannot show that a blind user can operate the app, and does not claim to |
+| 5 — Self-conducted task testing | 🟢 **Closed 2026-08-24** — **Android descoped** (`DEC-064`), **user study dropped** (`DEC-070`). Three sessions: 08-22 by hand (found `DEC-072`/`073`/`074`), 08-24 against 16 photographs via `eval/run_self_test.py` (found `DEC-076`), and **08-24 in aeroplane mode through the browser app — the offline claim now has a measurement rather than an inference**. 16 of 22 rows exercised; **6 had no photograph and nobody has listened to the audio**. It cannot show that a blind user can operate the app, and does not claim to |
 | 6 — Evaluation & report | 🟢 **Report complete and current** — `docs/REPORT.md` written end to end; author items closed 2026-08-15 (`DEC-069`), and §8.4 + §9 updated 2026-08-24 with `DEC-076`, which is the fourth instance of the pattern that section names. Outstanding: **the demo rehearsal**, which needs a person and a room |
 
 **Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
@@ -296,7 +296,7 @@ The Android port is dropped (`DEC-064`) and the study with blind participants is
       the text beside it. The sheet's own framing is what caught it: task B1's pass condition
       is *"correct denomination spoken"*, not *"correct denomination returned"*.
       **Resumed 2026-08-24 against 16 fresh photographs**, run through `eval/run_self_test.py`
-      rather than by hand — see §2.5 below for the outcome. **13 of 22 rows exercised, 9 not
+      rather than by hand — see §2.5 below for the outcome. **16 of 22 rows exercised, 6 not
       covered for want of an input**, and the run produced `DEC-076`
 - [x] Record every failure with the photograph that caused it, so a fix has a fixture —
       three promoted to `data/samples/` on 2026-08-24 and wired into `eval.check_fixtures`:
@@ -318,7 +318,7 @@ with failures recorded as fixtures rather than as recollections.
 **Exit criteria: met, with one substitution and one gap.** Every mode was exercised, every
 failure has a fixture, and **the offline claim was checked in aeroplane mode** — through the
 browser app end to end rather than task by task, which is the substitution. The gap is that
-**8 of 22 rows had no input** (A1, the expired strip, being the one that matters) and that
+**6 of 22 rows had no input** (A1, the expired strip, being the one that matters) and that
 **nobody has listened to the audio**. Both are stated rather than absorbed.
 
 **What this phase can no longer deliver:** evidence that a blind user can operate the app.

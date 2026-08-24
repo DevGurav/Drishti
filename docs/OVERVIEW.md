@@ -6,16 +6,24 @@ Users in Indian Languages
 **Domain:** Artificial Intelligence & Data Science (Computer Vision · Multimodal Deep Learning
 · Edge AI · Accessibility)
 
-**By:** Devendra Ramesh Gurav · **Started:** July 2026
+**By:** Devendra Ramesh Gurav · **Started:** July 2026 · **Closed:** 24 August 2026
 
-A personal project. `docs/BUILD_PLAN.md` carries the live status, decision log and risks;
-this document explains what Drishti is and why it is built this way.
+A personal project, and a finished one. All six phases are complete: five task modes run
+offline on a laptop, the fine-tuning result is negative and ships that way, and the write-up
+in `docs/REPORT.md` records what did not work alongside what did. **Two things it never
+established**, both stated rather than buried: no blind user has operated it (`DEC-070`), and
+nobody has listened to the synthesised speech end to end — every automated check reads the
+text, which is precisely how four separate defects survived (`DEC-072`, `DEC-076`).
+
+`docs/BUILD_PLAN.md` carries the status, decision log and risks; this document explains what
+Drishti is and why it is built this way.
 
 ---
 
 ## Abstract
 
-India has an estimated 5 million blind and about 70 million visually-impaired citizens.
+India has an estimated **4.8 million blind and 74 million visually-impaired** citizens
+(Vashist et al., 2022; see `docs/REPORT.md` §1 for the extrapolation and its date).
 Existing AI assistance tools (Be My AI, Microsoft Seeing AI, Google Lookout) require constant
 internet connectivity, respond primarily in English, and upload private images — prescriptions,
 currency, the user's home — to cloud servers. This excludes rural, non-English-speaking, and
@@ -109,7 +117,12 @@ Two dates, self-imposed, kept because a plan with no date cannot tell you when s
 slipping. The ordered work — six phases, live status, decision log and risk register — is in
 `docs/BUILD_PLAN.md`, which is authoritative if the two ever differ.
 
-| Target | By | What "done" means |
-|---|---|---|
-| Demoable end to end | ~Oct 2026 | Read, medicine and currency answering on a laptop, offline, spoken in Marathi |
-| Project complete | ~Mar–Apr 2027 | Fine-tuning measured and written up (it tied with prompting and does not ship — `DEC-068`), a scripted self-test passed in airplane mode, and the results written up. **No user study** (`DEC-070`) |
+| Target | By | What "done" means | Actual |
+|---|---|---|---|
+| Demoable end to end | ~Oct 2026 | Read, medicine and currency answering on a laptop, offline, spoken in Marathi | **2026-08-11**, about seven weeks early |
+| Project complete | ~Mar–Apr 2027 | Fine-tuning measured and written up (it tied with prompting and does not ship — `DEC-068`), a scripted self-test passed in airplane mode, and the results written up. **No user study** (`DEC-070`) | **2026-08-24** — self-test run against 16 photographs, offline verified through the browser app, report written. Both dates beaten by a wide margin, largely because two of the six phases were dropped rather than delivered |
+
+**Both targets were met early, and the honest reason is scope.** The Android port and the
+user study were cut (`DEC-064`, `DEC-070`), and objective 5 is scored *not met* rather than
+redefined. A plan that finishes seven months early has usually changed shape, and this one
+did.

@@ -137,7 +137,7 @@ which is usually a sign the task was too easy rather than the system too good.
 
 ## Outcome, 2026-08-24
 
-**13 of 22 rows exercised. 9 had no input.** Full per-task output in
+**16 of 22 rows exercised. 6 had no input.** Full per-task output in
 `eval/results/self_test_results.csv`; re-runnable with `python -m eval.run_self_test`.
 
 | | |
@@ -145,7 +145,8 @@ which is usually a sign the task was too easy rather than the system too good.
 | Passed | A2, A5, B1 (5 of 6 denominations), B4, B6 (paper only), C1, C2, C3, D1, D3, **E1**, E4 (answering half) |
 | Failed | **A3** (declined a strip it should read), **A-ctl** (lost the expiry at full phone resolution) |
 | Passed but shouldn't have | **C4** — handwriting was read, on an image too easy to be the test |
-| Not run | A1, A4, B1-200, B2, B3, B5, B6 (book/card), D2 |
+| Not run (6 rows) | A1, A4, B2, B3, B5, D2 |
+| Run, but not exhaustively | B1 (no ₹200) and B6 (no book, no bank card) — the row was exercised, not every item in it |
 | Waiting on a listener | E2, E3, and the audio half of every row above |
 
 **One new defect, and it was found by the fix for an old one.** `DEC-076`: IndicTrans2

@@ -4,7 +4,8 @@ A personal project. A fully **offline** assistant that lets blind users
 read medicine strips, identify currency, read Devanagari/English text, and hear scene
 descriptions — spoken in **Marathi/Hindi/English**, with zero internet and zero cloud upload.
 
-**Why:** ~5M blind / ~70M visually-impaired Indians. Existing tools (Be My AI, Seeing AI,
+**Why:** ~4.8M blind / ~74M visually-impaired Indians (Vashist et al., 2022 — see
+[docs/REPORT.md](docs/REPORT.md) §1). Existing tools (Be My AI, Seeing AI,
 Lookout) need internet + English and upload private photos (prescriptions, money, your home)
 to the cloud. Drishti runs on a ₹10k Android phone, offline.
 

@@ -208,8 +208,19 @@ Three findings worth reporting in their own right:
 
 The corpus contains **no faces, no identity documents and no prescriptions carrying a
 patient name**. Banknote **serial numbers are traceable to an individual transaction**, so
-the five self-photographed fixtures are blurred at the serial and no note image appears in
-this report.
+no note image appears in this report.
+
+**The blurring this section used to claim was never applied, and saying so is more useful
+than quietly deleting the sentence.** Until 2026-08-24 this paragraph read "the five
+self-photographed fixtures are blurred at the serial". They are not: `curr-500.jpg` carries
+a legible `8PQ 590000`, printed twice, and the same is true of every note fixture including
+the ₹20 added the same day. The rule was written down, was correct, and was never
+implemented — and nothing checked, because a privacy policy in prose has no test attached to
+it. **That is §8.4's pattern arriving in a place §8.4 did not think to look**: the claims
+this project got wrong were the ones nobody measured, and it did not occur to anyone that a
+privacy claim is also a claim about an artifact. The fixtures are the author's own notes and
+the repository is his own, so the exposure is his to accept; the defect is that the document
+asserted a protection the repository did not provide.
 
 That last rule has a second reason. A Kaggle dataset tagged CC0 was found to contain
 Shutterstock-watermarked stock photography (`DEC-053`), which establishes that **a platform
