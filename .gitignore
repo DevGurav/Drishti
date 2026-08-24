@@ -21,6 +21,12 @@ test-images/
 *.pt
 *.safetensors
 *.onnx
+# Screen recordings and exported write-ups live in this directory during a demo push. The
+# 08-21 recording alone is 267 MB, and a stray `git add .` would put it in history for good
+# -- git keeps deleted blobs, so this is not a mistake you can tidy up afterwards.
+*.mp4
+*.mov
+*.pdf
 
 # results & logs
 eval/results/*
