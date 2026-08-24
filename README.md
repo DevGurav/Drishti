@@ -140,9 +140,16 @@ Currency mode works. The 7-class MobileNet is trained and wired in
 retrain, and at the chosen `CONFIDENCE_THRESHOLD = 0.90` it answers 89.9% of the time at
 **0.9941**, an expected error of **₹0.68** per identification. Below that threshold it says it is
 unsure rather than guessing a denomination, and a photo with no note in it comes back as
-`background` instead of an amount. Verified on the laptop the same day: 4 of the 5 real handheld
-fixtures answer, and 2 of 3 non-note photos correctly return `background`. ₹2000 is deliberately
-not a class — see `DEC-051` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
+`background` instead of an amount. ₹2000 is deliberately not a class — see `DEC-051` in
+[docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
+
+On the committed fixtures, re-run 2026-08-24 (`python -m eval.check_fixtures`): **4 of 6
+real notes answer** and **4 of 4 non-notes are refused** — but only two of those four are
+refused by the `background` class. The other two are predicted as denominations and held
+back by the threshold alone: a medicine strip at **₹100, 0.840**, and a folded towel at
+**₹20, 0.804**. The towel outscores the real ₹20 note, which reads 0.765. **Do not lower
+`CONFIDENCE_THRESHOLD`** — the notes and the non-notes are interleaved in that band, so
+buying one costs the other (`DEC-062`).
 
 **CPU timings, measured 2026-08-10 on a GPU-less Colab runtime** — not estimates:
 

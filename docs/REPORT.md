@@ -546,9 +546,12 @@ State these plainly rather than burying them:
 - **Latency misses the <8s target in five modes of six.** Currency meets it at 1–2s; scene and ask are 28–31× over and are not an optimisation problem. **And the published figures are the gentle ones** — read mode takes 36s on the newspaper fixture and **314s on a real utility bill**, because OCR cost scales with the number of text lines and the fixtures are short (§7.4).
 - **Devanagari OCR needs a server-class detector.** Every lighter tier returned zero
   Devanagari characters (`DEC-058`), which is what blocks the phone port.
-- **`background` does not fully generalise.** 2 of 3 non-note images are now handled, but
-  a medicine strip still reads as a banknote at 0.840 against a 0.90 bar — **0.06 of
-  headroom** (`DEC-062`).
+- **`background` does not fully generalise.** Only 2 of 4 non-note fixtures are caught by
+  the class itself; the other two are predicted as denominations and stopped by the
+  threshold alone — a medicine strip at ₹100/**0.840** and a folded towel at ₹20/**0.804**.
+  The towel scores higher as a ₹20 note than the real ₹20 note does (0.765), so the 0.90 bar
+  is not separating notes from non-notes, it is sitting above a band where they interleave
+  (`DEC-062`).
 - **The drug database is a guardrail, not a pharmacopoeia.** It also matches generic names
   only, so a packet showing just a brand or an abbreviation is declined even when the
   medicine is in the list — a false negative, which is the safe direction, but a real one.
@@ -577,8 +580,8 @@ State these plainly rather than burying them:
   pixels per character at any setting. This is `DEC-043`'s finding for currency appearing
   again for text, and it is the failure a blind photographer is most likely to cause and
   least able to detect.
-- **Evaluated on public datasets and five fixtures**, not on photographs taken by blind
-  users in their homes.
+- **Evaluated on public datasets and ten committed fixtures**, not on photographs taken by
+  blind users in their homes.
 - **No blind user has ever used this system, and nothing here shows that one could.** The
   study that would have established it was dropped for time (`DEC-070`); what replaces it is
   the author testing his own build. That is a weaker instrument than it sounds, and weakest
