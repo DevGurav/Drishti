@@ -11,7 +11,7 @@ most likely to be the ones someone asks for.
 ```powershell
 # 1. Clean-install verification (RISK-6: upstream churn breaks a working pipeline)
 .\setup.ps1
-.\.venv\Scripts\python.exe -m unittest discover -s tests -q     # expect 237 tests, OK
+.\.venv\Scripts\python.exe -m unittest discover -s tests -q     # expect 255 tests, OK
 
 # 2. Warm every model cache, so nothing downloads on the day
 .\.venv\Scripts\python.exe -m app.cli --mode currency --image data\samples\curr-500.jpg
@@ -66,6 +66,13 @@ Reads the drug name, expiry and MRP, and speaks in Marathi. Two things to mentio
 runs: the drug name is spoken **only** on a verified database match, and a faster OCR tier
 was rejected because it lost the expiry date — 6.3× quicker, and it would tell a blind user
 an expired medicine is safe (`DEC-058`).
+
+**If a price or a date is printed but not spoken, that is `DEC-076` working, not a bug.**
+The translator renders spelled-out numbers faithfully about two times in three; the rest of
+the time it states a different amount, so delivery checks and drops the sentence rather than
+announcing the wrong price. This fixture is safe — `₹10.30` → `दहा रुपये आणि तीस पैसे`, verified
+— but say the rule out loud if it fires on anything else, because "it declined to tell me the
+price" is the strongest live demonstration this project has of designed refusal.
 
 ### 3. Read, Marathi — the hardest thing here (~65s)
 

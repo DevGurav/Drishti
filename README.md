@@ -46,7 +46,8 @@ notebooks/   00_feasibility_spike (Colab GPU) · 00b_ocr_spike (laptop CPU) · 0
 models/      downloaded/quantized weights (gitignored)
 app/         demo app: router, mode handlers, engine interfaces, CLI (laptop first, Android later)
 tests/       unit tests for app/ (pure Python, no GPU/model needed — run with `python -m unittest discover -s tests -t .`)
-eval/        evaluation results
+eval/        evaluation results, plus check_fixtures (real-photo regression) and
+             run_self_test (the docs/SELF_TEST.md task sheet, run against photographs)
 docs/        OVERVIEW.md (what the project is) + BUILD_PLAN.md (status, decisions, risks)
 ```
 
@@ -64,6 +65,15 @@ Medicines 2022, extracted from the CDSCO publication by `data/scripts/build_drug
 **OCR engine: PaddleOCR** — see `DEC-003` in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md) for why
 Surya and Tesseract were rejected, plus the mandatory config flags (`DEC-004`, `DEC-005`,
 `DEC-008`).
+
+**Numbers are checked after translation, not just before it.** These TTS voices carry a
+character vocabulary with no digits, so answers are built as words (`app/speakable.py`,
+`DEC-072`) — and IndicTrans2 then renders those words as a *different amount* about one time
+in three: `₹84.21` came back as twenty-four rupees. `app/devanagari_numbers.py` reads the
+translation back and `app/speech.py` **drops any sentence whose numbers did not survive**
+(`DEC-076`). It verifies rather than corrects, because a wrong entry in a hand-written
+Marathi number table would be a confidently wrong price, while a missing one is only a
+silence.
 
 ## The app
 
@@ -105,7 +115,7 @@ load is one-time, and there is no reason to spend it in front of an audience.
 Install in stages so a failure is easy to attribute, cheapest and most-proven first:
 
 ```powershell
-# 0. tests need nothing at all - 237 tests, no models
+# 0. tests need nothing at all - 255 tests, no models
 python -m unittest discover -s tests -t .
 
 # 1. OCR: read + medicine modes            (~100 MB downloaded on first run)

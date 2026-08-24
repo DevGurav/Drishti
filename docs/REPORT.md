@@ -381,6 +381,28 @@ which is worth stating because the 1280 default had been justified partly on lat
 grounds. read-mr should improve further still: `DEC-074` removes a 6.4s translation step
 from that path, and that step was actively corrupting the text.
 
+#### The benchmark photographs are not the hard ones
+
+Every figure above was measured on `data/samples/`. Running the same modes over the
+2026-08-24 self-test photographs — phone shots at 4080×3072, framed the way a user would —
+gives a different picture, and the direction is the one §8.4 keeps predicting.
+
+| mode | on the fixtures | on a real photograph | ratio |
+|---|---|---|---|
+| currency | 1.6s | **0.2–2.6s** | same, or faster |
+| medicine | 24.2s | **26.7–47.6s** | ~1.5× |
+| read (English) | 35.9s | **314s** on a full utility bill | **8.7×** |
+| read-mr | 65.5s | **119.7s** on a printed notice | 1.8× |
+
+**Currency does not care and read mode cares enormously**, and the reason is text volume
+rather than difficulty: `newspaper-marathi.png` is one column, while an electricity bill is
+a dense two-sided A4 of small print, and OCR cost scales with the number of text lines
+detected. A five-minute answer is not a usable one. **This does not change the conclusion —
+one mode of six met the target and one still does — but it does change the size of the
+miss**, and it is another instance of a number that was true of the fixture and not of the
+task. The honest version of the read-mode row is *"36 seconds on a newspaper column, five
+minutes on a bill"*.
+
 ## 8. Discussion — the benchmark is not the product
 
 This is the thread running through the project. **Five independent times, the benchmark and
@@ -457,7 +479,25 @@ visible to any metric in this report:
    (a city) as `विव्हंदी` (not a word), `निधीचा` ("of funds") as `नीतीचा` ("of policy"), and
    then looped on `अधिक माहितीचे`.
 
-**The shape is the same in all three, and it is not the shape of §8.** These are not proxies
+A second batch on **2026-08-24** produced a fourth, and it is the most instructive of the
+set because **the fix for the first one caused it**.
+
+**The translator changes the numbers** (`DEC-076`). `DEC-072` was fixed by spelling numbers
+into English *words* before translation, so the digit-less voices could say them. Measured
+over 16 real MRP values, IndicTrans2 renders those words faithfully only about two times in
+three. It re-emits digits (Marathi 3 of 16, Hindi 1 of 16) — and then the voice drops them
+again, exactly as before. Worse, it states **a different amount** (Marathi 4 of 16, Hindi
+4 of 16): `eighty four rupees and twenty one paise` returned as `चोवीस रुपये` —
+**twenty-four**; `seventy eight` as `अठ्ठावीस` (28) in Marathi and `अड़तालीस` (48) in Hindi;
+a real strip's `₹353.39` as **343.29**. Grammatical, fluent, and a different price.
+
+**Why the fix did not hold.** `DEC-072` also added a control — `has_digits()`, asserted on
+every spoken answer, which fails the build if a digit reaches the voice. It was placed on
+the **English** text, because that is where the digits had been. The defect moved to the
+translator's *output*, and the guard was watching its *input*. Every one of the 250 tests
+passed while `₹84.21` was being announced as twenty-four rupees.
+
+**The shape is the same in all four, and it is not the shape of §8.** These are not proxies
 drifting from the goal. Each component was *certified by a measurement that stopped one
 stage short of the user*:
 
@@ -466,11 +506,19 @@ stage short of the user*:
 | 1010 Devanagari characters **recognised** (`DEC-036`) | what delivery did with them afterwards | the page was rewritten before it was spoken |
 | correct Marathi text, and 5.3s of audio **produced** | whether the audio said the text | ₹500 announced as "00" for twelve days |
 | "no accuracy cost at 1280" (`DEC-036`) | that the test image was 1296×1720 and barely downscaled | the default was validated on an input that did not stress it |
+| no digits in the **English** answer (`DEC-072`'s own control) | what the translator did to the number words afterwards | ₹84.21 announced as twenty-four rupees, with 250 tests green |
 
 Each measurement was real, correctly performed, and honestly reported. Each stopped at the
 boundary of the component being built rather than at the person being served. **The third
-row is the sharpest: a downscale limit was approved using a fixture it shrank by 25%, then
-applied to photographs it shrank by 69%.**
+row is the sharpest of the original three: a downscale limit was approved using a fixture it
+shrank by 25%, then applied to photographs it shrank by 69%.**
+
+**The fourth row is sharper still, because it is not a missing measurement — it is a
+measurement in the wrong place.** `DEC-072` ended by adding a control precisely so this
+class of bug could not recur, and the control was correct, cheap, and asserted on every
+answer. It simply guarded the stage that had already been fixed. A test suite says nothing
+about the stages it does not straddle, and "we added a regression test" is not the same
+claim as "the output is checked".
 
 Stated as a rule, and it is the more useful half of this report's argument: **a component
 is only validated on inputs that stress it, and a pipeline is only validated end to end.**
@@ -495,7 +543,7 @@ skipped for time — which, given the user study was already dropped for exactly
 
 State these plainly rather than burying them:
 
-- **Latency misses the <8s target in five modes of six.** Currency meets it at 1–2s; scene and ask are 28–31× over and are not an optimisation problem.
+- **Latency misses the <8s target in five modes of six.** Currency meets it at 1–2s; scene and ask are 28–31× over and are not an optimisation problem. **And the published figures are the gentle ones** — read mode takes 36s on the newspaper fixture and **314s on a real utility bill**, because OCR cost scales with the number of text lines and the fixtures are short (§7.4).
 - **Devanagari OCR needs a server-class detector.** Every lighter tier returned zero
   Devanagari characters (`DEC-058`), which is what blocks the phone port.
 - **`background` does not fully generalise.** 2 of 3 non-note images are now handled, but
@@ -511,6 +559,16 @@ State these plainly rather than burying them:
   number words cannot be used either. Only a Marathi/Hindi number speller closes this, and
   it is not written. The engine now warns when a voice discards characters, which makes the
   loss visible rather than silent — a detector, not a fix.
+- **About one spoken number in three is now withheld rather than spoken** (`DEC-076`).
+  IndicTrans2 renders spelled-out numbers faithfully roughly two times in three; the rest
+  of the time it re-emits digits or states a different amount — `₹84.21` as twenty-four
+  rupees. Since 2026-08-24 the app verifies that a translated number still says what the
+  English said, and **drops the sentence when it does not**. So a Marathi listener is now
+  reliably told the drug name and the expiry, and is told the price only when the price
+  survived; the printed text always carries it. This is honest rather than good. Closing
+  it needs a validated Marathi/Hindi number speller — no library provides one (`num2words`
+  covers 56 languages, neither of these), and writing one is a linguistic task needing a
+  native reviewer, not more engineering.
 - **Marathi mispronounces transliterated drug names.** That voice lacks `ॅ` and `ॉ`, so
   `पॅरासिटामॉल` is spoken `परासिटामल`. Recognisable, not a wrong answer, and absent in
   Hindi — the residual belongs to one voice rather than to the pipeline.
