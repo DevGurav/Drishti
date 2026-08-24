@@ -19,6 +19,12 @@ from app.speech import deliver, localize
 
 MARATHI_PAGE = 'ठाणे : अरुंद रस्ते, महापालिकेची आर्थिक कोंडी'
 ENGLISH_ANSWER = 'This is a five hundred rupee note.'
+# Number-free, for the tests that are about *whether* translation happens rather than
+# about what survives it. An answer containing a number is now checked after translation
+# (DEC-076), so a stub translator returning a constant fails that check -- correctly, since
+# a constant really has lost the number. Keeping the two concerns in separate fixtures
+# stops a script-routing test from failing for a number-verification reason.
+ENGLISH_ANSWER_NO_NUMBERS = 'This is Paracetamol.'
 
 
 class SpyTranslator:
@@ -76,6 +82,36 @@ class TestLocalizeSkipsRedundantTranslation(unittest.TestCase):
 
     def test_english_answers_are_still_translated(self):
         """The modes that build English answers must keep their translation step."""
+        spy = SpyTranslator()
+        self.assertEqual(localize(ENGLISH_ANSWER_NO_NUMBERS, 'mr', spy), 'TRANSLATED')
+        self.assertEqual(len(spy.calls), 1)
+
+    def test_an_answer_whose_number_did_not_survive_is_dropped(self):
+        """DEC-076. Verbatim from the 2026-08-24 measurement: IndicTrans2 rendered
+        "eighty four rupees and twenty one paise" as twenty-four rupees. A number that
+        changed in translation must not be spoken as though it had not."""
+        class CorruptingTranslator:
+            def translate(self, text, lang):
+                return 'एम. आर. पी. चोवीस रुपये आणि एकवीस पैसे आहे.'
+
+        self.assertEqual(
+            localize('MRP is eighty four rupees and twenty one paise.', 'mr',
+                     CorruptingTranslator()),
+            '')
+
+    def test_a_faithful_translation_is_kept(self):
+        """The other side of it: the check must not eat correct answers. Also measured."""
+        class FaithfulTranslator:
+            def translate(self, text, lang):
+                return 'ही पाचशे रुपयांची नोट आहे.'
+
+        self.assertEqual(localize(ENGLISH_ANSWER, 'mr', FaithfulTranslator()),
+                         'ही पाचशे रुपयांची नोट आहे.')
+
+    def test_a_latin_translation_is_not_judged_by_a_devanagari_lexicon(self):
+        """A stub or a failed translation returning Latin has a different problem, and
+        `dropped_characters` already reports it: a voice with no Latin letters discards
+        the sentence whole. Failing it here too would turn one diagnosis into two."""
         spy = SpyTranslator()
         self.assertEqual(localize(ENGLISH_ANSWER, 'mr', spy), 'TRANSLATED')
         self.assertEqual(len(spy.calls), 1)

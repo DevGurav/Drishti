@@ -170,3 +170,74 @@ def has_digits(text: str) -> bool:
     spoken answer, and needs no model loaded.
     """
     return any(ch.isdigit() for ch in text)
+
+
+_ENGLISH_CARDINALS = {word: value for value, word in enumerate(_ONES)}
+_ENGLISH_CARDINALS.update({word: value * 10
+                           for value, word in enumerate(_TENS) if word})
+
+_WORD = re.compile(r"[a-z]+")
+
+
+def parse_english_numbers(text: str) -> list[int]:
+    """Every number this English text states, in order.
+
+    The inverse of `number_words`, and the reason it exists: to know what a translation
+    was *supposed* to say, the value has to be recoverable from the English that went in.
+    By the time `app/speech.localize` sees a medicine answer the digits are already gone --
+    the mode handler spelled them through `money_words` -- so reading the digits back is
+    not an option and the words have to be parsed instead.
+
+    >>> parse_english_numbers('MRP is eighty four rupees and twenty one paise.')
+    [84, 21]
+    >>> parse_english_numbers('It is valid until April two thousand twenty eight.')
+    [2028]
+    """
+    found: list[int] = []
+    total = 0
+    current = 0
+    started = False
+    in_fraction = False
+
+    def flush() -> None:
+        nonlocal total, current, started
+        if started:
+            found.append(total + current)
+        total, current, started = 0, 0, False
+
+    for token in _WORD.findall(text.lower()):
+        if token == 'point':
+            # `spell_numbers_in_text` renders a fraction digit by digit -- "eighty seven
+            # point nine zero" -- because "point ninety" would be a different quantity.
+            # Each digit after this is its own value, so accumulating them the way a
+            # compound accumulates would read .90 as a single 9 and 87.90 as 96.
+            flush()
+            in_fraction = True
+        elif in_fraction and token in _ENGLISH_CARDINALS:
+            found.append(_ENGLISH_CARDINALS[token])
+        elif token == 'thousand':
+            current = (current or 1) * 1000
+            total += current
+            current, started = 0, True
+        elif token == 'hundred':
+            current = (current or 1) * 100
+            started = True
+        elif token in _ENGLISH_CARDINALS:
+            # "twenty one" is one number, but "one one" is two -- a compound only
+            # continues while each part is smaller than the last.
+            value = _ENGLISH_CARDINALS[token]
+            if started and value >= max(current % 100 or 100, 1) and current % 100:
+                flush()
+            current += value
+            started = True
+        elif token == 'and':
+            # "one hundred and twenty" is one number, and money_words writes "eighty four
+            # rupees and twenty one paise" -- where `rupees` has already ended the first
+            # number, so joining here costs nothing and helps the hundreds case.
+            continue
+        else:
+            flush()
+            in_fraction = False
+
+    flush()
+    return found
