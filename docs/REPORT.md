@@ -208,19 +208,26 @@ Three findings worth reporting in their own right:
 
 The corpus contains **no faces, no identity documents and no prescriptions carrying a
 patient name**. Banknote **serial numbers are traceable to an individual transaction**, so
-no note image appears in this report.
+every note fixture is redacted at both printings of its serial and no note image appears in
+this report.
 
-**The blurring this section used to claim was never applied, and saying so is more useful
-than quietly deleting the sentence.** Until 2026-08-24 this paragraph read "the five
-self-photographed fixtures are blurred at the serial". They are not: `curr-500.jpg` carries
-a legible `8PQ 590000`, printed twice, and the same is true of every note fixture including
-the ₹20 added the same day. The rule was written down, was correct, and was never
-implemented — and nothing checked, because a privacy policy in prose has no test attached to
-it. **That is §8.4's pattern arriving in a place §8.4 did not think to look**: the claims
-this project got wrong were the ones nobody measured, and it did not occur to anyone that a
-privacy claim is also a claim about an artifact. The fixtures are the author's own notes and
-the repository is his own, so the exposure is his to accept; the defect is that the document
-asserted a protection the repository did not provide.
+**That redaction was applied on 2026-08-24, and this paragraph had asserted it since the
+fixtures were first committed.** It was never done: `curr-500.jpg` carried a legible
+`8PQ 590000`, printed twice, as did every other note. The rule was written down, was
+correct, and nothing ever checked it — because **a privacy policy written in prose has no
+test attached to it**. That is §8.4's pattern turning up somewhere §8.4 did not think to
+look. Every defect in that section is a claim nobody measured; it simply had not occurred to
+anyone that a privacy claim is also a claim about an artifact, and therefore also checkable.
+
+Doing it properly produced one more instance of the same lesson. The serials are found by
+matching **five or more consecutive digits** in the recogniser's output — safe because every
+circulating denomination is at most three digits, so the rule cannot reach the numeral the
+classifier reads. The first attempt also matched short alphanumeric tokens, to catch the
+`48W` prefix, and promptly redacted `500` and `20`; the classifier check caught it, having
+moved by up to 0.071. **Redaction then moved the fixture confidences anyway**, by −0.027 to
++0.057, which is recorded in `data/samples/README.md` rather than smoothed over. Every
+fixture still predicts its denomination and still falls on the same side of the 0.90
+threshold, which is what a fixture actually owes.
 
 That last rule has a second reason. A Kaggle dataset tagged CC0 was found to contain
 Shutterstock-watermarked stock photography (`DEC-053`), which establishes that **a platform
@@ -560,7 +567,7 @@ State these plainly rather than burying them:
 - **`background` does not fully generalise.** Only 2 of 4 non-note fixtures are caught by
   the class itself; the other two are predicted as denominations and stopped by the
   threshold alone — a medicine strip at ₹100/**0.840** and a folded towel at ₹20/**0.804**.
-  The towel scores higher as a ₹20 note than the real ₹20 note does (0.765), so the 0.90 bar
+  The towel scores higher as a ₹20 note than the real ₹20 note does (0.739), so the 0.90 bar
   is not separating notes from non-notes, it is sitting above a band where they interleave
   (`DEC-062`).
 - **The drug database is a guardrail, not a pharmacopoeia.** It also matches generic names

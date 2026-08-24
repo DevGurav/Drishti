@@ -51,7 +51,7 @@ material, and the slow modes are the ones with an honest explanation attached.
 .\.venv\Scripts\python.exe -m app.cli --mode currency --image data\samples\curr-200.jpg --lang mr --speak
 ```
 
-`curr-200` predicts `200` correctly at 0.784, below the 0.90 threshold, so it declines and
+`curr-200` predicts `200` correctly at 0.841, below the 0.90 threshold, so it declines and
 asks for a better photo. Say plainly why that is the *right* behaviour: a withheld answer
 costs a retaken photo, a wrong denomination costs money, and the user cannot check
 (`DEC-062`).

@@ -148,7 +148,7 @@ On the committed fixtures, re-run 2026-08-24 (`python -m eval.check_fixtures`): 
 real notes answer** and **4 of 4 non-notes are refused** — but only two of those four are
 refused by the `background` class. The other two are predicted as denominations and held
 back by the threshold alone: a medicine strip at **₹100, 0.840**, and a folded towel at
-**₹20, 0.804**. The towel outscores the real ₹20 note, which reads 0.765. **Do not lower
+**₹20, 0.804**. The towel outscores the real ₹20 note, which reads 0.739. **Do not lower
 `CONFIDENCE_THRESHOLD`** — the notes and the non-notes are interleaved in that band, so
 buying one costs the other (`DEC-062`).
 

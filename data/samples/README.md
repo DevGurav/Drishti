@@ -6,13 +6,13 @@ Small committed fixtures so notebooks and tests can run without uploading anythi
 |---|---|
 | `strip_paracip.jpg` | Paracip-500 (Cipla), 10 tabs, back side — the read that produced 55 OCR lines including the drug name, `MFD.MAY 25 EXP.APR.28` and `Rs.10.30` |
 | `strip_partial.jpg` | A **different** strip — 20 tabs, `MFG.NOV.2024 EXP.OCT.2026`, no drug name in frame. Only 3 lines recognized. Kept deliberately as the negative case: the guardrail must decline when no name matches |
-| `curr-10.jpg` | Handheld ₹10, old series, worn with a pen mark, on concrete — money mode's positive fixture. Predicted `10` at **0.942** |
-| `curr-500.jpg` | Handheld ₹500, current series, slight fold, on concrete. Predicted `500` at **0.961** |
-| `curr-50.jpg` | Handheld ₹50, wide framing (aspect 2.0). Predicted `50` at **0.958** — answers. It declined at 0.882 under the single-source model |
-| `curr-100.jpg` | Handheld ₹100, tight framing. Predicted `100` at **0.978** |
-| `curr-200.jpg` | Handheld ₹200 on patterned cloth, note lying sideways, aspect 2.1. Top-1 `200` correctly, but **0.784** — **declines**. The hardest fixture in the set, and the only note that still fails |
+| `curr-10.jpg` | Handheld ₹10, old series, worn with a pen mark, on concrete — money mode's positive fixture. Predicted `10` at **0.952** |
+| `curr-500.jpg` | Handheld ₹500, current series, slight fold, on concrete. Predicted `500` at **0.962** |
+| `curr-50.jpg` | Handheld ₹50, wide framing (aspect 2.0). Predicted `50` at **0.938** — answers. It declined at 0.882 under the single-source model |
+| `curr-100.jpg` | Handheld ₹100, tight framing. Predicted `100` at **0.982** |
+| `curr-200.jpg` | Handheld ₹200 on patterned cloth, note lying sideways, aspect 2.1. Top-1 `200` correctly, but **0.841** — **declines**. The hardest fixture in the set, and the only note that still fails |
 | `newspaper-marathi.png` | Photographed Marathi newspaper page (Maharashtra Times), 1296×1720 — the Devanagari Read-mode fixture. Dense printed body text plus a large headline, so it exercises both easy and hard recognition in one image |
-| `curr-20-withheld.jpg` | Flat ₹20, even light, generously framed — an *easy* photo. Top-1 `20` correctly, at **0.765**: declines. Added 2026-08-24 |
+| `curr-20-withheld.jpg` | Flat ₹20, even light, generously framed — an *easy* photo. Top-1 `20` correctly, at **0.739**: declines. Added 2026-08-24 |
 | `cloth-pink-towel.jpg` | A folded pink towel, no note anywhere in frame. Predicted `20` at **0.804**. Added 2026-08-24 |
 | `strip_paracip_fullres.jpg` | The **same product** as `strip_paracip.jpg`, rephotographed at **4080×3072** and committed uncompressed. OCR reads the drug name and **loses the expiry and the MRP** that the smaller fixture reads correctly. Added 2026-08-24 |
 
@@ -55,13 +55,13 @@ fixed both (₹200 → 0.926, ₹50 → 0.967) while the *benchmark went down* o
 
 | | result |
 |---|---|
-| real notes answered correctly | **4 of 6** — `curr-200` withheld at 0.784, `curr-20-withheld` at 0.765 |
+| real notes answered correctly | **4 of 6** — `curr-200` withheld at 0.841, `curr-20-withheld` at 0.739 |
 | non-notes correctly refused | **4 of 4** |
 | worst false positive | `strip_paracip` → ₹100 at **0.840**, leaving **0.060** of headroom below the 0.90 bar |
 | second worst | `cloth-pink-towel` → ₹20 at **0.804**, **0.096** of headroom |
 
 **The two ₹20 rows are the finding, and only as a pair.** The towel scores **0.804** as a
-twenty-rupee note; the actual twenty-rupee note scores **0.765**. A folded towel is a more
+twenty-rupee note; the actual twenty-rupee note scores **0.739**. A folded towel is a more
 confident ₹20 than a ₹20 is, on an easy, evenly-lit, generously-framed photograph of the
 note. Neither is spoken, so no user sees a failure today — the threshold holds both back.
 But the *ordering* says what the 0.90 bar is really doing: it is not separating notes from
@@ -95,3 +95,36 @@ stops reproducing. `strip_paracip_fullres.jpg` is **byte-for-byte** at 3.1 MB, b
 entire purpose is what a recogniser can resolve in small print at full phone resolution, and
 compression artifacts land exactly there. A fixture is only worth its disk if it still
 demonstrates the thing it was kept for.
+
+## Serial numbers are redacted, and the confidences moved because of it
+
+**Every note fixture carries a flat grey block over both printings of its serial**, applied
+2026-08-24. `REPORT.md` §5.1 had claimed this since the fixtures were first committed and it
+had never been done — `curr-500.jpg` carried a legible `8PQ 590000`. The claim is now true.
+
+The serials were located by running the recogniser and matching **five or more consecutive
+digits**, which is what makes this safe rather than clever: every circulating denomination is
+at most three digits, so the rule cannot reach the numeral the classifier reads. An earlier
+version also matched short alphanumeric tokens, to catch the `48W` prefix, and immediately
+blurred `500` and `20` — moving confidence by up to 0.071. Each image is then re-read to
+confirm nothing serial-shaped survives.
+
+**Redaction is not free, and the numbers below moved:**
+
+| fixture | before | after | |
+|---|---|---|---|
+| `curr-10` | 0.942 | **0.952** | +0.010 |
+| `curr-20-withheld` | 0.765 | **0.739** | −0.027 |
+| `curr-50` | 0.958 | **0.938** | −0.020 |
+| `curr-100` | 0.978 | **0.982** | +0.004 |
+| `curr-200` | 0.784 | **0.841** | +0.057 |
+| `curr-500` | 0.961 | **0.962** | +0.001 |
+
+**Every finding survives**: the same denomination is predicted in each case, and each stays
+on the same side of the 0.90 bar — the four that answered still answer, the two that were
+withheld are still withheld. That is the test the redaction had to pass, and it is a
+deliberately different test from the one used for recompression above. A ±0.02 drift bound
+was tried first and three fixtures failed it no matter how gently the redaction was done;
+tightening the redaction until an arbitrary number was satisfied would have meant choosing
+the threshold over the privacy rule. **What a fixture owes is its finding, not its decimal
+places** — so the finding is asserted and the drift is published.

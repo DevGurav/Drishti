@@ -337,8 +337,8 @@ that found all three of the 08-22 defects and is what the sheet actually asks fo
 | **A3** ZIFI CV (Cefixime + Clavulanate) | ❌ **Declines a strip it should read.** The matcher finds both actives in a transcription; OCR returned 211 characters of noise (`2AFI CV 200 -1 xhl-loud…`) and never saw the header, which is printed *across the blister bubbles*. A safe failure — it declined rather than guessed — but a failure |
 | **A3b** Becosules (9 actives) | ⚠️ **Reports 2 of 9** as "a combination of Ascorbic acid and Riboflavin". Also the near-miss worth recording: the matcher, given clean text, returns **both `Vitamin C` and `Ascorbic acid`** — one substance, listed twice in NLEM, reported as two ingredients. `DEC-033`'s occurrence counting cannot catch it because neither name contains the other. It did not fire here only because OCR missed the title |
 | **A-ctl** Paracip at full phone resolution | ❌ **Names the drug, loses the expiry and the MRP** — the exact pair the committed 1600px fixture of the *same product* reads correctly. `DEC-073` raised Latin `max_side` to 2048 for this failure mode and **2048 is not enough for this photograph.** It says "I could not read a clear expiry date" rather than omitting it silently, which is the designed behaviour and the reason this is a functional failure and not a safety one |
-| **B1** 10 / 50 / 100 / 500 | ✅ Correct, all ≥0.94 |
-| **B1** 20 | ⚠️ Correct at **0.765**, withheld. A pass by the sheet ("correct, or a decline") |
+| **B1** 10 / 50 / 100 / 500 | ✅ Correct, all ≥0.96 |
+| **B1** 20 | ⚠️ Correct at **0.763**, withheld. A pass by the sheet ("correct, or a decline") |
 | **B4** floor, hand | ✅ `background`, "no note in frame" |
 | **B4** cloth | ⚠️ Refused, but as *"not confident"* rather than *"no note"* — it predicted **₹20 at 0.804**, which is **higher than the real ₹20 note scored**. See `data/samples/README.md`: the 0.90 bar is not separating notes from non-notes, it is sitting above a band where they interleave |
 | **B6** notice, bill | ✅ No denomination |
