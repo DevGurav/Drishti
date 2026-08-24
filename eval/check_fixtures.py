@@ -50,6 +50,14 @@ FIXTURES = [
     ('curr-100.jpg', '100', 'handheld Rs 100, tight framing'),
     ('curr-200.jpg', '200', 'handheld Rs 200 on cloth, sideways, aspect 2.1 - the hardest'),
     ('curr-500.jpg', '500', 'handheld Rs 500, slight fold, on concrete'),
+    # Added 2026-08-24 from the Phase-5 batch, and only meaningful as a pair. The note is
+    # predicted correctly and withheld at 0.765; the towel is predicted Rs 20 at 0.804.
+    # **The cloth is a more confident twenty-rupee note than the twenty-rupee note is.**
+    # Neither is spoken, so neither is a user-visible failure today -- but the ordering
+    # says the margin protecting DEC-062 is luck rather than separation, and a threshold
+    # lowered to answer the note would ship the towel first.
+    ('curr-20-withheld.jpg', '20', 'flat Rs 20, even light - correct at 0.765, below the bar'),
+    ('cloth-pink-towel.jpg', None, 'folded towel - predicts Rs 20 at 0.804, ABOVE the note'),
     ('strip_paracip.jpg', None, 'medicine strip - no note present'),
     ('strip_partial.jpg', None, 'medicine strip - no note present'),
     ('newspaper-marathi.png', None, 'Marathi newspaper - no note present'),
