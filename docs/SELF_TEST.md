@@ -45,8 +45,9 @@ succeeds only with the network up, that is the single most important finding on 
 > failed to state, and that omission is the reason three bugs survived to be found by ear.
 
 Date run: **2026-08-22** (by hand, stopped in section B) and **2026-08-24** (16 photographs,
-via `python -m eval.run_self_test`)  ·  Machine cool at start? `☑`  ·  Aeroplane mode on?
-**`☒` NO — see E1. This is the run's biggest omission.**
+via `python -m eval.run_self_test`, then the browser app in aeroplane mode)  ·  Machine cool
+at start? `☑`  ·  Aeroplane mode on? **`☑` for the browser-app session (E1, E4); `☒` for the
+CLI battery in A–D, which ran with the network up.**
 
 > **Read the Result column as "checked by machine", not "checked".** The 08-24 session ran
 > every task and compared the printed answer to the object in the photograph, which settles
@@ -109,10 +110,10 @@ note (`DEC-062`).
 
 | # | Task | Pass condition | Result |
 |---|---|---|---|
-| E1 | Every mode above, aeroplane mode on throughout | All work. **Any network dependency is a headline finding** | **NOT RUN. The network was up for every run on this page.** Models were warm in cache so nothing needed to download, but that is a different claim from "could not". **This row is unverified and the offline claim rests on it** |
+| E1 | Every mode above, aeroplane mode on throughout | All work. **Any network dependency is a headline finding** | **PASS, via the browser app.** Aeroplane mode on at the OS level, `python -m app.web.server` started, photos captured and answered through the UI. **No network dependency found** — the page loaded with no external fetch and the engines answered from cached weights. **Scope, stated so it is not read as more:** this exercises the path the demo actually uses, end to end, which is the strongest single check of the offline claim. It does **not** enumerate all 22 tasks individually — sections A–D above were run through the CLI with the network up |
 | E2 | Marathi speech from medicine mode | Audio plays, Devanagari text printed correctly | **PARTIAL** — Devanagari printed correctly, wav written, and the tokenizer check says only `ॅ`/`ॉ` are lost (the known one-voice residual, `DEC-072`). **Nobody has listened.** That is the check that found all three defects on 08-22 |
 | E3 | Hindi speech | Same | **PARTIAL, and cleaner than Marathi** — `यह पेरासिटामोल है। मैं एक स्पष्ट समाप्ति तिथि नहीं पढ़ सका` with **nothing dropped at all**, confirming `DEC-072`'s finding that the residual belongs to the Marathi voice rather than to the pipeline. Also unheard |
-| E4 | Web app at `127.0.0.1:5000`, camera capture | Answers, and the capture is deleted afterwards (`DEC-020`) | **NOT RUN** — the batch went through the CLI. Deletion is covered by unit tests, not by this row |
+| E4 | Web app at `127.0.0.1:5000`, camera capture | Answers, and the capture is deleted afterwards (`DEC-020`) | **PASS on answering** — same session as E1: camera capture through the browser, answers returned. **The deletion half was not separately observed**, and is covered by unit tests rather than by this row. Worth a glance at `runtime/` next time the app runs |
 
 ---
 
@@ -141,10 +142,10 @@ which is usually a sign the task was too easy rather than the system too good.
 
 | | |
 |---|---|
-| Passed | A2, A5, B1 (5 of 6 denominations), B4, B6 (paper only), C1, C2, C3, D1, D3 |
+| Passed | A2, A5, B1 (5 of 6 denominations), B4, B6 (paper only), C1, C2, C3, D1, D3, **E1**, E4 (answering half) |
 | Failed | **A3** (declined a strip it should read), **A-ctl** (lost the expiry at full phone resolution) |
 | Passed but shouldn't have | **C4** — handwriting was read, on an image too easy to be the test |
-| Not run | A1, A4, B1-200, B2, B3, B5, B6 (book/card), D2, E1, E4 |
+| Not run | A1, A4, B1-200, B2, B3, B5, B6 (book/card), D2 |
 | Waiting on a listener | E2, E3, and the audio half of every row above |
 
 **One new defect, and it was found by the fix for an old one.** `DEC-076`: IndicTrans2
@@ -161,6 +162,14 @@ registered as a warning instead of a win. And the framing "judge by what you HEA
 makes the PARTIAL rows honest — without it the machine-checked results would read as a
 green sheet.
 
-**The largest gap is E1.** The offline claim is this project's entire premise and it is the
-one row nothing has ever tested. It costs fifteen minutes: aeroplane mode on, then
-`python -m eval.run_self_test --skip-vlm`.
+**E1 closed the same day.** The browser app was driven end to end with aeroplane mode on and
+answered without reaching for the network — the project's central claim, checked on the path
+the demo actually uses rather than inferred from a unit test over the rendered HTML. That
+test could only ever assert the page contains no external URLs; it could not see a model
+phoning home, and now something has.
+
+**The largest remaining gap is that nobody has listened.** Every defect found on 08-22 was
+found by ear, and the 08-24 session was graded by machine. `dropped_characters` proves which
+characters a voice discards and proves nothing about whether the result is intelligible.
+Until someone plays the wavs, this page records that the *text* is right — which is the exact
+belief that let ₹500 be announced as "00" for twelve days.

@@ -54,7 +54,7 @@
 | 2 — Dataset assembly | ✅ **Complete** — 5,602 images from four licence-clean sources, deduplicated, rebuildable from `data/currency_manifest.csv` |
 | 3 — Fine-tuning | ✅ **Complete — the result is negative, and it ships that way** — currency retrained (0.9827, ₹0.68 at threshold); the VLM LoRA ran twice against the 0.533 bar and is **statistically indistinguishable** from it, so the stakes prompt ships and the adapter does not (`DEC-068`) |
 | 4 — Integration | ✅ **Complete** — five modes, browser app on real engines, combination strips. The per-mode latency budget is closed as won't-do (`DEC-071`): measured and reported per tier rather than enforced, because enforcing it would disable five modes of six |
-| 5 — Self-conducted task testing | 🟡 **Closed 2026-08-24, partly** — **Android descoped** (`DEC-064`), **user study dropped** (`DEC-070`). Two sessions run: 08-22 by hand (found `DEC-072`/`073`/`074`), 08-24 against 16 photographs via `eval/run_self_test.py` (found `DEC-076`). **13 of 22 rows exercised; airplane mode never used and nobody has listened to the audio.** It cannot show that a blind user can operate the app, and does not claim to |
+| 5 — Self-conducted task testing | 🟢 **Closed 2026-08-24** — **Android descoped** (`DEC-064`), **user study dropped** (`DEC-070`). Three sessions: 08-22 by hand (found `DEC-072`/`073`/`074`), 08-24 against 16 photographs via `eval/run_self_test.py` (found `DEC-076`), and **08-24 in aeroplane mode through the browser app — the offline claim now has a measurement rather than an inference**. 14 of 22 rows exercised; **8 had no photograph and nobody has listened to the audio**. It cannot show that a blind user can operate the app, and does not claim to |
 | 6 — Evaluation & report | 🟢 **Report complete and current** — `docs/REPORT.md` written end to end; author items closed 2026-08-15 (`DEC-069`), and §8.4 + §9 updated 2026-08-24 with `DEC-076`, which is the fourth instance of the pattern that section names. Outstanding: **the demo rehearsal**, which needs a person and a room |
 
 **Targets** (self-imposed — a plan with no date cannot tell you when it is slipping):
@@ -263,7 +263,7 @@ Brought forward while model installs were pending — the interface needs no wei
 
 ---
 
-### Phase 5 — Self-conducted task testing · 🟡 **Closed 2026-08-24 with two gaps named, not filled**
+### Phase 5 — Self-conducted task testing · 🟢 **Closed 2026-08-24; the offline claim is measured, the audio is not**
 
 **Goal:** exercise every mode against realistic tasks on the demo laptop, and record what
 breaks. **This is not a user study and must never be written up as one** (`DEC-070`).
@@ -276,13 +276,14 @@ The Android port is dropped (`DEC-064`) and the study with blind participants is
 - [x] ~~Resolve the PyTorch/PaddlePaddle process-isolation constraint~~ — solved on both
       platforms instead (`DEC-027`, `DEC-044`); it stops being a port problem once the port is
       dropped
-- [ ] **Airplane-mode verification** — network off at the OS level, then every mode run end
-      to end. **Still not done, and it is now the largest single gap in this phase.** The
-      offline claim is enforced only by a test over the rendered page, which cannot see a
-      model phoning home. Every run recorded below was made with the network up: the models
-      were all warm in cache, so nothing *needed* to download, but "did not need to" is not
-      the same measurement as "could not". This is 15 minutes of work and nobody has spent
-      them
+- [x] **Airplane-mode verification** — **done 2026-08-24: the browser app was driven end to
+      end with aeroplane mode on at the OS level, and answered.** No network dependency
+      surfaced. Until then the offline claim rested on a test asserting the rendered page
+      contains no external URLs, which cannot see a model phoning home; this checks the
+      whole path instead, on the delivery route the demo actually uses. **Scope, so the row
+      is not read as more than it is:** the CLI battery in §2.5 was run separately with the
+      network up, so what is verified offline is the web app end to end, not each of the 22
+      tasks individually
 - [x] **Write the task list and its pass conditions, before testing** — `docs/SELF_TEST.md`,
       2026-08-15. 22 tasks across the five modes plus offline delivery, each with its pass
       condition fixed *now*, while nothing has been run. It states in its own header what it
@@ -314,10 +315,11 @@ The Android port is dropped (`DEC-064`) and the study with blind participants is
 **Exit criteria:** every mode exercised against a pre-written task list in airplane mode,
 with failures recorded as fixtures rather than as recollections.
 
-**Exit criteria: partly met, and the phase closes anyway.** Every mode was exercised and
-every failure has a fixture. **Airplane mode was not used, and 9 of 22 rows had no input** —
-both stated rather than absorbed. Closing on those terms is a scheduling decision, not a
-measurement, and the report should describe it that way.
+**Exit criteria: met, with one substitution and one gap.** Every mode was exercised, every
+failure has a fixture, and **the offline claim was checked in aeroplane mode** — through the
+browser app end to end rather than task by task, which is the substitution. The gap is that
+**8 of 22 rows had no input** (A1, the expired strip, being the one that matters) and that
+**nobody has listened to the audio**. Both are stated rather than absorbed.
 
 **What this phase can no longer deliver:** evidence that a blind user can operate the app.
 That claim needs blind participants and is now out of scope (`DEC-070`).
@@ -347,11 +349,14 @@ that found all three of the 08-22 defects and is what the sheet actually asks fo
 | **D1** scene on a strip | ✅ **`DEC-037` reproduces verbatim** on a third independent run — "contains 30 tablets" (it holds 10), "clear plastic… white backing" (it is opaque foil) |
 | **D3** ask, small print | ✅ "I can't tell from this photo" — declines rather than guessing |
 
+**E1 and E4 were closed separately the same day**, in aeroplane mode through the browser
+app: it started, captured, and answered with no network. That is the project's central
+claim checked on the route the demo uses.
+
 **Not covered, for want of a photograph:** A1 (no expired strip — the single most important
 row in the sheet), A4 (curved in hand), B1-200, B2 (poor light), B3 (arm's length), B5
-(₹2000), B6 (book, bank card), D2 (blurry), E1 (airplane mode), E4 (browser capture).
-**B2 and B3 both test *declining*, which is the behaviour currency mode exists for**, so
-their absence is not evenly distributed across risk.
+(₹2000), B6 (book, bank card), D2 (blurry). **B2 and B3 both test *declining*, which is the
+behaviour currency mode exists for**, so their absence is not evenly distributed across risk.
 
 ---
 
